@@ -1,23 +1,35 @@
-import Enigma.{ArrayRotor, ByteReflector}
-import Enigma.ArrayRotorExt.{rotorFileableInstance, rotorRandomGenerator}
-import Enigma.ByteReflectorExt.{byteReflectorFileableInstance, reflectorRandomGenerator}
+import Enigma.ByteArrayReflectorExt.{byteArrayReflectorFileableInstance, byteArrayReflectorRandomGenerator}
+import Enigma.{ByteArrayReflector, ByteArrayRotor, Rotor}
+import Enigma.ByteArrayRotorExt.{rotorFileableInstance, rotorRandomGenerator}
 import Ext.FileableSyntax.{ToFileOps, fromFile}
+import Ext.Files.using
+
+import java.io.FileWriter
 
 object RotorTest extends App {
-  val testRotor: ArrayRotor = ArrayRotor.gen
+  val testRotor: ByteArrayRotor = ByteArrayRotor.gen
+  testRotor.rotate(1)
   println
   println(testRotor.toString)
   testRotor.toFile("rotor1")
-  val newRotor: Option[ArrayRotor] = fromFile[ArrayRotor]("rotor1")
   println
+  val read = fromFile[ByteArrayRotor]("rotor1")
 }
 
 object ReflTest extends App {
-  val testRefl: ByteReflector = ByteReflector.gen
+  val testRefl: ByteArrayReflector = ByteArrayReflector.gen
   println
   println(testRefl.toString)
   testRefl.toFile("refl1")
-  val newRefl: Option[ByteReflector] = fromFile[ByteReflector]("refl1")
+  val newRefl: Option[ByteArrayReflector] = fromFile[ByteArrayReflector]("refl1")
   println
 }
 
+object SpamToFile extends App {
+  using(new FileWriter("test_file")) { f => {
+    for (i <- Byte.MinValue to Byte.MaxValue) {
+      f.write(i)
+    }
+  }
+  }
+}

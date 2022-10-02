@@ -1,9 +1,11 @@
-//import Enigma.{Reflector, Rotor, Enigma => EnigmaC}
-//import Enigma.ReflectorExtensions.{reflectorFileable, reflectorRandomGenerator => ReflGen}
-//import Enigma.RotorExtensions.{rotorFileableInstance, rotorRandomGenerator => RotGen}
-import Ext.FileableSyntax.{FromFileOps, ToFileOps}
+import Enigma.ByteArrayReflectorExt.{byteArrayReflectorFileableInstance, byteArrayReflectorRandomGenerator}
+import Enigma.{ByteArrayReflector, ByteArrayRotor, ByteEnigma}
+import Enigma.ByteArrayRotorExt.{rotorFileableInstance, rotorRandomGenerator}
+import Ext.FileableSyntax.{ToFileOps, fromFile}
+import Ext.Files.using
 import scopt.OParser
 
+import java.io.{BufferedWriter, FileWriter}
 import scala.sys.exit
 
 case class Config(
@@ -57,24 +59,36 @@ object Main {
   }
 
   private def startEnigma(config: Config): Unit = {
-//    val rotorFilenames = for (i <- 1 to config.rotorCount) yield s"${config.rotorPrefix}$i"
-//    val rotors: List[Rotor] = (rotorFilenames map { filename =>
-//      FromFileOps[Rotor](filename).fromFile match {
-//        case Some(v) => v
-//        case _ => println(s"Error while loading rotor from $filename"); return
-//      }
-//    }).toList
-//    val reflector: Reflector = FromFileOps[Reflector](config.reflectorPrefix).fromFile match {
-//      case Some(v) => v
-//      case _ => println(s"Error while loading rotor from ${config.reflectorPrefix}"); return
-//    }
-//    val enigma = EnigmaC(rotors, reflector)
+    val rotorFilenames = for (i <- 1 to config.rotorCount) yield s"${config.rotorPrefix}$i"
+    val rotors: List[ByteArrayRotor] = (rotorFilenames map { filename =>
+      fromFile[ByteArrayRotor](filename) match {
+        case Some(v) => v
+        case _ => println(s"Error while loading rotor from $filename"); return
+      }
+    }).toList
+    val reflector: ByteArrayReflector = fromFile[ByteArrayReflector](config.reflectorPrefix) match {
+      case Some(v) => v
+      case _ => println(s"Error while loading rotor from ${config.reflectorPrefix}"); return
+    }
+    val enigma: ByteEnigma = ByteEnigma(rotors, reflector)
+
+    using(io.Source.fromFile(config.inputFile)) {inputFile =>
+      using(new BufferedWriter(new FileWriter(config.outputFile))) { outputFile => {
+        val reader = inputFile.reader
+        var c = reader.read
+        while (c != -1) {
+          outputFile.write(enigma.cryptAndGo(c.toByte))
+          c = reader.read
+        }
+      }
+      }
+    }
   }
 
   private def startGenerator(config: Config): Unit = {
-//    for (i <- 1 to config.rotorCount)
-//      Rotor.gen.toFile(s"${config.rotorPrefix}$i")
-//    Reflector.gen.toFile(s"${config.reflectorPrefix}")
+    for (i <- 1 to config.rotorCount)
+      ByteArrayRotor.gen.toFile(s"${config.rotorPrefix}$i")
+    ByteArrayReflector.gen.toFile(s"${config.reflectorPrefix}")
   }
 
   def main(args: Array[String]): Unit = {
