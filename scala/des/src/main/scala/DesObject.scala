@@ -1,8 +1,6 @@
-package Des
-
 import scala.annotation.tailrec
 
-trait DesF[T] {
+trait DesObject[T] {
   def halved(v: T): (T, T)
   def combined(a: T, b: T): T
 
@@ -13,12 +11,12 @@ trait DesF[T] {
 
   def expanded(v: T): T
   def truncated(v: T): T
-  def toInner(data: Seq[Byte]): T
-  def toOuter(v: T): Seq[Byte]
+  def toModel(data: Array[Byte]): T
+  def fromModel(v: T): Array[Byte]
 }
 
 object DesFInstances {
-  implicit val desByteArrayInstance: DesF[Array[Byte]] = new DesF[Array[Byte]] {
+  implicit val desByteArrayInstance: DesObject[Array[Byte]] = new DesObject[Array[Byte]] {
     override def halved(v: Array[Byte]): (Array[Byte], Array[Byte]) =
       (v.slice(0, v.length / 2), v.slice(v.length / 2, v.length))
 
@@ -47,7 +45,7 @@ object DesFInstances {
     override def xored(a: Array[Byte], b: Array[Byte]): Array[Byte] =
       (a zip b).map { case (aa, bb) => ((aa + bb) % 2).toByte }
 
-    override def toInner(data: Seq[Byte]): Array[Byte] = {
+    override def toModel(data: Array[Byte]): Array[Byte] = {
       @tailrec
       def toBinary(a: Byte, res: List[Byte] = List()): List[Byte] =
         if ((a == 0 || a == -1) && res.length >= 8) res
@@ -55,16 +53,17 @@ object DesFInstances {
       data.toArray.flatMap(b => toBinary(b))
     }
 
-    override def toOuter(v: Array[Byte]): Seq[Byte] = {
+    override def fromModel(v: Array[Byte]): Array[Byte] = {
       @tailrec
       def fromBinary(a: Array[Byte], res: Byte = 0): Byte =
         if (a.isEmpty) res
         else fromBinary(a.tail, (res * 2 + a.head).toByte)
-      for {
-        i <- 0 until v.length / 8
-        subArr = v.slice(i * 8, (i + 1) * 8)
-        byte = fromBinary(subArr)
-      } yield byte
+      (for {
+          i <- 0 until v.length / 8
+          subArr = v.slice(i * 8, (i + 1) * 8)
+          byte = fromBinary(subArr)
+        } yield byte
+      ).toArray
     }
 
     override def expanded(v: Array[Byte]): Array[Byte] =
@@ -86,19 +85,20 @@ object DesFInstances {
   }
 }
 
-object DesFSyntax {
-  implicit class DesFOps[A](value: A) {
-    def halved(implicit desF: DesF[A]): (A, A) = desF.halved(value)
-    def combine(b: A)(implicit desF: DesF[A]): A = desF.combined(value, b)
-    def applyTable(table: Seq[Int])(implicit desF: DesF[A]): A = desF.applyTable(value, table)
-    def applySTable(sTable: Seq[Byte], offset: Int)(implicit desF: DesF[A]): A = desF.applySTable(value, sTable, offset)
-    def shiftLeft(i: Int)(implicit desF: DesF[A]): A = desF.shiftedLeft(value, i)
-    def xor(b: A)(implicit desF: DesF[A]): A = desF.xored(value, b)
+object DesObjectSyntax {
+  implicit class DesObjectOps[A](value: A) {
+    def halved(implicit desF: DesObject[A]): (A, A) = desF.halved(value)
+    def combine(b: A)(implicit desF: DesObject[A]): A = desF.combined(value, b)
+    def applyTable(table: Seq[Int])(implicit desF: DesObject[A]): A = desF.applyTable(value, table)
+    def applySTable(sTable: Seq[Byte], offset: Int)(implicit desF: DesObject[A]): A = desF.applySTable(value, sTable, offset)
+    def shiftLeft(i: Int)(implicit desF: DesObject[A]): A = desF.shiftedLeft(value, i)
+    def xor(b: A)(implicit desF: DesObject[A]): A = desF.xored(value, b)
 
-    def toOuter(implicit desF: DesF[A]): Seq[Byte] = desF.toOuter(value)
-    def expand(implicit desF: DesF[A]): A = desF.expanded(value)
-    def trunc(implicit desF: DesF[A]): A = desF.truncated(value)
+    def expand(implicit desF: DesObject[A]): A = desF.expanded(value)
+    def trunc(implicit desF: DesObject[A]): A = desF.truncated(value)
+
+    def fromModel(implicit desF: DesObject[A]): Array[Byte] = desF.fromModel(value)
   }
-  implicit def toInner[A](data: Seq[Byte])(implicit desF: DesF[A]): A =
-    desF.toInner(data)
+  implicit def toModel[A](data: Array[Byte])(implicit desF: DesObject[A]): A =
+    desF.toModel(data)
 }

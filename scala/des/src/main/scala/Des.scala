@@ -1,7 +1,4 @@
-package Des
-
-import DesFInstances._
-import DesFSyntax._
+import DesObjectSyntax._
 
 /*
  * Используемые абстракции:
@@ -12,6 +9,7 @@ import DesFSyntax._
  *
  * Другие особенности:
  * DesConstants -- объект, в котором перечислены все используемые далее константы алгоритма DES
+ * К сожалению, проверка ошибок не предусмотрена, так что результаты не обарачиваются ни в Either, ни в Option
  */
 
 object DesConstants {
@@ -121,23 +119,23 @@ object DesConstants {
   )
 }
 
-object Des {
-  def generateShifted[A: DesF](initial: A, shiftList: List[Int]): List[A] =
+class Des[A: DesObject](private val key: A, private val isDecipher: Boolean) {
+  private def generateShifted(initial: A, shiftList: List[Int]): List[A] =
     shiftList.foldLeft(List[A](initial)) { (res, shift) =>
       res.head.shiftLeft(shift) +: res
     }.reverse.tail
 
   // Функция f для подсчета правой половины
-  def f[A: DesF](rPrev: A, kCur: A, sTables: Seq[Seq[Byte]]): A = {
+  private def f(rPrev: A, kCur: A, sTables: Seq[Seq[Byte]]): A = {
     val eRprev = rPrev.applyTable(DesConstants.eBit)
     val eRprevXored = eRprev.xor(kCur)
     val sTabled = for ((t, i) <- sTables.zipWithIndex) yield eRprevXored.applySTable(t, i)
-    val concat = sTabled.tail.foldLeft(sTabled.head)(_ combine _) // Как жаль, что тут нет pure :(
+    val concat = sTabled.tail.foldLeft(sTabled.head)(_ combine _)
     val appliedPTable = concat.applyTable(DesConstants.p)
     appliedPTable
   }
 
-  def cypherInner[A: DesF](data: A, key: A, isDecipher: Boolean = false): A = {
+  private def cypherInner(data: A): A = {
     // К ключу из 64 бит применить таблицу перестановок PC1
     val key56 = key.applyTable(DesConstants.pc1)
     // Ключ из 56 бит разделить пополам
@@ -169,8 +167,8 @@ object Des {
     (r16 combine l16).applyTable(DesConstants.minusIp)
   }
 
-  def cypher[A: DesF](block8byteOrLess: Seq[Byte], key: A, isDecipher: Boolean = false): Seq[Byte] = {
-    val in = toInner[A](block8byteOrLess).expand
-    cypherInner(in, key, isDecipher).toOuter
+  def cypher(block8byteOrLess: Array[Byte]): A = {
+    val in = toModel[A](block8byteOrLess).expand
+    cypherInner(in)
   }
 }
