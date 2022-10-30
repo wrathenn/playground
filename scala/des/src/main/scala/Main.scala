@@ -22,11 +22,11 @@ case object ConfigModeDecipher extends ConfigModes
  * Des.scala -- константы Des, класс Des, включающий себя алгоритм шифрования (и дешифрования, см. конструктор класса)
  *
  * Пример запуска:
- * @java-stuff@ cypher --input test-input.txt --output test-output.txt --key FFFFAAAA
- * @java-stuff@ decipher --input test-output.txt --output test-output-deciphered.txt --key FFFFAAAA
+ * @java-stuff@ cypher --input test-input.txt --output test-output.txt --key FFFFAAAA11110000
+ * @java-stuff@ decipher --input test-output.txt --output test-output-deciphered.txt --key FFFFAAAA11110000
  *
  * Особенности:
- * - входной ключ считывается в кодировке UTF-8
+ * - входной ключ считывается в формате FFFFAAAA11110000
  * - отсутствуют проверки, так что почти ничто не оборачивается в Option или Either :(
  */
 object Main extends IOApp{
@@ -53,6 +53,16 @@ object Main extends IOApp{
         .required()
         .action((a, c) => c.copy(key = a))
         .text("Key 8byte-size as utf-8")
+        .validate { x =>
+          if (x.length == 16
+            && x.count { c =>
+              ('0' <= c && c <= '9') ||
+              ('a' <= c && c <= 'f') ||
+              ('A' <= c && c <= 'F')
+            } == 16
+          ) success
+          else failure("Incorrect key format")
+        }
     )
   }
 
@@ -61,12 +71,29 @@ object Main extends IOApp{
       config <- OParser.parse(argParser, args, Config())
       mode <- config.mode
     } yield mode match {
-      case ConfigModeCypher => cypherFile(config.inputFile, config.outputFile, config.key, isDecipher = false)
+      case ConfigModeCypher => translateKey(config.key); cypherFile(config.inputFile, config.outputFile, config.key, isDecipher = false)
       case ConfigModeDecipher => cypherFile(config.inputFile, config.outputFile, config.key, isDecipher = true)
       case _ => IO(ExitCode.Error)
     }
   }.getOrElse(IO(ExitCode.Error))
 
+  // Преобразовать ключ из строки в набор байтов
+  private def translateKey(strKey: String): Array[Byte] = {
+    def charMap(c: Char): Byte = (c match {
+      case _ if '0' <= c && c <= '9' => c - '0'
+      case _ if 'a' <= c && c <= 'f' => c - 'a' + 10
+      case _ if 'A' <= c && c <= 'F' => c - 'A' + 10
+    }).toByte
+
+    val res = for {
+      pair <- strKey.getBytes().sliding(2, 2).toList
+      c1 = charMap(pair(0).toChar)
+      c2 = charMap(pair(1).toChar)
+    } yield ((c1 << 4) + c2).toByte
+    res.toArray
+  }
+
+  // Рекурсивное шифрование следующего блока
   private def cypherNext[A: DesObject](input: FileInputStream, output: FileOutputStream, des: Des[A]): IO[Unit] = for {
     bytes <- IO(input.readNBytes(8))
     cyphered = des.cypher(bytes)
@@ -74,6 +101,7 @@ object Main extends IOApp{
     _ <- if (bytes.length == 8) cypherNext(input, output, des) else IO.unit
   } yield ()
 
+  // Рекурсивная дешифрока следующего блока
   private def decipherNext[A: DesObject](input: FileInputStream, output: FileOutputStream, des: Des[A],
     prevBlock: Option[A] = None): IO[Unit] = for {
 
@@ -96,6 +124,7 @@ object Main extends IOApp{
     }
   } yield ()
 
+  // Зашифровать или расшифровать всю информацию в файле
   private def cypherFile(filenameIn: String, filenameOut: String, key: String, isDecipher: Boolean): IO[ExitCode] =
     (
       for {
@@ -103,7 +132,7 @@ object Main extends IOApp{
         output <- Resource.fromAutoCloseable(IO(new FileOutputStream(filenameOut)))
       } yield (input, output)
     ).use { case (input, output) =>
-      val innerKey = toModel(key.getBytes())
+      val innerKey = toModel(translateKey(key))
       val des = new Des(innerKey, isDecipher)
       val start = if (isDecipher) decipherNext(input, output, des)
                   else cypherNext(input, output, des)
