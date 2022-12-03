@@ -61,30 +61,19 @@ object RSA {
     if (a * gcd.aBezout + mod * gcd.bBezout == gcd.gcd) ifNegative(gcd.aBezout)
     else ifNegative(gcd.bBezout)
   }
-
-  def main(args: Array[String]): Unit = {
-    val p = BigInt(3557)
-    val q = BigInt(2579)
-    val n = p * q
-    val eiler = (p-1)*(q-1)
-    val e = 3
-    val d = inverse(e, eiler)
-    val k = Test.bezout(e, eiler)
-    println()
-  }
 }
 
-object Test extends App {
-  def bezout(a: BigInt, b: BigInt): (BigInt, BigInt, BigInt) = {
-    @tailrec
-    def bezoutR(r0: BigInt=a, s0: BigInt=1, t0: BigInt=0,
-      r1: BigInt=b, s1: BigInt=0, t1: BigInt=1):
-    (BigInt, BigInt, BigInt) =
-      if (r1 == BigInt(0)) (r0, s0, t0)
-      else {
-        val q = r0 / r1
-        bezoutR(r1, s1, t1, r0 % r1, s0 - q * s1, t0 - q * t1)
-      }
-    bezoutR()
-  }
-}
+//object Test extends App {
+//  def bezout(a: BigInt, b: BigInt): (BigInt, BigInt, BigInt) = {
+//    @tailrec
+//    def bezoutR(r0: BigInt=a, s0: BigInt=1, t0: BigInt=0,
+//      r1: BigInt=b, s1: BigInt=0, t1: BigInt=1):
+//    (BigInt, BigInt, BigInt) =
+//      if (r1 == BigInt(0)) (r0, s0, t0)
+//      else {
+//        val q = r0 / r1
+//        bezoutR(r1, s1, t1, r0 % r1, s0 - q * s1, t0 - q * t1)
+//      }
+//    bezoutR()
+//  }
+//}
