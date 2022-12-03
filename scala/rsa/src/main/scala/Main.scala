@@ -85,6 +85,7 @@ object Main extends IOApp {
     s <- IO { new String(file.readAllBytes()) }
   } yield Key.fromString(s)
 
+  // ГЕНЕРАЦИЯ
   private def generateNewKeys(output: String): IO[ExitCode] = { for {
     outPublic <- Resource.fromAutoCloseable(IO { new FileOutputStream(s"$output.pub") })
     outPrivate <- Resource.fromAutoCloseable(IO { new FileOutputStream(output) })
@@ -93,6 +94,7 @@ object Main extends IOApp {
     _ <- Resource.eval( IO { outPublic.write(key._2.toString.getBytes()) })
   } yield () }.use(_ => IO(ExitCode.Success))
 
+  // ДЕШИФРОВАНИЕ
   private def runDecipher(keyFilename: String, inputFilename: String, outputFilename: String): IO[ExitCode] = {
     for {
       outputStream <- Resource.fromAutoCloseable(IO { new FileOutputStream(outputFilename) })
@@ -108,15 +110,15 @@ object Main extends IOApp {
     } yield res
   }
 
-  @tailrec
-  private def cutBlock(block: Array[Byte]): Array[Byte] =
-    block match {
-      case Array(1, _*) => block.tail
-      case Array(0, _*) => cutBlock(block.tail)
-      case _ => block
-    }
-
   private def decipherFile(inputStream: FileInputStream, outputStream: FileOutputStream, key: Key): IO[ExitCode] = {
+    @tailrec
+    def cutBlock(block: Array[Byte]): Array[Byte] =
+      block match {
+        case Array(1, _*) => block.tail
+        case Array(0, _*) => cutBlock(block.tail)
+        case _ => block
+      }
+
     def decipherRec: IO[ExitCode] = for {
       input <- IO { inputStream.readNBytes(256) }
       res <- if (input.nonEmpty) writeBlock(input) *> decipherRec
@@ -132,30 +134,30 @@ object Main extends IOApp {
     decipherRec
   }
 
-  // Зашифровать или расшифровать всю информацию в файле
+  // ШИФРОВАНИЕ
   private def runCypher(keyFilename: String, inputFilename: String, outputFilename: String): IO[ExitCode] = {
-      for {
-        outputStream <- Resource.fromAutoCloseable(IO { new FileOutputStream(outputFilename) })
-        inputStream <- Resource.fromAutoCloseable(IO { new FileInputStream(inputFilename) })
-        keyStream <- Resource.fromAutoCloseable(IO { new FileInputStream(keyFilename) })
-      } yield (inputStream, outputStream, keyStream)
-    }.use { case (inputStream, outputStream, keyStream) => for {
-        key <- readKey(keyStream)
-        res <- key match {
-          case Some(key) => cypherFile(inputStream, outputStream, key)
-          case None => IO(ExitCode.Error)
-        }
-      } yield res
-    }
-
-  private def extendArray[A: ClassTag](array: Array[A], toSize: Int): Array[A] =
-    Array.ofDim[A](toSize - array.length) ++ array
-
-  private def extendBlock(array: Array[Byte], toSize: Int): Array[Byte] =
-    Array.ofDim[Byte](toSize - array.length - 1) ++ (1.toByte +: array)
+    for {
+      outputStream <- Resource.fromAutoCloseable(IO { new FileOutputStream(outputFilename) })
+      inputStream <- Resource.fromAutoCloseable(IO { new FileInputStream(inputFilename) })
+      keyStream <- Resource.fromAutoCloseable(IO { new FileInputStream(keyFilename) })
+    } yield (inputStream, outputStream, keyStream)
+  }.use { case (inputStream, outputStream, keyStream) => for {
+      key <- readKey(keyStream)
+      res <- key match {
+        case Some(key) => cypherFile(inputStream, outputStream, key)
+        case None => IO(ExitCode.Error)
+      }
+    } yield res
+  }
 
   private def cypherFile(inputStream: FileInputStream, outputStream: FileOutputStream, key: Key): IO[ExitCode] = {
     val blockSize = key.blockByteSize()
+
+    def extendArray[A: ClassTag](array: Array[A], toSize: Int): Array[A] =
+      Array.ofDim[A](toSize - array.length) ++ array
+
+    def extendBlock(array: Array[Byte], toSize: Int): Array[Byte] =
+      Array.ofDim[Byte](toSize - array.length - 1) ++ (1.toByte +: array)
 
     def cypherRec: IO[ExitCode] = for {
       input <- IO { inputStream.readNBytes(blockSize) }
