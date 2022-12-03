@@ -1,5 +1,6 @@
-import RSA._
+import rsa.Algorithm._
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import rsa.{Algorithm, Key}
 import scopt.OParser
 
 import java.io.{FileInputStream, FileOutputStream, InputStream}
@@ -19,17 +20,10 @@ case object ConfigModeDecipher extends ConfigModes
 case object ConfigModeGenerate extends ConfigModes
 
 /*
- * DesObject.scala -- тайп-класс с описанием поведения объекта, используемого Des.
- *    Первая реализация объекта -- на основе Array[Byte]. Стоит добавить реализацию на BitSet.
- * Des.scala -- константы Des, класс Des, включающий себя алгоритм шифрования (и дешифрования, см. конструктор класса)
- *
  * Пример запуска:
- * @java-stuff@ cypher --input test-input.txt --output test-output.txt --key FFFFAAAA11110000
- * @java-stuff@ decipher --input test-output.txt --output test-output-deciphered.txt --key FFFFAAAA11110000
- *
- * Особенности:
- * - входной ключ считывается в формате FFFFAAAA11110000
- * - отсутствуют проверки, так что почти ничто не оборачивается в Option или Either :(
+ * @java-stuff@ generate --key test
+ * @java-stuff@ cypher --input test.txt --output test-cy.txt --key test.pub
+ * @java-stuff@ decipher --input test-cy.txt --output test-decy.txt --key test
  */
 object Main extends IOApp {
   private val builder = OParser.builder[Config]
@@ -87,9 +81,9 @@ object Main extends IOApp {
     }
   }.get
 
-  private def readKey(file: InputStream): IO[Option[RSAKey]] = for {
+  private def readKey(file: InputStream): IO[Option[Key]] = for {
     s <- IO { new String(file.readAllBytes()) }
-  } yield RSAKey.fromString(s)
+  } yield Key.fromString(s)
 
   private def generateNewKeys(output: String): IO[ExitCode] = { for {
     outPublic <- Resource.fromAutoCloseable(IO { new FileOutputStream(s"$output.pub") })
@@ -122,9 +116,7 @@ object Main extends IOApp {
       case _ => block
     }
 
-  private def decipherFile(inputStream: FileInputStream, outputStream: FileOutputStream, key: RSAKey): IO[ExitCode] = {
-    val decipheredBlockSize = key.blockByteSize()
-
+  private def decipherFile(inputStream: FileInputStream, outputStream: FileOutputStream, key: Key): IO[ExitCode] = {
     def decipherRec: IO[ExitCode] = for {
       input <- IO { inputStream.readNBytes(256) }
       res <- if (input.nonEmpty) writeBlock(input) *> decipherRec
@@ -132,7 +124,7 @@ object Main extends IOApp {
     } yield res
 
     def writeBlock(block: Array[Byte]): IO[Unit] = {
-      val deciphered = RSA.cypher(BigInt(block), key).toByteArray
+      val deciphered = Algorithm.cypher(BigInt(block), key).toByteArray
       val cutted = cutBlock(deciphered)
       IO { outputStream.write(cutted) }
     }
@@ -162,7 +154,7 @@ object Main extends IOApp {
   private def extendBlock(array: Array[Byte], toSize: Int): Array[Byte] =
     Array.ofDim[Byte](toSize - array.length - 1) ++ (1.toByte +: array)
 
-  private def cypherFile(inputStream: FileInputStream, outputStream: FileOutputStream, key: RSAKey): IO[ExitCode] = {
+  private def cypherFile(inputStream: FileInputStream, outputStream: FileOutputStream, key: Key): IO[ExitCode] = {
     val blockSize = key.blockByteSize()
 
     def cypherRec: IO[ExitCode] = for {
@@ -173,7 +165,7 @@ object Main extends IOApp {
 
     def writeBlock(block: Array[Byte]): IO[Unit] = {
       val extended = extendBlock(block, 256)
-      val cyphered = RSA.cypher(BigInt(extended), key).toByteArray
+      val cyphered = Algorithm.cypher(BigInt(extended), key).toByteArray
       val zeroExtended = extendArray(cyphered, 256)
       IO { outputStream.write(zeroExtended) }
     }

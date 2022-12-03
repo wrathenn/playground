@@ -1,3 +1,5 @@
+package rsa.math
+
 import java.math.BigInteger
 import java.util.Random
 import scala.annotation.tailrec
@@ -11,7 +13,7 @@ object BigIntOps {
     aBezout: BigInt, bBezout: BigInt
   )
 
-  // if negative bezout -- add module
+  // Если коэффициент Безо получился отрицательный - добавить модуль
   def extendedGCD(a: BigInt, b: BigInt): ExtendedGCDRes = {
     case class GCDRes(
       r0: BigInt, r1: BigInt,
