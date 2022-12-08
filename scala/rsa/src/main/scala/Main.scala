@@ -94,7 +94,7 @@ object Main extends IOApp {
     _ <- Resource.eval( IO { outPublic.write(key._2.toString.getBytes()) })
   } yield () }.use(_ => IO(ExitCode.Success))
 
-  // ДЕШИФРОВАНИЕ
+  // ДЕШИФРОВКА
   private def runDecipher(keyFilename: String, inputFilename: String, outputFilename: String): IO[ExitCode] = {
     for {
       outputStream <- Resource.fromAutoCloseable(IO { new FileOutputStream(outputFilename) })

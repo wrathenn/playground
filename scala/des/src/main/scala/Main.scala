@@ -104,7 +104,6 @@ object Main extends IOApp{
   // Рекурсивная дешифрока следующего блока
   private def decipherNext[A: DesObject](input: FileInputStream, output: FileOutputStream, des: Des[A],
     prevBlock: Option[A] = None): IO[Unit] = for {
-
     bytes <- IO(input.readNBytes(8))
     _ <- bytes.length match {
       case 8 =>

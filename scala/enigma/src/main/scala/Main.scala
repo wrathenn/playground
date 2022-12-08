@@ -5,7 +5,8 @@ import Ext.FileableSyntax.{ToFileOps, fromFile}
 import Ext.Files.using
 import scopt.OParser
 
-import java.io.{BufferedWriter, FileWriter}
+import java.io.{BufferedReader, BufferedWriter, FileInputStream, FileOutputStream, FileReader, FileWriter}
+import java.nio.charset.Charset
 import scala.sys.exit
 
 case class Config(
@@ -32,16 +33,16 @@ object Main {
         .text(""),
       cmd("start")
         .action((_, c) => c.copy(mode = Some(ConfigModeStart)))
-        .text("Use machine to encrypt messages")
+        .text("Use machine to cypher messages")
         .children(
           opt[String]('i', "input")
             .required()
             .action((a, c) => c.copy(inputFile = a))
-            .text("File to encrypt"),
+            .text("File to cypher"),
           opt[String]('o', "output")
             .required()
             .action((a, c) => c.copy(outputFile = a))
-            .text("File to encrypt"),
+            .text("Cyphered information"),
         ),
       opt[String]("rotor-prefix")
         .required()
@@ -72,13 +73,12 @@ object Main {
     }
     val enigma: ByteEnigma = ByteEnigma(rotors, reflector)
 
-    using(io.Source.fromFile(config.inputFile)) {inputFile =>
-      using(new BufferedWriter(new FileWriter(config.outputFile))) { outputFile => {
-        val reader = inputFile.reader
-        var c = reader.read
+    using(new FileInputStream(config.inputFile)) {inputFile =>
+      using(new FileOutputStream(config.outputFile)) { outputFile => {
+        var c = inputFile.read
         while (c != -1) {
-          outputFile.write(enigma.cryptAndGo(c.toByte))
-          c = reader.read
+          outputFile.write(enigma.cypherAndGo(c.toByte).toInt)
+          c = inputFile.read
         }
       }
       }

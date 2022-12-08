@@ -157,14 +157,22 @@ class Des[A: DesObject](private val key: A, private val isDecipher: Boolean) {
     // Разделить блок пополам
     val (l0, r0) = ip.halved
     // Пройтись через половинки L1..L16, R1..R16
-    val (l16, r16) = finalKeys.foldLeft(l0, r0 /* L0..L16, R0..R16 */) {
-      case ((lPrev, rPrev), key48) =>
-        val Ln = rPrev
-        val Rn = lPrev xor f(rPrev, key48, DesConstants.sTables)
-        (Ln, Rn)
-    }
-
-    (r16 combine l16).applyTable(DesConstants.minusIp)
+    val (l16, r16) = if (isDecipher)
+      finalKeys.foldLeft(r0, l0) {
+        case ((lPrev, rPrev), key48) =>
+          val Rn = lPrev
+          val Ln = rPrev xor f(lPrev, key48, DesConstants.sTables)
+          (Ln, Rn)
+      }
+    else
+      finalKeys.foldLeft(l0, r0) {
+        case ((lPrev, rPrev), key48) =>
+          val Ln = rPrev
+          val Rn = lPrev xor f(rPrev, key48, DesConstants.sTables)
+          (Ln, Rn)
+      }
+    val combined = if (isDecipher) l16 combine r16 else r16 combine l16
+    combined.applyTable(DesConstants.minusIp)
   }
 
   def cypher(block8byteOrLess: Array[Byte]): A = {

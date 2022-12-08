@@ -12,7 +12,7 @@ object Algorithm {
     val module = prime1 * prime2 // n
     val eiler = (prime1 - 1) * (prime2 - 1) // phi
     val publicExponent = coprimeLessThen(eiler) // e
-    val privateExponent = inverse(publicExponent, eiler) // d
+    val privateExponent = inverse(publicExponent, eiler) // d // (e * d) mod eiler = 1
     val publicKey = Key(publicExponent, module)
     val privateKey = Key(privateExponent, module)
     publicKey -> privateKey

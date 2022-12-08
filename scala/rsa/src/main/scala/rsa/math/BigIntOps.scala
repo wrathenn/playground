@@ -13,8 +13,14 @@ object BigIntOps {
     aBezout: BigInt, bBezout: BigInt
   )
 
-  // Если коэффициент Безо получился отрицательный - добавить модуль
-  def extendedGCD(a: BigInt, b: BigInt): ExtendedGCDRes = {
+  // Если коэффициент Безу получился отрицательный - добавить модуль
+  // a * aBezout + b * bBezout = 1
+  //  (e * d) mod eiler = 1
+  // a * x + b * y = 1
+  // a * x - 1 = -b * y ( mod y )
+  // a * x - 1 = 0  (mod y)
+  // a * x (mod y) = 1
+  def extendedGCD(e: BigInt, phi: BigInt): ExtendedGCDRes = {
     case class GCDRes(
       r0: BigInt, r1: BigInt,
       a0: BigInt, a1: BigInt,
@@ -34,7 +40,7 @@ object BigIntOps {
       }
 
     iter(GCDRes(
-      a, b,
+      e, phi,
       1, 0,
       0, 1
     )) match {
