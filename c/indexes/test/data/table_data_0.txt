@@ -1,0 +1,10 @@
+1;_;hello, world!
+2;_;hell, heaven
+3;_;world is world
+4;_;heaven possibly is bright
+5;_;good evening
+6;_;good gooh gool good
+7;_;thanks im good
+8;_;goo slimes
+9;_;year 2001
+10;_;i was born in 2004

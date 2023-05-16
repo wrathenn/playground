@@ -1,0 +1,7 @@
+out/*.o
+out/*/*.o
+app.exe
+tests.exe
+.idea
+venv
+test*.txt

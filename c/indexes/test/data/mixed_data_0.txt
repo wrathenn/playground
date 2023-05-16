@@ -1,0 +1,133 @@
+0;_;Beneath the sunken deeps
+1;_;Frigid waters tip the plates
+2;_;A claw of magma sweeps
+3;_;Rends the crust to giant slates
+4;_;Convection slowly creeps
+5;_;Sends new mountains through the gates
+6;_;An ancient psyche seeps
+7;_;Mends helices towards new fates
+8;_;Nothing stays entombed forever
+9;_;A dying gravestone weeps
+10;_;Blends the waters, carves, awaits,
+11;_;Sows the lakes the ice had severed
+12;_;The tomb no longer sleeps
+13;_;Fed by fire it stirs, creates
+14;_;Buried worlds shall rise up, rise up
+15;_;Buried worlds shall rise up high
+16;_;Thaw and rise up, rise up, rise up
+17;_;Thaw and rise up, rise up high
+18;_;Where Skaði's shadow falls
+19;_;Life grinds to an icy halt
+20;_;Where Vulcan's boiling crawls
+21;_;Oceans burn and heave and fault
+22;_;But where they meet and kiss and jostle
+23;_;A chthonic tendril sprawls
+24;_;Cathedrals rise of pure basalt
+25;_;Mantle ghosts, tectonic fossils
+26;_;A hellish glow illuminates the glacial vault
+27;_;More than rock shall rise up, rise up
+28;_;More than rock shall rise up high
+29;_;Race to rise up, rise up, rise up
+30;_;Race to rise up, rise up high
+31;_;Virgin channels draw in, breathe out
+32;_;Gnawing through the cryosphere
+33;_;Stygian mollusks swarm and reach out
+34;_;Life explodes the hydrosphere
+35;_;Bioluminescent cities light up
+36;_;Underneath a frozen sky
+37;_;Sing and light the austral night up
+38;_;Rise to scrape the ice up high
+39;_;Eldritch valleys rise up
+40;_;Eldritch valleys rebound and rise up, rise up high
+41;_;Nautilus delves, clad in crystal
+42;_;Sepia and urchin breed
+43;_;Teuthis' hunger grows, abyssal
+44;_;Octopodes on dendrites feed
+45;_;Bioluminescent cities light up
+46;_;Underneath a frozen sky
+47;_;Sing and light the austral night up
+48;_;Rise to break the ice up high
+49;_;And something wakes in the deep…
+50;_;Landmasses coalesce
+51;_;Long gone the holocene extinction
+52;_;As hypercanes ravage and bless
+53;_;The coastal swamps with biomass
+54;_;The benthos' grand egress
+55;_;Towards terrestrial distinction
+56;_;A postdiluvian octopia
+57;_;Invertebrate cornucopia
+58;_;Arachnoid bodies rise
+59;_;Infest their telluric new utopia
+60;_;As lichens rise to giant woods
+61;_;Octopus take to the trees
+62;_;As overlords of lands and seas
+63;_;Symbionts inside their hoods
+64;_;Nine brains fire, reboot their neurons-
+65;_;Spectral eyes and thinking skin
+66;_;Revel in new-found endurance
+67;_;Cogitate and join their kin
+68;_;An empire shall rise up, rise up
+69;_;Shape-shifting hives that never die
+70;_;Masters of the new earth rise up
+71;_;From abyss to open sky
+72;_;Kraken and Leviathan
+73;_;Evolve to polypotency
+74;_;Molecular their mimicry
+75;_;Bulging tools from myosin
+76;_;Tardigrades conjoin the membranes
+77;_;Polyploid biotechnology
+78;_;Medusoid immortality
+79;_;The dermis cast in chloroplasts
+80;_;Ancient, sapient, scintillating cephalopods
+81;_;Transdifferentiating cephalopods
+82;_;From bleeding crust to canopy
+83;_;From crudest ooze to the sublime
+84;_;Invisibly, unseizably,
+85;_;Unstoppably the masters climb
+86;_;Where instinct ends
+87;_;Where schemes emerge
+88;_;Where hunger goes
+89;_;The masters surge
+90;_;Ancient, sapient, scintillating cephalopods
+91;_;Transdifferentiating cephalopods
+92;_;Like a tide they rise up, rise up
+93;_;Like a tide they rise up high
+94;_;On piles of bones they rise up, rise up
+95;_;On piles of bones they rise up high
+96;_;On primate fossils they rise up
+97;_;On our remains they rise up high
+98;_;With a vengeance they rise up
+99;_;With a vengeance they rise up high
+100;_;Tentacles spread
+101;_;Cilia flare
+102;_;The octopus take to the air
+103;_;As overlords of earth and sky
+104;_;The elders glide
+105;_;The young ones fly
+106;_;As polyp seeds
+107;_;They pair and tear
+108;_;As fleshy leaves
+109;_;They soar up high
+110;_;Find burning needs
+111;_;In starry skies
+112;_;Where novae glare
+113;_;And planets die
+114;_;This world won't last forever
+115;_;In time, the only way is up
+116;_;Illuminating silent winds,
+117;_;The coleoidea dream of nebulae
+118;_;Billowing iridescence
+119;_;Brings a thousand maws with fangs
+120;_;Staring lanterns light the night
+121;_;Fleshy domes float to the sky
+122;_;Leathery bells chime in the dark
+123;_;The dragons of their aeon
+124;_;The dragons of their aeon
+125;_;Coral spires rise up, rise up
+126;_;Stratospheric colonies
+127;_;Make the waters rise up, rise up
+128;_;Shun the earth, escape and freeze
+129;_;Winged ammonites from the dawn of time
+130;_;Launch ships of ice to rise up high
+131;_;Primeval aliens in their prime
+132;_;To conquer worlds beyond the sky
