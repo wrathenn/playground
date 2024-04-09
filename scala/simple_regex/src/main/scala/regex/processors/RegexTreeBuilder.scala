@@ -9,7 +9,6 @@ import cats.implicits._
 import scala.collection.mutable
 
 object RegexTreeBuilder {
-  // TODO make this work with empty regex
   def buildRegexTree(postfixForm: List[RegexSymbol]): Either[RegexError, RegexTree] = {
     val stack = mutable.Stack[RegexTree]()
 

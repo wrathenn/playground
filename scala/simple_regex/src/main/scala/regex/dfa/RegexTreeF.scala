@@ -31,7 +31,7 @@ case class OrF(left: RegexTreeF, right: RegexTreeF) extends RegexTreeF with Tree
 case class ConcatenationF(left: RegexTreeF, right: RegexTreeF) extends RegexTreeF with Tree2[RegexTreeF] {
   override val nullable: Boolean = left.nullable && right.nullable
   override lazy val firstPos: Set[Int] = if (left.nullable) left.firstPos | right.firstPos else left.firstPos
-  override lazy val lastPos: Set[Int] = if (right.nullable) left.firstPos | right.firstPos else right.firstPos
+  override lazy val lastPos: Set[Int] = if (right.nullable) left.lastPos | right.lastPos else right.lastPos
 }
 
 case class TerminalF(number: Int, symbol: Char) extends RegexTreeF with Tree0[RegexTreeF] {
@@ -40,7 +40,9 @@ case class TerminalF(number: Int, symbol: Char) extends RegexTreeF with Tree0[Re
   override val lastPos: Set[Int] = Set(number)
 }
 
-class TerminalEndF(override val number: Int) extends TerminalF(number, '#')
+class TerminalEndF(override val number: Int) extends TerminalF(number, '#') {
+//  override val nullable = true
+}
 
 object RegexTreeF {
   private def functionsRepr(f: RegexTreeF) =

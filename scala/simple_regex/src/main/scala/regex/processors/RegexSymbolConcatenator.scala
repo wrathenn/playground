@@ -16,7 +16,7 @@ object RegexSymbolConcatenator {
         case (_: RegexOperandSymbol, _: RegexOperandSymbol) => true
         case (_: RegexExpressionSymbol.StarOperator.type, _: RegexOperandSymbol) => true
         case (_: RegexExpressionSymbol.StarOperator.type, _: RegexExpressionSymbol.LeftParenthesis.type) => true
-        case (_: RegexExpressionSymbol.LeftParenthesis.type, _: RegexExpressionSymbol.RightParenthesis.type) => true
+        case (_: RegexExpressionSymbol.RightParenthesis.type, _: RegexExpressionSymbol.LeftParenthesis.type) => true
         case (_: RegexExpressionSymbol.RightParenthesis.type, _: RegexOperandSymbol) => true
         case (_: RegexOperandSymbol, _: RegexExpressionSymbol.LeftParenthesis.type) => true
         case _ => false

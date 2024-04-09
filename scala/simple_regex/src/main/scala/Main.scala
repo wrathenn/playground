@@ -4,15 +4,18 @@ import regex.automata.{Automata, AutomataConverter, AutomataMinimizer, AutomataW
 import regex.dbg.TreePrinter
 import regex.dfa.RegexTreeF.terminalEndFShow
 import regex.dfa.{DFA, DFAStateBuilder, DFAWalker}
-import regex.models.RegexTree
+import regex.models.{RawRegexChar, RegexTree}
 import regex.models.RegexTree.regexTreeShow
 import regex.processors._
 
 import cats.effect.{ExitCode, IO, IOApp}
+import cats.syntax._
+import cats.implicits._
+import com.wrathenn.compilers.regex.AutomataDrawer
+import com.wrathenn.compilers.regex.models.RegexExpressionSymbol.Concatenation
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-// TODO minimization
 object Main extends IOApp {
   implicit def logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
@@ -55,8 +58,21 @@ object Main extends IOApp {
 
     dfa = DFAStateBuilder.buildDFA(treeF)
     simpleAutomata = AutomataConverter.fromDFA(dfa)
+    simpleVisualization <- IO defer AutomataDrawer.drawAutomata(simpleAutomata)
+    _ <- IO delay {
+      simpleVisualization.setTitle("ДКА")
+      simpleVisualization.setLocation(100, 100)
+      simpleVisualization.setVisible(true)
+    }
+
     minimizedAutomata = AutomataMinimizer.minimize(simpleAutomata)
-//    _ <- tryStrings(dfa, rawRegexString).foreverM
+    minimizedVisualization <- IO defer AutomataDrawer.drawAutomata(minimizedAutomata)
+    _ <- IO delay {
+      minimizedVisualization.setTitle("Минимизированный ДКА")
+      minimizedVisualization.setLocation(1000, 100)
+      minimizedVisualization.setVisible(true)
+    }
+
     _ <- tryStringsAutomata(minimizedAutomata, rawRegexString).foreverM
   } yield ExitCode.Success
 }
