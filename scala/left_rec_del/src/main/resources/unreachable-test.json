@@ -1,0 +1,143 @@
+{
+  "name": "test",
+  "terminals": [
+    {
+      "name": "a",
+      "spell": "a"
+    },
+    {
+      "name": "b",
+      "spell": "b"
+    },
+    {
+      "name": "c",
+      "spell": "c"
+    }
+  ],
+  "nonTerminals": [
+    {
+      "name": "A"
+    },
+    {
+      "name": "B"
+    },
+    {
+      "name": "C"
+    },
+    {
+      "name": "D"
+    },
+    {
+      "name": "F"
+    },
+    {
+      "name": "S"
+    }
+  ],
+  "productions": [
+    {
+      "left": {
+        "name": "S"
+      },
+      "right": [
+        {
+          "type": "term",
+          "name": "a"
+        },
+        {
+          "type": "nonterm",
+          "name": "A"
+        },
+        {
+          "type": "nonterm",
+          "name": "B"
+        }
+      ]
+    },
+    {
+      "left": { "name": "A" },
+      "right": [
+        { "type": "term", "name": "a" },
+        { "type": "nonterm", "name": "A" }
+      ]
+    },
+    {
+      "left": { "name": "A" },
+      "right": [
+        { "type": "term", "name": "b" },
+        { "type": "nonterm", "name": "B" }
+      ]
+    },
+    {
+      "left": { "name": "B" },
+      "right": [
+        { "type": "nonterm", "name": "A" },
+        { "type": "nonterm", "name": "C" },
+        { "type": "term", "name": "b" }
+      ]
+    },
+    {
+      "left": { "name": "B" },
+      "right": [
+        { "type": "term", "name": "b" }
+      ]
+    },
+    {
+      "left": { "name": "C" },
+      "right": [
+        { "type": "nonterm", "name": "A" }
+      ]
+    },
+    {
+      "left": { "name": "C" },
+      "right": [
+        { "type": "term", "name": "b" },
+        { "type": "nonterm", "name": "A" }
+      ]
+    },
+    {
+      "left": { "name": "C" },
+      "right": [
+        { "type": "term", "name": "c" },
+        { "type": "nonterm", "name": "C" }
+      ]
+    },
+    {
+      "left": { "name": "D" },
+      "right": [
+        { "type": "term", "name": "a" }
+      ]
+    },
+    {
+      "left": { "name": "D" },
+      "right": [
+        { "type": "term", "name": "c" }
+      ]
+    },
+    {
+      "left": { "name": "D" },
+      "right": [
+        { "type": "nonterm", "name": "F" },
+        { "type": "term", "name": "b" }
+      ]
+    },
+    {
+      "left": { "name": "F" },
+      "right": [
+        { "type": "nonterm", "name": "B" },
+        { "type": "nonterm", "name": "C" }
+      ]
+    },
+    {
+      "left": { "name": "F" },
+      "right": [
+        { "type": "nonterm", "name": "A" },
+        { "type": "nonterm", "name": "C" }
+      ]
+    }
+  ],
+  "startSymbol": {
+    "name": "S"
+  }
+}
+

@@ -1,0 +1,132 @@
+{
+  "name": "G0",
+  "terminals": [
+    {
+      "name": "IDENT",
+      "spell": "a"
+    },
+    {
+      "name": "ADD",
+      "spell": "+"
+    },
+    {
+      "name": "MUL",
+      "spell": "*"
+    },
+    {
+      "name": "LPAREN",
+      "spell": "("
+    },
+    {
+      "name": "RPAREN",
+      "spell": ")"
+    }
+  ],
+  "nonTerminals": [
+    {
+      "name": "E"
+    },
+    {
+      "name": "T"
+    },
+    {
+      "name": "F"
+    }
+  ],
+  "productions": [
+    {
+      "left": {
+        "name": "E"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "E"
+        },
+        {
+          "type": "term",
+          "name": "ADD"
+        },
+        {
+          "type": "nonterm",
+          "name": "T"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "E"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "T"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "T"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "T"
+        },
+        {
+          "type": "term",
+          "name": "MUL"
+        },
+        {
+          "type": "nonterm",
+          "name": "F"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "T"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "F"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "F"
+      },
+      "right": [
+        {
+          "type": "term",
+          "name": "IDENT"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "F"
+      },
+      "right": [
+        {
+          "type": "term",
+          "name": "LPAREN"
+        },
+        {
+          "type": "nonterm",
+          "name": "E"
+        },
+        {
+          "type": "term",
+          "name": "RPAREN"
+        }
+      ]
+    }
+  ],
+  "startSymbol": {
+    "name": "E"
+  }
+}
+
