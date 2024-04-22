@@ -8,6 +8,7 @@ import scala.collection.mutable
 
 class Grammar(
   val name: String,
+  val epsilon: Option[String],
   val terminals: List[Grammar.Terminal],
   val nonTerminals: List[Grammar.NonTerminal],
   val productions: List[Grammar.Production],
@@ -19,6 +20,7 @@ class Grammar(
     nonTerminals.view.map { nt => nt.id -> nt }.toMap
   val productionsLeftMap: Map[Grammar.ID, List[Grammar.Production]] =
     productions.groupBy(_.left.id)
+  val maxId = (terminalsMap.keySet | nonTerminalsMap.keySet).max
 //  val productions
 }
 

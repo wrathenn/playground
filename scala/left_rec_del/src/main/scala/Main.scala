@@ -3,8 +3,8 @@ package com.wrathenn.compilers
 import algs.DestroyUnreachableSymbols.DestroyUnreachableSyntax
 import algs.IsLanguageEmpty.IsEmptySyntax
 import converters.ConfigToModel
-import models.config.Config.GrammarConfig
-import models.config.Config.GrammarConfig._
+import com.wrathenn.compilers.models.Config.GrammarConfig
+import com.wrathenn.compilers.models.Config.GrammarConfig._
 import models.implicits.grammarShow
 
 import cats.effect.{ExitCode, IO, IOApp}

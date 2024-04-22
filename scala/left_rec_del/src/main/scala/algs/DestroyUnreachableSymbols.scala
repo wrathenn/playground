@@ -32,6 +32,7 @@ object DestroyUnreachableSymbols {
       
       new Grammar(
         name = grammar.name + "[no-unreachable]",
+        epsilon = grammar.epsilon,
         terminals = grammar.terminals.filter { t => v.contains(t.id) },
         nonTerminals = grammar.nonTerminals.filter { nt => v.contains(nt.id) },
         productions = grammar.productions.filter { p =>

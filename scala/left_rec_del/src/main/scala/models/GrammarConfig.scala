@@ -1,5 +1,5 @@
 package com.wrathenn.compilers
-package models.config
+package models
 
 //import models.grammar.GrammarConfig._
 
@@ -34,6 +34,7 @@ object Config {
   @derive(codec)
   case class GrammarConfig(
     name: String,
+    epsilon: Option[String],
     terminals: List[Terminal],
     nonTerminals: List[NonTerminal],
     productions: List[Production],

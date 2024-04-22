@@ -3,7 +3,7 @@ package converters
 
 import models.Grammar
 import models.Grammar.ID
-import models.config.Config.GrammarConfig
+import com.wrathenn.compilers.models.Config.GrammarConfig
 
 import cats.implicits._
 
@@ -60,8 +60,16 @@ object ConfigToModel {
       return new IllegalStateException(s"Start symbole ${config.startSymbol.name} not found among nonTerminals").asLeft
     }
 
+    for {
+      epsName <- config.epsilon
+      _ = if (!nonTerminals.contains(epsName)) {
+        return new IllegalStateException(s"Start symbole ${config.startSymbol.name} not found among nonTerminals").asLeft
+      }
+    } yield ()
+
     new Grammar(
       name = config.name,
+      epsilon = config.epsilon,
       terminals = terminals.values.toList,
       nonTerminals = nonTerminals.values.toList,
       productions = productions,
