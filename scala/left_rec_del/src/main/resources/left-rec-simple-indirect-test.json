@@ -1,5 +1,5 @@
 {
-  "name": "Left recursion simple test",
+  "name": "Left recursion simple indirect test",
   "terminals": [
     {
       "name": "a",
@@ -8,11 +8,18 @@
     {
       "name": "b",
       "spell": "b"
+    },
+    {
+      "name": "c",
+      "spell": "c"
     }
   ],
   "nonTerminals": [
     {
       "name": "A"
+    },
+    {
+      "name": "B"
     }
   ],
   "productions": [
@@ -23,7 +30,7 @@
       "right": [
         {
           "type": "nonterm",
-          "name": "A"
+          "name": "B"
         },
         {
           "type": "term",
@@ -39,6 +46,21 @@
         {
           "type": "term",
           "name": "b"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "B"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "A"
+        },
+        {
+          "type": "term",
+          "name": "c"
         }
       ]
     }

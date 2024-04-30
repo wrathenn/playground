@@ -70,9 +70,25 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       } yield ()
     }.assertNoException
 
+    "Simple indirect left recursion destroy" in {
+      for {
+        grammar <- TestGrammarReader.getGrammar("left-rec-simple-indirect-test.json")
+        result = grammar.destroyLeftRecursion
+        _ <- IO println result.show
+      } yield ()
+    }.assertNoException
+
     "G0 left recursion destroy" in {
       for {
         grammar <- TestGrammarReader.getGrammar("g0.json")
+        result = grammar.destroyLeftRecursion
+        _ <- IO println result.show
+      } yield ()
+    }.assertNoException
+
+    "Indirect left recursion test" in {
+      for {
+        grammar <- TestGrammarReader.getGrammar("left-rec-indirect-test.json")
         result = grammar.destroyLeftRecursion
         _ <- IO println result.show
       } yield ()

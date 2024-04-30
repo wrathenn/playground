@@ -1,0 +1,106 @@
+{
+  "name": "Grammar with indirect left recursion",
+  "epsilon": "eps",
+  "terminals": [
+    {
+      "name": "eps",
+      "spell": "{eps}"
+    },
+    {
+      "name": "a",
+      "spell": "a"
+    },
+    {
+      "name": "b",
+      "spell": "b"
+    },
+    {
+      "name": "c",
+      "spell": "c"
+    },
+    {
+      "name": "d",
+      "spell": "d"
+    }
+  ],
+  "nonTerminals": [
+    {
+      "name": "A"
+    },
+    {
+      "name": "S"
+    }
+  ],
+  "productions": [
+    {
+      "left": {
+        "name": "A"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "A"
+        },
+        {
+          "type": "term",
+          "name": "c"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "A"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "S"
+        },
+        {
+          "type": "term",
+          "name": "d"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "A"
+      },
+      "right": [
+        {
+          "type": "term",
+          "name": "eps"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "S"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "A"
+        },
+        {
+          "type": "term",
+          "name": "a"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "S"
+      },
+      "right": [
+        {
+          "type": "term",
+          "name": "b"
+        }
+      ]
+    }
+  ],
+  "startSymbol": {
+    "name": "S"
+  }
+}

@@ -99,7 +99,7 @@ private[algs] object DestroyLeftRecursion {
       forProductions.map { forP =>
         Grammar.Production(
           left = curP.left, // is curNonTerminal
-          right = curP.right.tail ++ forP.right,
+          right = forP.right ++ curP.right.tail,
         )
       }
     }
@@ -130,13 +130,10 @@ private[algs] object DestroyLeftRecursion {
     curNonTerminal: Grammar.NonTerminal,
     productions: List[Grammar.Production]
   ): DeletionResult = {
-    val immediateDeletionResult = deleteImmediate(curNonTerminal, productions)
-    val productionsAfterIndirectRecDeletion = deleteIndirectForAll(curNonTerminal, prevNonTerminals, immediateDeletionResult.changedProductions)
+    val productionsAfterIndirectRecDeletion = deleteIndirectForAll(curNonTerminal, prevNonTerminals, productions)
+    val immediateDeletionResult = deleteImmediate(curNonTerminal, productionsAfterIndirectRecDeletion)
 
-    DeletionResult(
-      newNonTerminal = immediateDeletionResult.newNonTerminal,
-      changedProductions = productionsAfterIndirectRecDeletion,
-    )
+    return immediateDeletionResult
   }
 
   private case class AllDeletionResult(
