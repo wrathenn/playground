@@ -1,11 +1,6 @@
 package com.wrathenn.compilers
 package models
 
-import cats.Show
-
-import scala.collection.immutable.SortedSet
-import scala.collection.mutable
-
 class Grammar(
   val name: String,
   val epsilon: Option[String],
@@ -20,8 +15,6 @@ class Grammar(
     nonTerminals.view.map { nt => nt.id -> nt }.toMap
   val productionsLeftMap: Map[Grammar.ID, List[Grammar.Production]] =
     productions.groupBy(_.left.id)
-  val maxId = (terminalsMap.keySet | nonTerminalsMap.keySet).max
-//  val productions
 }
 
 object Grammar {
@@ -44,29 +37,4 @@ object Grammar {
     left: NonTerminal,
     right: List[Element]
   )
-}
-
-object implicits {
-  implicit val grammarShow: Show[Grammar] = (g: Grammar) => {
-    val name = g.name
-    val terminals = g.terminals.map(_.spell).mkString(", ")
-    val nonTerminals = g.nonTerminals.map(_.id).mkString(", ")
-
-    val productions = g.productions.map { p =>
-      val left = g.nonTerminalsMap(p.left.id)
-      val rights = p.right.map {
-        case Grammar.Terminal(_, spell) => spell
-        case Grammar.NonTerminal(id) => id
-      }.mkString("")
-      s"${left.id}-->$rights"
-    }.mkString("\n")
-
-    s"""|Name: $name
-        |Terminals: $terminals
-        |NonTerminals: $nonTerminals
-        |Productions:
-        |$productions
-        |StartSymbol: ${g.start}
-        |""".stripMargin
-  }
 }

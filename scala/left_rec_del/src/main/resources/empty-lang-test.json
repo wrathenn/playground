@@ -36,36 +36,6 @@
   "productions": [
     {
       "left": {
-        "name": "E"
-      },
-      "right": [
-        {
-          "type": "nonterm",
-          "name": "E"
-        },
-        {
-          "type": "term",
-          "name": "ADD"
-        },
-        {
-          "type": "nonterm",
-          "name": "T"
-        }
-      ]
-    },
-    {
-      "left": {
-        "name": "E"
-      },
-      "right": [
-        {
-          "type": "nonterm",
-          "name": "T"
-        }
-      ]
-    },
-    {
-      "left": {
         "name": "T"
       },
       "right": [

@@ -1,0 +1,83 @@
+{
+  "name": "test",
+  "epsilon": "eps",
+  "terminals": [
+    {
+      "name": "a",
+      "spell": "a"
+    },
+    {
+      "name": "b",
+      "spell": "b"
+    },
+    {
+      "name": "eps",
+      "spell": "[eps]"
+    }
+  ],
+  "nonTerminals": [
+    {
+      "name": "S"
+    }
+  ],
+  "productions": [
+    {
+      "left": {
+        "name": "S"
+      },
+      "right": [
+        {
+          "type": "term",
+          "name": "a"
+        },
+        {
+          "type": "nonterm",
+          "name": "S"
+        },
+        {
+          "type": "term",
+          "name": "b"
+        },
+        {
+          "type": "nonterm",
+          "name": "S"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "S"
+      },
+      "right": [
+        {
+          "type": "term",
+          "name": "b"
+        },
+        {
+          "type": "nonterm",
+          "name": "S"
+        },
+        {
+          "type": "term",
+          "name": "a"
+        },
+        {
+          "type": "nonterm",
+          "name": "S"
+        }
+      ]
+    },
+    {
+      "left": { "name": "S" },
+      "right": [
+        {
+          "type": "term",
+          "name": "eps"
+        }
+      ]
+    }
+  ],
+  "startSymbol": {
+    "name": "S"
+  }
+}

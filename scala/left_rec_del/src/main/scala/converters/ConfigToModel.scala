@@ -57,13 +57,13 @@ object ConfigToModel {
     }
 
     if (!nonTerminals.contains(config.startSymbol.name)) {
-      return new IllegalStateException(s"Start symbole ${config.startSymbol.name} not found among nonTerminals").asLeft
+      return new IllegalStateException(s"Start symbol ${config.startSymbol.name} not found among nonTerminals").asLeft
     }
 
     for {
       epsName <- config.epsilon
-      _ = if (!nonTerminals.contains(epsName)) {
-        return new IllegalStateException(s"Start symbole ${config.startSymbol.name} not found among nonTerminals").asLeft
+      _ = if (!terminals.contains(epsName)) {
+        return new IllegalStateException(s"Epsilon ${config.epsilon} not found among terminals").asLeft
       }
     } yield ()
 

@@ -1,6 +1,5 @@
 {
   "name": "test",
-  "epsilon": "EPS",
   "terminals": [
     {
       "name": "a",
