@@ -12,6 +12,7 @@ object GrammarExt {
     def destroyUselessSymbols: Grammar = DestroyUselessSymbols.execute(grammar)
     def destroyUnreachableSymbols: Grammar = DestroyUnreachableSymbols.execute(grammar)
     def destroyEpsRules: Grammar = DestroyEpsRules.execute(grammar)
+    def destroyLeftRecursion: Grammar = DestroyLeftRecursion.execute(grammar)
   }
 
   implicit val grammarShow: Show[Grammar] = (g: Grammar) => {

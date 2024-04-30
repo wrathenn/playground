@@ -2,7 +2,7 @@
   "name": "G0",
   "terminals": [
     {
-      "name": "IDENT",
+      "name": "a",
       "spell": "a"
     },
     {
@@ -101,7 +101,7 @@
       "right": [
         {
           "type": "term",
-          "name": "IDENT"
+          "name": "a"
         }
       ]
     },

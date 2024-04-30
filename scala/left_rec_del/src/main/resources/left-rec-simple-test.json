@@ -1,0 +1,50 @@
+{
+  "name": "G0",
+  "terminals": [
+    {
+      "name": "a",
+      "spell": "a"
+    },
+    {
+      "name": "b",
+      "spell": "b"
+    }
+  ],
+  "nonTerminals": [
+    {
+      "name": "A"
+    }
+  ],
+  "productions": [
+    {
+      "left": {
+        "name": "A"
+      },
+      "right": [
+        {
+          "type": "nonterm",
+          "name": "A"
+        },
+        {
+          "type": "term",
+          "name": "a"
+        }
+      ]
+    },
+    {
+      "left": {
+        "name": "A"
+      },
+      "right": [
+        {
+          "type": "term",
+          "name": "b"
+        }
+      ]
+    }
+  ],
+  "startSymbol": {
+    "name": "A"
+  }
+}
+

@@ -2,6 +2,8 @@ package com.wrathenn.compilers
 
 import util.TestGrammarReader
 
+import cats.syntax.all._
+import cats.effect.IO
 import cats.effect.testing.scalatest.AsyncIOSpec
 import com.wrathenn.compilers.algs.GrammarExt._
 import org.scalatest.freespec.AsyncFreeSpec
@@ -59,5 +61,21 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         result = grammar.destroyEpsRules
       } yield grammar.productions.size != result.productions.size
     }.asserting(_ shouldBe true)
+
+    "Simple left recursion destroy" in {
+      for {
+        grammar <- TestGrammarReader.getGrammar("left-rec-simple-test.json")
+        result = grammar.destroyLeftRecursion
+        _ <- IO println result.show
+      } yield ()
+    }.assertNoException
+
+    "G0 left recursion destroy" in {
+      for {
+        grammar <- TestGrammarReader.getGrammar("g0.json")
+        result = grammar.destroyLeftRecursion
+        _ <- IO println result.show
+      } yield ()
+    }.assertNoException
   }
 }
