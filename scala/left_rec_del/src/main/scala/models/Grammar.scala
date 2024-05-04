@@ -3,7 +3,7 @@ package models
 
 class Grammar(
   val name: String,
-  val epsilon: Option[String],
+  val epsilon: Option[Grammar.ID],
   val terminals: List[Grammar.Terminal],
   val nonTerminals: List[Grammar.NonTerminal],
   val productions: List[Grammar.Production],

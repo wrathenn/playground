@@ -4,6 +4,7 @@ package algs
 import models.Grammar
 
 import cats.syntax.all._
+import com.wrathenn.compilers.algs.GrammarExt.productionShow
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -131,9 +132,16 @@ private[algs] object DestroyLeftRecursion {
     productions: List[Grammar.Production]
   ): DeletionResult = {
     val productionsAfterIndirectRecDeletion = deleteIndirectForAll(curNonTerminal, prevNonTerminals, productions)
+    println(s"After indirect for ${curNonTerminal.id}:\n\t${productionsAfterIndirectRecDeletion.map(_.show).mkString("\n\t")}")
     val immediateDeletionResult = deleteImmediate(curNonTerminal, productionsAfterIndirectRecDeletion)
+    println(s"After immediate for ${curNonTerminal.id} ${
+      immediateDeletionResult.newNonTerminal match {
+        case Some(value) => s"(added new non-terminal): ${value.id}"
+        case None => ""
+      }
+    }:\n\t${immediateDeletionResult.changedProductions.map(_.show).mkString("\n\t")}")
 
-    return immediateDeletionResult
+    immediateDeletionResult
   }
 
   private case class AllDeletionResult(
@@ -143,9 +151,10 @@ private[algs] object DestroyLeftRecursion {
 
   @tailrec
   private def deleteLeftRecForAll(
+    grammarStartId: Grammar.ID,
     allNonTerminals: List[Grammar.NonTerminal],
     productions: List[Grammar.Production],
-    // for tailRec:
+    // for tailrec:
     prevNonTerminals: List[Grammar.NonTerminal] = List(),
     addedNonTerminals: List[Grammar.NonTerminal] = List(),
   ): AllDeletionResult = {
@@ -160,6 +169,7 @@ private[algs] object DestroyLeftRecursion {
     )
 
     deleteLeftRecForAll(
+      grammarStartId = grammarStartId,
       allNonTerminals = allNonTerminals.tail,
       productions = deletedForOne.changedProductions,
       prevNonTerminals = prevNonTerminals :+ allNonTerminals.head,
@@ -170,16 +180,35 @@ private[algs] object DestroyLeftRecursion {
     )
   }
 
-  def execute(grammar: Grammar): Grammar = {
-    val deletionResult = deleteLeftRecForAll(grammar.nonTerminals, grammar.productions)
+  private def sanitizeEps(startId: Grammar.ID, eps: Option[Grammar.ID], productions: List[Grammar.Production]): List[Grammar.Production] = {
+    val epsId = eps.getOrElse(return productions)
+    productions.flatMap { p =>
+      if (p.right.head.id == epsId && (p.right.size != 1 || p.left.id != startId)) {
+        val newRight = p.right.tail
+        if (newRight.isEmpty) None
+        else p.copy(right = newRight).some
+      } else {
+        p.some
+      }
+    }
+  }
 
-    new Grammar(
-      name = s"${grammar.name} [left recursion deleted]",
-      epsilon = grammar.epsilon,
-      terminals = grammar.terminals,
-      nonTerminals = grammar.nonTerminals ++ deletionResult.newNonTerminals,
-      productions = deletionResult.newProductions,
-      start = grammar.start,
+  def execute(grammar: Grammar): Grammar = {
+    val deletionResult = deleteLeftRecForAll(grammar.start, grammar.nonTerminals, grammar.productions)
+
+    val newProductionsSanitized = sanitizeEps(grammar.start, grammar.epsilon, deletionResult.newProductions)
+//    val newProductionsSanitized = deletionResult.newProductions
+//    DestroyEpsRules.execute(
+    DestroyUselessSymbols.execute(
+      new Grammar(
+        name = s"${grammar.name} [left recursion deleted]",
+        epsilon = grammar.epsilon,
+        terminals = grammar.terminals,
+        nonTerminals = grammar.nonTerminals ++ deletionResult.newNonTerminals,
+        productions = newProductionsSanitized,
+        start = grammar.start,
+      )
     )
+//    )
   }
 }

@@ -1,11 +1,11 @@
 package com.wrathenn.compilers
 
+import algs.GrammarExt._
 import util.TestGrammarReader
 
-import cats.syntax.all._
 import cats.effect.IO
 import cats.effect.testing.scalatest.AsyncIOSpec
-import com.wrathenn.compilers.algs.GrammarExt._
+import cats.syntax.all._
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -59,6 +59,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       for {
         grammar <- TestGrammarReader.getGrammar("eps-destroy-test.json")
         result = grammar.destroyEpsRules
+        _ <- IO println result.show
       } yield grammar.productions.size != result.productions.size
     }.asserting(_ shouldBe true)
 

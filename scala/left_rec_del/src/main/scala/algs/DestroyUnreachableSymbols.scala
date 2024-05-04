@@ -13,7 +13,6 @@ private[algs] object DestroyUnreachableSymbols {
       // just an optimization to not calculate all previous things again
       `V_i-1_added`: Set[Grammar.ID],
     ): Set[Grammar.ID] = {
-      println("aaa  " + `V_i-1`.mkString(", "))
       val `V_i_added` = `V_i-1_added`.view.flatMap { prevA =>
           grammar.productionsLeftMap.get(prevA) // find production with this as left
         }.flatten

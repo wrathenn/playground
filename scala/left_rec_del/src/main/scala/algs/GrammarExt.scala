@@ -15,6 +15,14 @@ object GrammarExt {
     def destroyLeftRecursion: Grammar = DestroyLeftRecursion.execute(grammar)
   }
 
+  implicit val productionShow: Show[Grammar.Production] = (p: Grammar.Production) => {
+    val rights = p.right.map {
+      case Grammar.Terminal(_, spell) => spell
+      case Grammar.NonTerminal(id) => id
+    }.mkString("")
+    s"${p.left.id}-->$rights"
+  }
+
   implicit val grammarShow: Show[Grammar] = (g: Grammar) => {
     val name = g.name
     val terminals = g.terminals.map(_.spell).mkString(", ")
