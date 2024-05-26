@@ -19,6 +19,8 @@ libraryDependencies ++= Seq(
 libraryDependencies += "tf.tofu" %% "derevo-core" % "0.13.0"
 libraryDependencies += "tf.tofu" %% "derevo-circe" % "0.13.0"
 
+libraryDependencies += "com.lihaoyi" %% "pprint" % "0.9.0"
+
 libraryDependencies += "org.typelevel" %% "cats-effect" % versions.cats
 
 libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.23.1"

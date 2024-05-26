@@ -11,6 +11,8 @@ import org.scalatest.{Failed, Succeeded}
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.xml.PrettyPrinter
+
 
 class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   def ipFromString(data: String) = new InputPointer(data = data.toCharArray.toList)
@@ -216,6 +218,41 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       println(r)
       Succeeded
 
+    }
+  }
+
+  "SimpleExpr reader" - {
+    "single" in {
+      val ip = ipFromString("+asd ** 2")
+      val r = NonTerminalReader.simpleExprReader.read(ip)
+      println(r)
+      Succeeded
+    }
+
+    "with other" in {
+      val ip = ipFromString("asd & 2 & 3 + 132")
+      val r = NonTerminalReader.simpleExprReader.read(ip)
+      println(r)
+      Succeeded
+    }
+  }
+
+  "Relation reader" - {
+    "single" in {
+      val ip = ipFromString("2 ** 2 > 3 ** 3")
+      val r = NonTerminalReader.relationReader.read(ip)
+      println(r)
+      Succeeded
+    }
+  }
+
+  "Expression reader" - {
+    "single" in {
+      val ip = ipFromString("2 ** 2 > 3 ** 3 and 7 * 7 or 123")
+      val r = NonTerminalReader.expressionReader.read(ip)
+      pprint.pprintln(r)
+      println(r)
+      Succeeded
     }
   }
 }

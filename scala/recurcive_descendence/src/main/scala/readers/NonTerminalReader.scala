@@ -1,17 +1,45 @@
 package com.wrathenn.compilers
 package readers
 
-import cats.syntax.all._
+import models.G5
 import models.G5.{NonTerminal, Terminal}
 
-import com.wrathenn.compilers.models.G5
-import com.wrathenn.compilers.models.G5.NonTerminal.MultiplicativeOperation
+import cats.syntax.all._
 
 import scala.annotation.tailrec
 
 trait NonTerminalReader[NT <: G5.NonTerminal] {
   def read(ip: InputPointer): Either[Exception, (NT, InputPointer)]
-  //  def readEmptySymbols(ip: InputPointer):
+  protected def readOneContinuation[
+    Splitter <: G5.NonTerminal,
+    Target <: G5.NonTerminal,
+  ](
+    inputPointer: InputPointer,
+    splitterReader: NonTerminalReader[Splitter],
+    targetReader: NonTerminalReader[Target],
+  ): Option[((Splitter, Target), InputPointer)] = for {
+    ip0 <- inputPointer.skipEmpty().some
+    (splitOp, ip1) <- splitterReader.read(ip0).toOption
+    ip2 = ip1.skipEmpty()
+    (target, ip3) <- targetReader.read(ip2).toOption
+  } yield (splitOp, target) -> ip3
+
+  @tailrec
+  final protected def readContinuations[
+    Splitter <: G5.NonTerminal,
+    Target <: G5.NonTerminal,
+  ](
+    inputPointer: InputPointer,
+    splitterReader: NonTerminalReader[Splitter],
+    targetReader: NonTerminalReader[Target],
+    acc: List[(Splitter, Target)],
+  ): (List[(Splitter, Target)], InputPointer) = {
+    readOneContinuation(inputPointer, splitterReader, targetReader) match {
+      case Some((group, ipNext)) =>
+        readContinuations(ipNext, splitterReader, targetReader, acc :+ group)
+      case None => acc -> inputPointer
+    }
+  }
 }
 
 object NonTerminalReader {
@@ -200,92 +228,50 @@ object NonTerminalReader {
   }
 
   val summandReader: NonTerminalReader[NonTerminal.Summand] = new NonTerminalReader[NonTerminal.Summand] {
-    private def readOneContinuation(inputPointer: InputPointer): Option[((NonTerminal.MultiplicativeOperation, NonTerminal.Multiplier), InputPointer)] = {
-      val ip0 = inputPointer.skipEmpty()
-      for {
-        (multOp, ip1) <- multiplicativeOperationReader.read(ip0).toOption
-        ip2 = ip1.skipEmpty()
-        (multiplier, ip3) <- multiplierReader.read(ip2).toOption
-      } yield (multOp, multiplier) -> ip3
-    }
-
-    @tailrec
-    private def readContinuations(
-      inputPointer: InputPointer,
-      acc: List[(NonTerminal.MultiplicativeOperation, NonTerminal.Multiplier)],
-    ): (List[(NonTerminal.MultiplicativeOperation, NonTerminal.Multiplier)], InputPointer) = {
-      readOneContinuation(inputPointer) match {
-        case Some((group, ipNext)) =>
-          readContinuations(ipNext, acc :+ group)
-        case None => acc -> inputPointer
-      }
-    }
-
     override def read(ip: InputPointer): Either[Exception, (NonTerminal.Summand, InputPointer)] = for {
       first <- ip.getFirstEither
       _ <- if (!NonTerminal.Summand.first(first)) new IllegalStateException(s"Wrong first [Summand]: $ip").asLeft else ().asRight
       (multiplier0, ip0) <- multiplierReader.read(ip)
-      (other, ip1) = readContinuations(ip0, List())
+      (other, ip1) = readContinuations(ip0, multiplicativeOperationReader, multiplierReader, List())
     } yield NonTerminal.Summand(firstMultiplier = multiplier0, other = other) -> ip1
   }
 
   val simpleExprReader: NonTerminalReader[NonTerminal.SimpleExpr] = new NonTerminalReader[NonTerminal.SimpleExpr] {
-    override def read(ip: InputPointer): Either[Exception, (NonTerminal.SimpleExpr, InputPointer)] = {
-      var _ip = ip
-
-      var firstChar = _ip.getFirst() match {
-        case Some(value) => value
-        case None => return new IllegalStateException("").asLeft
+    override def read(ip: InputPointer): Either[Exception, (NonTerminal.SimpleExpr, InputPointer)] = for {
+      first <- ip.getFirstEither
+      _ <- if (!NonTerminal.SimpleExpr.first(first)) new IllegalStateException(s"Wrong first [SimpleExpr]: $ip").asLeft else ().asRight
+      (unaryOp, ip0) <- unaryAdditiveOperationReader.read(ip) match {
+        case Left(_) => (None -> ip).asRight
+        case Right((unary, ip)) => (unary.some -> ip).asRight
       }
-
-      val optionalUnary = if (NonTerminal.UnaryAdditiveOperation.first(firstChar)) {
-        unaryAdditiveOperationReader.read(_ip) match {
-          case Left(_) => None
-          case Right((value, newIp)) => {
-            _ip = newIp
-            value.some
-          }
-        }
-      } else None
-
-      firstChar = _ip.getFirst() match {
-        case Some(value) => value
-        case None => return new IllegalStateException("").asLeft
-      }
-
-      val summand = if (NonTerminal.Summand.first(firstChar)) {
-//        summandReader.read()
-      }
-      ???
-    }
+      (firstSummand, ip1) <- summandReader.read(ip0)
+      (other, ip2) = readContinuations(ip1, binaryAdditiveOperationReader, summandReader, List())
+    } yield NonTerminal.SimpleExpr(
+      unaryAdditiveOperation = unaryOp,
+      summand = firstSummand,
+      otherSummands = other,
+    ) -> ip2
   }
 
   val relationReader: NonTerminalReader[NonTerminal.Relation] = new NonTerminalReader[NonTerminal.Relation] {
-    override def read(ip: InputPointer): Either[Exception, (NonTerminal.Relation, InputPointer)] = {
-      val firstChar = ip.getFirst() match {
-        case Some(value) => value
-        case None => return new IllegalStateException("").asLeft
+    override def read(ip: InputPointer): Either[Exception, (NonTerminal.Relation, InputPointer)] = for {
+      first <- ip.getFirstEither
+      _ <- if (!NonTerminal.Relation.first(first)) new IllegalStateException(s"Wrong first [SimpleExpr]: $ip").asLeft else ().asRight
+      (simpleExpr, ip0) <- simpleExprReader.read(ip)
+      (cont, ip1) <- readOneContinuation(ip0, relationOperationReader, simpleExprReader) match {
+        case Some((value, ip)) => (value.some -> ip).asRight
+        case None => (None -> ip0).asRight
       }
-      if (!NonTerminal.SimpleExpr.first(firstChar)){
-        return new IllegalStateException("Doesn't start with SimpleExpr.first").asLeft
-      }
-      val relation = simpleExprReader.read(ip)
-      ???
-    }
+    } yield NonTerminal.Relation(simpleExpr = simpleExpr, otherSimpleExpr = cont) -> ip1
   }
 
 
   val expressionReader: NonTerminalReader[NonTerminal.Expression] = new NonTerminalReader[NonTerminal.Expression] {
-    override def read(ip: InputPointer): Either[Exception, (NonTerminal.Expression, InputPointer)] = {
-      val firstChar = ip.getFirst() match {
-        case Some(value) => value
-        case None => return new IllegalStateException("").asLeft
-      }
-      if (!NonTerminal.Relation.first(firstChar)) {
-        return new IllegalStateException("Doesn't start with Relation.first").asLeft
-      }
-      val relation = relationReader.read(ip)
-      ???
-    }
+    override def read(ip: InputPointer): Either[Exception, (NonTerminal.Expression, InputPointer)] = for {
+      first <- ip.getFirstEither
+      _ <- if (!NonTerminal.Expression.first(first)) new IllegalStateException(s"Wrong first [Expression]: $ip").asLeft else ().asRight
+      (rel0, ip0) <- relationReader.read(ip)
+      (other, ip1) = readContinuations(ip0, logicalOperationReader, relationReader, List())
+    } yield NonTerminal.Expression(relation = rel0, otherExpressions = other) -> ip1
   }
 }
