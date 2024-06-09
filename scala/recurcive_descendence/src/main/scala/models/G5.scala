@@ -36,11 +36,18 @@ object G5 {
     case object Abs extends Terminal("abs") with HigherPriorityOperational
     case object Not extends Terminal("not") with HigherPriorityOperational
 
+    sealed trait IdentifierDeclarational
+    case object `val` extends Terminal("val") with IdentifierDeclarational
+    case object `var` extends Terminal("var") with IdentifierDeclarational
+
+    case object Assigment extends Terminal("=")
+
     case class NumericLiteral(override val repr: String) extends Terminal(repr)
     case class Variable(override val repr: String) extends Terminal(repr)
   }
 
   trait FirstPos { def first(c: Char): Boolean }
+
   sealed trait NonTerminal extends Element
   object NonTerminal {
     case class MultiplicativeOperation(
@@ -119,7 +126,7 @@ object G5 {
 
     sealed trait Multiplier extends NonTerminal
     object Multiplier extends FirstPos {
-      case class Powers(p: Primary, other: List[Primary]) extends Multiplier
+      case class PrimaryPowers(p: Primary, other: List[Primary]) extends Multiplier
       case class Abs(p: Primary) extends Multiplier
       case class Not(p: Primary) extends Multiplier
 
@@ -164,6 +171,54 @@ object G5 {
     object Expression extends FirstPos {
       def first(c: Char): Boolean =
         NonTerminal.Relation.first(c)
+    }
+
+    case class Identifier(
+      decl: Terminal with Terminal.IdentifierDeclarational,
+      variable: Variable,
+    ) extends NonTerminal
+    object Identifier extends FirstPos {
+      def first(c: Char): Boolean = List(Terminal.`val`, Terminal.`val`)
+        .map(_.repr.head).contains(c)
+    }
+
+    case class Operator(
+      identifier: Identifier,
+      expr: Expression,
+    ) extends NonTerminal
+    object Operator extends FirstPos {
+      override def first(c: Char): Boolean = Identifier.first(c)
+    }
+
+    sealed trait OperatorTail extends NonTerminal
+    object OperatorTail extends FirstPos {
+      case object Nil extends OperatorTail
+      case class ListCell(car: Operator, cdr: OperatorTail) extends OperatorTail
+
+      override def first(c: Char): Boolean = c == ';'
+    }
+
+    case class OperatorList(
+      operator: Operator,
+      operatorTail: OperatorTail,
+    ) extends NonTerminal
+    object OperatorList extends FirstPos {
+      override def first(c: Char): Boolean = Operator.first(c)
+    }
+
+    // in { ... }
+    case class Block(
+      operatorList: OperatorList,
+    ) extends NonTerminal
+    object Block extends FirstPos {
+      override def first(c: Char): Boolean = c == '{'
+    }
+
+    case class Program(
+      block: Block,
+    ) extends NonTerminal
+    object Program extends FirstPos {
+      override def first(c: Char): Boolean = Block.first(c)
     }
   }
 }

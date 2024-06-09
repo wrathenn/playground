@@ -5,6 +5,7 @@ import cats.effect.IO
 import cats.effect.testing.scalatest.AsyncIOSpec
 import cats.syntax.all._
 import com.wrathenn.compilers.models.G5.{NonTerminal, Terminal}
+import com.wrathenn.compilers.readers.instances.{BlockReader, ExpressionReader, IdentifierReader, MultiplicativeOperationReader, MultiplierReader, NumericLiteralReader, OperatorListReader, OperatorReader, PrimaryReader, ProgramReader, RelationReader, SimpleExprReader, SummandReader, VariableReader}
 import com.wrathenn.compilers.readers.{InputPointer, NonTerminalReader}
 import org.scalatest.Checkpoints.Checkpoint
 import org.scalatest.{Failed, Succeeded}
@@ -21,7 +22,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Multiplicative Operation Reader" - {
     "*" in {
       val ip = ipFromString("*")
-      val r = NonTerminalReader.multiplicativeOperationReader.read(ip)
+      val r = MultiplicativeOperationReader.read(ip)
       println(r)
 
       r match {
@@ -40,7 +41,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Numeric Literal Reader" - {
     "positive" in {
       val ip = ipFromString("12364 7")
-      val r = NonTerminalReader.numericLiteralReader.read(ip)
+      val r = NumericLiteralReader.read(ip)
       println(r)
 
       r match {
@@ -56,7 +57,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     }
     "negative" in {
       val ip = ipFromString("-12364 7")
-      val r = NonTerminalReader.numericLiteralReader.read(ip)
+      val r = NumericLiteralReader.read(ip)
       println(r)
 
       r match {
@@ -75,7 +76,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Variable Reader" - {
     "correct" in {
       val ip = ipFromString("123d456 7")
-      val r = NonTerminalReader.variableReader.read(ip)
+      val r = VariableReader.read(ip)
       println(r)
 
       r match {
@@ -94,7 +95,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Primary Reader" - {
     "numeric literal" in {
       val ip = ipFromString("123456 7")
-      val r = NonTerminalReader.primaryReader.read(ip)
+      val r = PrimaryReader.read(ip)
       println(r)
 
       r match {
@@ -115,7 +116,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     "variable" in {
       val ip = ipFromString("asd 7")
-      val r = NonTerminalReader.primaryReader.read(ip)
+      val r = PrimaryReader.read(ip)
       println(r)
 
       r match {
@@ -138,7 +139,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Multiplier Reader" - {
     "abs numeric" in {
       val ip = ipFromString("abs -123 7")
-      val r = NonTerminalReader.multiplierReader.read(ip)
+      val r = MultiplierReader.read(ip)
       println(r)
 
       r match {
@@ -160,7 +161,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     }
     "abs variable" in {
       val ip = ipFromString("abs test")
-      val r = NonTerminalReader.multiplierReader.read(ip)
+      val r = MultiplierReader.read(ip)
       println(r)
 
       r match {
@@ -182,7 +183,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     }
     "not variable" in {
       val ip = ipFromString("not test")
-      val r = NonTerminalReader.multiplierReader.read(ip)
+      val r = MultiplierReader.read(ip)
       println(r)
 
       r match {
@@ -207,14 +208,14 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Summand reader" - {
     "single" in {
       val ip = ipFromString("abs 123")
-      val r = NonTerminalReader.summandReader.read(ip)
+      val r = SummandReader.read(ip)
       println(r)
       Succeeded
     }
 
     "with other" in {
       val ip = ipFromString("123 * not 12 * abs 727")
-      val r = NonTerminalReader.summandReader.read(ip)
+      val r = SummandReader.read(ip)
       println(r)
       Succeeded
 
@@ -224,14 +225,14 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "SimpleExpr reader" - {
     "single" in {
       val ip = ipFromString("+asd ** 2")
-      val r = NonTerminalReader.simpleExprReader.read(ip)
+      val r = SimpleExprReader.read(ip)
       println(r)
       Succeeded
     }
 
     "with other" in {
       val ip = ipFromString("asd & 2 & 3 + 132")
-      val r = NonTerminalReader.simpleExprReader.read(ip)
+      val r = SimpleExprReader.read(ip)
       println(r)
       Succeeded
     }
@@ -240,7 +241,7 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Relation reader" - {
     "single" in {
       val ip = ipFromString("2 ** 2 > 3 ** 3")
-      val r = NonTerminalReader.relationReader.read(ip)
+      val r = RelationReader.read(ip)
       println(r)
       Succeeded
     }
@@ -249,7 +250,68 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Expression reader" - {
     "single" in {
       val ip = ipFromString("2 ** 2 > 3 ** 3 and 7 * 7 or 123")
-      val r = NonTerminalReader.expressionReader.read(ip)
+      val r = ExpressionReader.read(ip)
+      pprint.pprintln(r)
+      println(r)
+      Succeeded
+    }
+  }
+
+  "Identifier reader" - {
+    "single" in {
+      val ip = ipFromString("val a = 2 ** 2 > 3 ** 3 and 7 * 7 or 123")
+      val r = IdentifierReader.read(ip)
+      pprint.pprintln(r)
+      println(r)
+      Succeeded
+    }
+  }
+
+  "Operator reader" - {
+    "single" in {
+      val ip = ipFromString("val a = 2 ** 2 > 3 ** 3 and 7 * 7 or 123")
+      val r = OperatorReader.read(ip)
+      pprint.pprintln(r)
+      println(r)
+      Succeeded
+    }
+  }
+
+  "OperatorList reader" - {
+    "single" in {
+      val ip = ipFromString("var a = 2; val b = 3")
+      val r = OperatorListReader.read(ip)
+      pprint.pprintln(r)
+      println(r)
+      Succeeded
+    }
+  }
+
+  "Block reader" - {
+    "single" in {
+      val ip = ipFromString(
+        """
+           {
+            var a = 2;
+            val b = 3
+           }
+        """.stripMargin)
+      val ip0 = ip.skipEmpty()
+      val r = BlockReader.read(ip0)
+      pprint.pprintln(r)
+      println(r)
+      Succeeded
+    }
+  }
+
+  "Program reader" - {
+    "single" in {
+      val ip = ipFromString(
+        """{
+var a = 2;
+val b = 3 }""".stripMargin)
+      val ip0 = ip.skipEmpty()
+      val r = ProgramReader.read(ip0)
       pprint.pprintln(r)
       println(r)
       Succeeded

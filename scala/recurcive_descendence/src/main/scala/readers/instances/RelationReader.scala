@@ -2,7 +2,7 @@ package com.wrathenn.compilers
 package readers.instances
 
 import models.G5.NonTerminal
-import readers.{InputPointer, NonTerminalReader, SimpleExprReader}
+import readers.{InputPointer, NonTerminalReader}
 
 import cats.syntax.all._
 

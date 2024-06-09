@@ -1,10 +1,10 @@
 package com.wrathenn.compilers
-package readers
+package readers.instances
 
 import models.G5.NonTerminal
+import readers.{InputPointer, NonTerminalReader}
 
 import cats.syntax.all._
-import com.wrathenn.compilers.readers.instances.{BinaryAdditiveOperationReader, SummandReader, UnaryAdditiveOperationReader}
 
 object SimpleExprReader extends NonTerminalReader[NonTerminal.SimpleExpr] {
   override def read(ip: InputPointer): Either[Exception, (NonTerminal.SimpleExpr, InputPointer)] = for {

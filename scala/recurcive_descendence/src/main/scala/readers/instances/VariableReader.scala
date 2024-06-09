@@ -3,12 +3,13 @@ package readers.instances
 
 import models.G5.{NonTerminal, Terminal}
 import readers.{InputPointer, NonTerminalReader}
+
 import cats.syntax.all._
 
 object VariableReader extends NonTerminalReader[NonTerminal.Variable] {
-  override def read(ip: InputPointer): Either[Exception, (NonTerminal.Variable, InputPointer)] = {
-    val repr = ip.takeWhile { c => c != '\n' && c != ' ' && c != '\t' }
-    if (repr.forall { _.isLetterOrDigit } && repr.exists { _.isLetter }) (NonTerminal.Variable(Terminal.Variable(repr)) -> ip.step(repr.length)).asRight
-    else new IllegalStateException("Error: NT variable").asLeft
-  }
+  override def read(ip: InputPointer): Either[Exception, (NonTerminal.Variable, InputPointer)] = for {
+    first <- ip.getFirstEither
+    _ <- if (first.isDigit) new IllegalStateException(s"Variable can't start with digit, $ip").asLeft else ().asRight
+    repr = ip.takeWhile { _.isLetterOrDigit }
+  } yield NonTerminal.Variable(Terminal.Variable(repr)) -> ip.step(repr.length)
 }

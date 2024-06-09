@@ -38,10 +38,10 @@ object MultiplierReader extends NonTerminalReader[NonTerminal.Multiplier] {
     }
   }
 
-  private def readPowers(inputPointer: InputPointer): Option[(NonTerminal.Multiplier.Powers, InputPointer)] = for {
+  private def readPowers(inputPointer: InputPointer): Option[(NonTerminal.Multiplier.PrimaryPowers, InputPointer)] = for {
     (p1, ip0) <- PrimaryReader.read(inputPointer).toOption
     (otherPowers, ip1) = readAllPowers(ip0, List())
-  } yield NonTerminal.Multiplier.Powers(p = p1, other = otherPowers) -> ip1
+  } yield NonTerminal.Multiplier.PrimaryPowers(p = p1, other = otherPowers) -> ip1
 
   override def read(ip: InputPointer): Either[Exception, (NonTerminal.Multiplier, InputPointer)] = for {
     first <- ip.getFirstEither
