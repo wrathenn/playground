@@ -305,11 +305,12 @@ class GrammarTests extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   }
 
   "Program reader" - {
-    "single" in {
+    "show" in {
       val ip = ipFromString(
         """{
-var a = 2;
-val b = 3 }""".stripMargin)
+            var a = 2 < 5 and 3 or 5;
+            val b = 3;
+           }""")
       val ip0 = ip.skipEmpty()
       val r = ProgramReader.read(ip0)
       pprint.pprintln(r)

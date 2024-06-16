@@ -31,6 +31,8 @@ scalacOptions += "-Ymacro-annotations"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test
 libraryDependencies += "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test
 
+libraryDependencies += "berlin.softwaretechnik" %% "graphviz-scala" % "0.0.7"
+
 lazy val root = (project in file("."))
   .settings(
     name := "recursive_descendence",

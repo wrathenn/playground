@@ -1,5 +1,5 @@
 {
 var a = 2;
 val b = 3;
-val test=3*2
+val test=3*2;
 }
