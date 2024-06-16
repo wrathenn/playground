@@ -11,5 +11,5 @@ object ExpressionReader extends NonTerminalReader[NonTerminal.Expression] {
     _ <- if (!NonTerminal.Expression.first(first)) new IllegalStateException(s"Wrong first [Expression]: $ip").asLeft else ().asRight
     (rel0, ip0) <- RelationReader.read(ip)
     (other, ip1) = readContinuations(ip0, LogicalOperationReader, RelationReader, List())
-  } yield NonTerminal.Expression(relation = rel0, otherExpressions = other) -> ip1
+  } yield NonTerminal.Expression(relation = rel0, otherRelations = other) -> ip1
 }

@@ -166,7 +166,7 @@ object G5 {
 
     case class Expression(
       relation: Relation,
-      otherExpressions: List[(LogicalOperation, Relation)],
+      otherRelations: List[(LogicalOperation, Relation)],
     ) extends NonTerminal
     object Expression extends FirstPos {
       def first(c: Char): Boolean =
