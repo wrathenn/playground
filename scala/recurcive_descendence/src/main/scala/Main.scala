@@ -8,6 +8,7 @@ import readers.instances.ProgramReader
 import berlin.softwaretechnik.graphviz.Graph
 import berlin.softwaretechnik.graphviz.attributes.{EdgeAttributes, GraphAttributes, NodeAttributes}
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import com.wrathenn.compilers.readers.postfix.programWriter
 
 import scala.io.Source.fromFile
 
@@ -39,5 +40,7 @@ object Main extends IOApp {
     programGraph <- getProgramGraph(program)
     _ <- IO println "Посетите https://dreampuf.github.io/GraphvizOnline/ и скопируйте:"
     _ <- IO println programGraph
+    _ <- IO println "В обратной польской нотации:"
+    _ <- IO println programWriter.write(program)
   } yield ExitCode.Success
 }

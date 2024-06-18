@@ -3,11 +3,11 @@ package readers.graphviz
 
 import models.G5
 import readers.InputPointer
-import readers.instances.{ExpressionReader, IdentifierReader, MultiplierReader, OperatorReader, PrimaryReader, ProgramReader, RelationReader, SimpleExprReader, SummandReader}
+import readers.graphviz.StringIdExt.IdInc
+import readers.instances._
 
 import berlin.softwaretechnik.graphviz.attributes.{EdgeAttributes, GraphAttributes, NodeAttributes, Plain}
 import berlin.softwaretechnik.graphviz.{Graph, Node}
-import com.wrathenn.compilers.readers.graphviz.StringIdExt.IdInc
 
 trait G5GraphvizVisualizer[A <: G5.NonTerminal] {
   // returns result and last used id

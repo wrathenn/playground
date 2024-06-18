@@ -121,7 +121,7 @@ object G5 {
       def first(c: Char): Boolean =
         NonTerminal.NumericLiteral.first(c) ||
         NonTerminal.Variable.first(c) ||
-        List("(", ")").contains(c)
+        List('(', ')').contains(c)
     }
 
     sealed trait Multiplier extends NonTerminal
@@ -178,7 +178,7 @@ object G5 {
       variable: Variable,
     ) extends NonTerminal
     object Identifier extends FirstPos {
-      def first(c: Char): Boolean = List(Terminal.`val`, Terminal.`val`)
+      def first(c: Char): Boolean = List(Terminal.`val`, Terminal.`var`)
         .map(_.repr.head).contains(c)
     }
 

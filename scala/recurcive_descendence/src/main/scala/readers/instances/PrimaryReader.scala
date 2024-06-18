@@ -30,9 +30,9 @@ object PrimaryReader extends NonTerminalReader[NonTerminal.Primary] {
     first <- ip.getFirstEither
     _ <- if (!NonTerminal.Primary.first(first)) new IllegalStateException(s"Wrong first [Primary]: $ip").asLeft else ().asRight
     primary <- List(
+      () => readBracketExpr(ip),
       () => readNumeric(ip),
       () => readVariable(ip),
-      () => readBracketExpr(ip),
     ).view.flatMap(_.apply()).headOption match {
       case Some(value) => value.asRight
       case None => new IllegalStateException(s"Error on reading [Primary]: $ip").asLeft
