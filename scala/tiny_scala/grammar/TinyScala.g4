@@ -1,13 +1,16 @@
 grammar TinyScala;
 
 compilationUnit
-    : tmplDef+
+    : (NL* tmplDef NL*)+
     ;
 
 tmplDef
-    : 'class' Id classParamClause* templateBody?
-    | 'object' Id templateBody?
+    : tmplDefCaseClass
+    | tmplDefObject
     ;
+
+tmplDefCaseClass : 'case class' Id classParamClause templateBody? ;
+tmplDefObject : 'object' Id ('extends' 'App')? templateBody? ;
 
 templateBody
     : NL* (
@@ -23,7 +26,7 @@ templateStat
 
 // class:
 classParamClause
-    : NL? '(' classParams? ')'
+    : NL? '(' classParams ')'
     ;
 
 classParams
@@ -31,7 +34,7 @@ classParams
     ;
 
 classParam
-    : ('val' | 'var')? Id ':' paramType ('=' expr)?
+    : /*('val' | 'var')?*/ Id ':' paramType /*('=' expr)?*/
     ;
 
 // ---------- EXPRESSIONS ----------
@@ -117,8 +120,8 @@ resultExpr
 def_
     : patVarDef
     | 'def' funDef
-    | 'type' NL* typeDef
-    | tmplDef
+//    | 'type' NL* typeDef
+//    | tmplDef
     ;
 
 // val/var:
@@ -182,7 +185,7 @@ functionArgTypes
 //    ;
 
 simpleType
-    : stableId ('.' 'type')?
+    : stableId
     | '(' types ')'
     ;
 
@@ -383,7 +386,7 @@ fragment OpCharPrecedence5 : '=' | '!' ;
 fragment OpCharPrecedence6 : '&' ;
 fragment OpCharPrecedence7 : '^' ;
 fragment OpCharPrecedence8 : '|' ;
-fragment OpCharPrecedence9 : '$' | '_' | 'a' .. 'z' | 'A' .. 'Z' ;
+fragment OpCharPrecedence9 : '$' | '_' ;
 
 fragment Idrest
     : (Letter | Digit)* ('_' OpAnyPrecedence)?
