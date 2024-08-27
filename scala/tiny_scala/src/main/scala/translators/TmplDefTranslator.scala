@@ -4,10 +4,13 @@ package translators
 import models.{StructDef, Type}
 import util.Util
 
+import java.util
+import scala.jdk.CollectionConverters.CollectionHasAsScala
+
 object TmplDefTranslator extends Translator[TinyScalaParser.TmplDefContext] {
   override def translate(context: TranslationContext, node: TinyScalaParser.TmplDefContext): String = {
-    val caseClassNode = node.tmplDefCaseClass()
-    TmplDefCaseClassTranslator.translate(context, caseClassNode)
+    if (node.tmplDefCaseClass != null) TmplDefCaseClassTranslator.translate(context, node.tmplDefCaseClass)
+    else TmplDefObjectTranslator.translate(context, node.tmplDefObject)
   }
 }
 
@@ -20,7 +23,7 @@ object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCase
     val properties = for {
       (param, i) <- collectedParams.zipWithIndex
       paramId = param.Id.getText
-      paramTinyScalaTypeRepr = param.paramType.type_.simpleType.stableId.getText
+      paramTinyScalaTypeRepr = param.type_.simpleType.stableId.getText
       paramType = Type.fromRepr(paramTinyScalaTypeRepr)
     } yield StructDef.Property(name = paramId, _type = paramType, index = i)
 
@@ -28,5 +31,17 @@ object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCase
     context.structDefinitions.addOne(id -> structDef)
 
     structDef.llvm
+  }
+}
+
+object TmplDefObjectTranslator extends Translator[TinyScalaParser.TmplDefObjectContext] {
+  override def translate(context: TranslationContext, node: TinyScalaParser.TmplDefObjectContext): String = {
+    val id = node.Id.getText
+    val body = node.templateBody
+
+    val templateStats = body.templateStat.asScala
+    templateStats.map { ts =>
+      new DefTranslator(objectName = id).translate(context, ts.def_)
+    }.mkString("")
   }
 }

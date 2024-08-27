@@ -9,8 +9,9 @@ tmplDef
     | tmplDefObject
     ;
 
-tmplDefCaseClass : 'case class' Id classParamClause templateBody? ;
-tmplDefObject : 'object' Id ('extends' 'App')? templateBody? ;
+tmplDefCaseClass : 'case class' Id classParamClause /*templateBody?*/ ;
+tmplDefObject : 'object' Id objectIsMain? templateBody? ;
+objectIsMain : 'extends' 'App' ;
 
 templateBody
     : NL* (
@@ -34,7 +35,7 @@ classParams
     ;
 
 classParam
-    : /*('val' | 'var')?*/ Id ':' paramType /*('=' expr)?*/
+    : /*('val' | 'var')?*/ Id Colon type_ /*('=' expr)?*/
     ;
 
 // ---------- EXPRESSIONS ----------
@@ -94,7 +95,7 @@ argumentExprs
 
 args
     : exprs?
-    | (exprs ',')? infixExpr (':' | '_')?
+    | (exprs ',')? infixExpr (Colon | '_')?
     ;
 
 blockExpr
@@ -120,23 +121,20 @@ resultExpr
 def_
     : patVarDef
     | 'def' funDef
-//    | 'type' NL* typeDef
-//    | tmplDef
     ;
 
 // val/var:
 patVarDef
-    : 'val' patDef
-    | 'var' patDef
+    : ('val' | 'var') patDef
     ;
 
 patDef
-    : pattern1 (':' type_)? '=' expr
+    : Id Colon type_ '=' expr
     ;
 
 // function:
 funDef
-    : funSig (':' type_)? '=' expr
+    : funSig (Colon type_)? '=' expr
     | funSig NL? '{' block '}'
     ;
 
@@ -157,37 +155,18 @@ params
     ;
 
 param
-    : Id (':' paramType)? ('=' expr)?
-    ;
-
-paramType
-    : type_
-    | '=>' type_
+    : Id (Colon type_)? ('=' expr)?
     ;
 
 // type:
-typeDef
-    : Id '=' type_
-    ;
-
 type_
-    : functionArgTypes '=>' type_
-    | simpleType
-    ;
-
-functionArgTypes
     : simpleType
-    | '(' (paramType (',' paramType)*)? ')'
+    | arrayType
     ;
 
-//infixType
-//    : simpleType (Id simpleType)*
-//    ;
+simpleType : stableId ;
 
-simpleType
-    : stableId
-    | '(' types ')'
-    ;
+arrayType : 'Array[' type_ ']' ;
 
 types
     : type_ (',' type_)*
@@ -212,7 +191,6 @@ ids
 stableId
     : Id
     | stableId '.' Id
-    | (Id '.')? ('this' | 'super' '.' Id)
     ;
 
 // Precedence not needed for prefix expressions
@@ -238,18 +216,18 @@ pattern
     ;
 
 pattern1
-    : (BoundVarid | '_' | Id) ':' type_
-    | simplePattern
+    : (BoundVarid | '_' | Id) Colon type_
+//    | simplePattern
 //    | simplePattern (Id NL? simplePattern)*
     ;
 
-simplePattern
-    : '_'
-    | Varid
-    | literal
-    | stableId ('(' patterns? ')')?
-    | '(' patterns? ')'
-    ;
+//simplePattern
+//    : '_'
+//    | Varid
+//    | literal
+//    | stableId ('(' patterns? ')')?
+//    | '(' patterns? ')'
+//    ;
 
 patterns
     : pattern (',' patterns)?
@@ -273,7 +251,7 @@ Id
 
 OpPrecedence1: OpCharPrecedence1 OpCharAnyPrecedence* ;
 OpPrecedence2: OpCharPrecedence2 OpCharAnyPrecedence* ;
-OpPrecedence3: OpCharPrecedence3 OpCharAnyPrecedence* ;
+OpPrecedence3: OpCharPrecedence3 OpCharAnyPrecedence+ ;
 OpPrecedence4: OpCharPrecedence4 OpCharAnyPrecedence* ;
 OpPrecedence5: OpCharPrecedence5 OpCharAnyPrecedence* ;
 OpPrecedence6: OpCharPrecedence6 OpCharAnyPrecedence* ;
@@ -337,9 +315,8 @@ Delim
     | ','
     ;
 
-Minus
-    : '-'
-    ;
+Minus : '-' ;
+Colon : ':' ;
 
 //Semi
 //    : (';' | (NL)+) -> skip
@@ -368,7 +345,7 @@ fragment WhiteSpace
 fragment OpCharAnyPrecedence
     : '*' | '/' | '%'
     | '+' | Minus
-    | ':'
+    | Colon
     | '>' | '<'
     | '=' | '!'
     | '&'
@@ -380,7 +357,7 @@ fragment OpAnyPrecedence : OpCharAnyPrecedence+ ;
 
 fragment OpCharPrecedence1 : '*' | '/' | '%' ;
 fragment OpCharPrecedence2 : '+' | Minus ;
-fragment OpCharPrecedence3 : ':' ;
+fragment OpCharPrecedence3 : Colon ;
 fragment OpCharPrecedence4 : '>' | '<' ;
 fragment OpCharPrecedence5 : '=' | '!' ;
 fragment OpCharPrecedence6 : '&' ;
@@ -389,7 +366,7 @@ fragment OpCharPrecedence8 : '|' ;
 fragment OpCharPrecedence9 : '$' | '_' ;
 
 fragment Idrest
-    : (Letter | Digit)* ('_' OpAnyPrecedence)?
+    : (Letter | Digit)*
     ;
 
 fragment StringElement

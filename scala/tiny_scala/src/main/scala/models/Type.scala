@@ -54,7 +54,7 @@ object Type {
       case Primitive._Chr.tinyScalaRepr => Primitive._Chr
       case Primitive._String.tinyScalaRepr => Primitive._String
       case str if str.matches("Array\\[(.*)]") => {
-        val nestedTypeRepr = "Array\\[(.*)]".r.findFirstMatchIn(str).get.group(0)
+        val nestedTypeRepr = "Array\\[(.*)]".r.findFirstMatchIn(str).get.group(1)
         val nestedType = fromRepr(nestedTypeRepr)
         Type.Array(tinyScalaRepr = str, _type = nestedType)
       }
