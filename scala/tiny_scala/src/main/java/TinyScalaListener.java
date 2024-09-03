@@ -28,6 +28,36 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 */
 	void exitTmplDef(TinyScalaParser.TmplDefContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TinyScalaParser#tmplDefCaseClass}.
+	 * @param ctx the parse tree
+	 */
+	void enterTmplDefCaseClass(TinyScalaParser.TmplDefCaseClassContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScalaParser#tmplDefCaseClass}.
+	 * @param ctx the parse tree
+	 */
+	void exitTmplDefCaseClass(TinyScalaParser.TmplDefCaseClassContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScalaParser#tmplDefObject}.
+	 * @param ctx the parse tree
+	 */
+	void enterTmplDefObject(TinyScalaParser.TmplDefObjectContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScalaParser#tmplDefObject}.
+	 * @param ctx the parse tree
+	 */
+	void exitTmplDefObject(TinyScalaParser.TmplDefObjectContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScalaParser#objectIsMain}.
+	 * @param ctx the parse tree
+	 */
+	void enterObjectIsMain(TinyScalaParser.ObjectIsMainContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScalaParser#objectIsMain}.
+	 * @param ctx the parse tree
+	 */
+	void exitObjectIsMain(TinyScalaParser.ObjectIsMainContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#templateBody}.
 	 * @param ctx the parse tree
 	 */
@@ -128,16 +158,6 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 */
 	void exitSimpleExpr1(TinyScalaParser.SimpleExpr1Context ctx);
 	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#exprs}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprs(TinyScalaParser.ExprsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#exprs}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprs(TinyScalaParser.ExprsContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#argumentExprs}.
 	 * @param ctx the parse tree
 	 */
@@ -148,55 +168,15 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 */
 	void exitArgumentExprs(TinyScalaParser.ArgumentExprsContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#args}.
+	 * Enter a parse tree produced by {@link TinyScalaParser#exprs}.
 	 * @param ctx the parse tree
 	 */
-	void enterArgs(TinyScalaParser.ArgsContext ctx);
+	void enterExprs(TinyScalaParser.ExprsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#args}.
+	 * Exit a parse tree produced by {@link TinyScalaParser#exprs}.
 	 * @param ctx the parse tree
 	 */
-	void exitArgs(TinyScalaParser.ArgsContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#blockExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlockExpr(TinyScalaParser.BlockExprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#blockExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlockExpr(TinyScalaParser.BlockExprContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#block}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlock(TinyScalaParser.BlockContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#block}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlock(TinyScalaParser.BlockContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#blockStat}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlockStat(TinyScalaParser.BlockStatContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#blockStat}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlockStat(TinyScalaParser.BlockStatContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#resultExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterResultExpr(TinyScalaParser.ResultExprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#resultExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitResultExpr(TinyScalaParser.ResultExprContext ctx);
+	void exitExprs(TinyScalaParser.ExprsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#def_}.
 	 * @param ctx the parse tree
@@ -238,6 +218,16 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 */
 	void exitFunDef(TinyScalaParser.FunDefContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TinyScalaParser#block}.
+	 * @param ctx the parse tree
+	 */
+	void enterBlock(TinyScalaParser.BlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScalaParser#block}.
+	 * @param ctx the parse tree
+	 */
+	void exitBlock(TinyScalaParser.BlockContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#funSig}.
 	 * @param ctx the parse tree
 	 */
@@ -247,26 +237,6 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFunSig(TinyScalaParser.FunSigContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#paramClauses}.
-	 * @param ctx the parse tree
-	 */
-	void enterParamClauses(TinyScalaParser.ParamClausesContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#paramClauses}.
-	 * @param ctx the parse tree
-	 */
-	void exitParamClauses(TinyScalaParser.ParamClausesContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#paramClause}.
-	 * @param ctx the parse tree
-	 */
-	void enterParamClause(TinyScalaParser.ParamClauseContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#paramClause}.
-	 * @param ctx the parse tree
-	 */
-	void exitParamClause(TinyScalaParser.ParamClauseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#params}.
 	 * @param ctx the parse tree
@@ -288,26 +258,6 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 */
 	void exitParam(TinyScalaParser.ParamContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#paramType}.
-	 * @param ctx the parse tree
-	 */
-	void enterParamType(TinyScalaParser.ParamTypeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#paramType}.
-	 * @param ctx the parse tree
-	 */
-	void exitParamType(TinyScalaParser.ParamTypeContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#typeDef}.
-	 * @param ctx the parse tree
-	 */
-	void enterTypeDef(TinyScalaParser.TypeDefContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#typeDef}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypeDef(TinyScalaParser.TypeDefContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#type_}.
 	 * @param ctx the parse tree
 	 */
@@ -318,16 +268,6 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 */
 	void exitType_(TinyScalaParser.Type_Context ctx);
 	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#functionArgTypes}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunctionArgTypes(TinyScalaParser.FunctionArgTypesContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#functionArgTypes}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunctionArgTypes(TinyScalaParser.FunctionArgTypesContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#simpleType}.
 	 * @param ctx the parse tree
 	 */
@@ -337,6 +277,16 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSimpleType(TinyScalaParser.SimpleTypeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TinyScalaParser#arrayType}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayType(TinyScalaParser.ArrayTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinyScalaParser#arrayType}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayType(TinyScalaParser.ArrayTypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#types}.
 	 * @param ctx the parse tree
@@ -388,26 +338,6 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 */
 	void exitOpNoPrecedence(TinyScalaParser.OpNoPrecedenceContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#caseClauses}.
-	 * @param ctx the parse tree
-	 */
-	void enterCaseClauses(TinyScalaParser.CaseClausesContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#caseClauses}.
-	 * @param ctx the parse tree
-	 */
-	void exitCaseClauses(TinyScalaParser.CaseClausesContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#caseClause}.
-	 * @param ctx the parse tree
-	 */
-	void enterCaseClause(TinyScalaParser.CaseClauseContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#caseClause}.
-	 * @param ctx the parse tree
-	 */
-	void exitCaseClause(TinyScalaParser.CaseClauseContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#pattern}.
 	 * @param ctx the parse tree
 	 */
@@ -427,16 +357,6 @@ public interface TinyScalaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPattern1(TinyScalaParser.Pattern1Context ctx);
-	/**
-	 * Enter a parse tree produced by {@link TinyScalaParser#simplePattern}.
-	 * @param ctx the parse tree
-	 */
-	void enterSimplePattern(TinyScalaParser.SimplePatternContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TinyScalaParser#simplePattern}.
-	 * @param ctx the parse tree
-	 */
-	void exitSimplePattern(TinyScalaParser.SimplePatternContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinyScalaParser#patterns}.
 	 * @param ctx the parse tree

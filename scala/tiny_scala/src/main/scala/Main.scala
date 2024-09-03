@@ -11,10 +11,8 @@ object Main {
           |case class B(a: Long, aa: A)
           |
           |object Test extends App {
-          |  val test_value: Int = 2
-          |  val test_a: A = new A()
-          |  var test_b: Test.B = Test.A
-          |  var test_arr: Array[B] = 123
+          |  val a: Int = 727
+          |  val test_value: Int = a + 3 * 4 / 2
           |}
           |""".stripMargin
     }
@@ -25,7 +23,8 @@ object Main {
     val res = parser.compilationUnit()
 
     val translationContext = TranslationContext()
-    val llvm = CompilationUnitTranslator.translate(translationContext, res)
-    println(llvm)
+    CompilationUnitTranslator.translate(translationContext, res)
+    val program = ProgramBuilder.buildProgram(context = translationContext)
+    println(program)
   }
 }

@@ -10,7 +10,7 @@ tmplDef
     ;
 
 tmplDefCaseClass : 'case class' Id classParamClause /*templateBody?*/ ;
-tmplDefObject : 'object' Id objectIsMain? templateBody? ;
+tmplDefObject : 'object' Id objectIsMain? templateBody ;
 objectIsMain : 'extends' 'App' ;
 
 templateBody
@@ -35,7 +35,7 @@ classParams
     ;
 
 classParam
-    : /*('val' | 'var')?*/ Id Colon type_ /*('=' expr)?*/
+    : /*('val' | 'var')?*/ Id Colon type_
     ;
 
 // ---------- EXPRESSIONS ----------
@@ -45,10 +45,8 @@ expr
     | 'do' expr 'while' '(' expr ')'
     | 'for' ('(' enumerators ')' | '{' enumerators '}') 'yield'? expr
     | 'return' expr?
-    | ((newClassExpr | simpleExpr1 '_'?) '.')? Id '=' expr
-    | infixExpr 'match' '{' caseClauses '}'
-    | infixExpr /* ascription? */
-    | simpleExpr1 argumentExprs '=' expr
+    | stableId '=' expr
+    | infixExpr
     ;
 
 infixExpr
@@ -65,56 +63,33 @@ infixExpr
     ;
 
 prefixExpr
-    : opNoPrecedence? (newClassExpr | simpleExpr1 '_'?)
+    : opNoPrecedence? simpleExpr1
+    | newClassExpr
     ;
 
 newClassExpr
-    : 'new' Id argumentExprs*
+    : 'new' Id argumentExprs
     ;
 
 // Dublicate lines to prevent left-recursive code.
 // can't use (newClassExpr|simpleExpr1) '.' Id
 simpleExpr1
     : literal
+    | stableId argumentExprs
     | stableId
-    | '_'
+//    | '_'
     | '(' expr ')'
-    | newClassExpr '.' Id // ?
-    | simpleExpr1 '_'? '.' Id // ?
-    | simpleExpr1 argumentExprs
+//    | newClassExpr '.' Id // ?
+//    | simpleExpr1 '_'? '.' Id // ?
+//    | simpleExpr1 argumentExprs
+    ;
+
+argumentExprs
+    : '(' exprs? ')'
     ;
 
 exprs
     : expr (',' expr)*
-    ;
-
-argumentExprs
-    : '(' args ')'
-    | NL? blockExpr
-    ;
-
-args
-    : exprs?
-    | (exprs ',')? infixExpr (Colon | '_')?
-    ;
-
-blockExpr
-    : '{' caseClauses '}'
-    | '{' block '}'
-    ;
-
-block
-    : blockStat+ resultExpr?
-    ;
-
-blockStat
-    : def_
-    | tmplDef
-    | expr
-    ;
-
-resultExpr
-    : expr
     ;
 
 // ---------- DEFINITIONS ----------
@@ -135,19 +110,13 @@ patDef
 // function:
 funDef
     : funSig (Colon type_)? '=' expr
-    | funSig NL? '{' block '}'
+    | funSig (Colon type_)? '=' '{' block '}'
     ;
+
+block : expr+ ;
 
 funSig
-    : Id paramClauses
-    ;
-
-paramClauses
-    : paramClause*
-    ;
-
-paramClause
-    : NL? '(' params? ')'
+    : Id '(' params? ')'
     ;
 
 params
@@ -155,7 +124,7 @@ params
     ;
 
 param
-    : Id (Colon type_)? ('=' expr)?
+    : Id Colon type_
     ;
 
 // type:
@@ -180,7 +149,6 @@ literal
     | BooleanLiteral
     | CharacterLiteral
     | StringLiteral
-    | SymbolLiteral
     | 'null'
     ;
 
@@ -199,15 +167,6 @@ opNoPrecedence: (
         OpPrecedence4 | OpPrecedence5 | OpPrecedence6 |
         OpPrecedence7 | OpPrecedence8 | OpPrecedence9
     );
-
-// ---------- Case clauses ----------
-caseClauses
-    : caseClause+
-    ;
-
-caseClause
-    : 'case' pattern '=>' block
-    ;
 
 // ---------- Patterns ----------
 
@@ -266,10 +225,6 @@ BooleanLiteral
 
 CharacterLiteral
     : '\'' (PrintableChar | CharEscapeSeq) '\''
-    ;
-
-SymbolLiteral
-    : '\'' Plainid
     ;
 
 IntegerLiteral

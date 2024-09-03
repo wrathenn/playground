@@ -34,16 +34,16 @@ object Type {
   object Primitive {
     case object _Int extends Primitive("Int", "i32")
     case object _Long extends Primitive("Long", "i64")
-    case object _Float extends Primitive("Float" ,"float")
+    case object _Float extends Primitive("Float", "float")
     case object _Double extends Primitive("Double", "double")
     case object _Chr extends Primitive("Chr", "i8")
-    case object _String extends Primitive("String", "i8*")
+    case object _String extends Primitive("String", "ptr")
   }
 
   case class Array(override val tinyScalaRepr: String, _type: Type)
-    extends Type(tinyScalaRepr, s"%Array")
+    extends Type(tinyScalaRepr, "ptr")
   case class Struct(override val tinyScalaRepr: String)
-    extends Type(tinyScalaRepr, s"%$tinyScalaRepr")
+    extends Type(tinyScalaRepr, "ptr")
 
   def fromRepr(str: String): Type = {
     str match {

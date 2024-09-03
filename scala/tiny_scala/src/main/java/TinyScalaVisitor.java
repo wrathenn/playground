@@ -23,6 +23,24 @@ public interface TinyScalaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTmplDef(TinyScalaParser.TmplDefContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TinyScalaParser#tmplDefCaseClass}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTmplDefCaseClass(TinyScalaParser.TmplDefCaseClassContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScalaParser#tmplDefObject}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTmplDefObject(TinyScalaParser.TmplDefObjectContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScalaParser#objectIsMain}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitObjectIsMain(TinyScalaParser.ObjectIsMainContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#templateBody}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -83,47 +101,17 @@ public interface TinyScalaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSimpleExpr1(TinyScalaParser.SimpleExpr1Context ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#exprs}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExprs(TinyScalaParser.ExprsContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#argumentExprs}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitArgumentExprs(TinyScalaParser.ArgumentExprsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#args}.
+	 * Visit a parse tree produced by {@link TinyScalaParser#exprs}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitArgs(TinyScalaParser.ArgsContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#blockExpr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBlockExpr(TinyScalaParser.BlockExprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#block}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBlock(TinyScalaParser.BlockContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#blockStat}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBlockStat(TinyScalaParser.BlockStatContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#resultExpr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitResultExpr(TinyScalaParser.ResultExprContext ctx);
+	T visitExprs(TinyScalaParser.ExprsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#def_}.
 	 * @param ctx the parse tree
@@ -149,23 +137,17 @@ public interface TinyScalaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunDef(TinyScalaParser.FunDefContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TinyScalaParser#block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBlock(TinyScalaParser.BlockContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#funSig}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFunSig(TinyScalaParser.FunSigContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#paramClauses}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParamClauses(TinyScalaParser.ParamClausesContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#paramClause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParamClause(TinyScalaParser.ParamClauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#params}.
 	 * @param ctx the parse tree
@@ -179,35 +161,23 @@ public interface TinyScalaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParam(TinyScalaParser.ParamContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#paramType}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParamType(TinyScalaParser.ParamTypeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#typeDef}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeDef(TinyScalaParser.TypeDefContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#type_}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitType_(TinyScalaParser.Type_Context ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#functionArgTypes}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunctionArgTypes(TinyScalaParser.FunctionArgTypesContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#simpleType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSimpleType(TinyScalaParser.SimpleTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyScalaParser#arrayType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayType(TinyScalaParser.ArrayTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#types}.
 	 * @param ctx the parse tree
@@ -239,18 +209,6 @@ public interface TinyScalaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOpNoPrecedence(TinyScalaParser.OpNoPrecedenceContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#caseClauses}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCaseClauses(TinyScalaParser.CaseClausesContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#caseClause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCaseClause(TinyScalaParser.CaseClauseContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#pattern}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -262,12 +220,6 @@ public interface TinyScalaVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPattern1(TinyScalaParser.Pattern1Context ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyScalaParser#simplePattern}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSimplePattern(TinyScalaParser.SimplePatternContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyScalaParser#patterns}.
 	 * @param ctx the parse tree

@@ -1,15 +1,17 @@
 package com.wrathenn.compilers
 package translators
 
+import com.wrathenn.compilers.translators.templates.TmplDefTranslator
+
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
+object CompilationUnitTranslator extends Translator[TinyScalaParser.CompilationUnitContext, Unit] {
 
-object CompilationUnitTranslator extends Translator[TinyScalaParser.CompilationUnitContext] {
-
-  override def translate(context: TranslationContext, node: TinyScalaParser.CompilationUnitContext): String = {
+  override def translate(context: TranslationContext, node: TinyScalaParser.CompilationUnitContext): Unit = {
     val tmplDefs = node.tmplDef()
-    tmplDefs.asScala.map { tmplDef =>
+
+    tmplDefs.asScala.foreach { tmplDef =>
       TmplDefTranslator.translate(context, tmplDef)
-    }.mkString("\n")
+    }
   }
 }

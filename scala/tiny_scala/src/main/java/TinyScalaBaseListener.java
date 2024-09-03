@@ -41,6 +41,42 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTmplDefCaseClass(TinyScalaParser.TmplDefCaseClassContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTmplDefCaseClass(TinyScalaParser.TmplDefCaseClassContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTmplDefObject(TinyScalaParser.TmplDefObjectContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTmplDefObject(TinyScalaParser.TmplDefObjectContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterObjectIsMain(TinyScalaParser.ObjectIsMainContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitObjectIsMain(TinyScalaParser.ObjectIsMainContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterTemplateBody(TinyScalaParser.TemplateBodyContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -161,18 +197,6 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprs(TinyScalaParser.ExprsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExprs(TinyScalaParser.ExprsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterArgumentExprs(TinyScalaParser.ArgumentExprsContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -185,61 +209,13 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterArgs(TinyScalaParser.ArgsContext ctx) { }
+	@Override public void enterExprs(TinyScalaParser.ExprsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitArgs(TinyScalaParser.ArgsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBlockExpr(TinyScalaParser.BlockExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBlockExpr(TinyScalaParser.BlockExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBlock(TinyScalaParser.BlockContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBlock(TinyScalaParser.BlockContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBlockStat(TinyScalaParser.BlockStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBlockStat(TinyScalaParser.BlockStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterResultExpr(TinyScalaParser.ResultExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitResultExpr(TinyScalaParser.ResultExprContext ctx) { }
+	@Override public void exitExprs(TinyScalaParser.ExprsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -293,6 +269,18 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBlock(TinyScalaParser.BlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBlock(TinyScalaParser.BlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterFunSig(TinyScalaParser.FunSigContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -300,30 +288,6 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFunSig(TinyScalaParser.FunSigContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterParamClauses(TinyScalaParser.ParamClausesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParamClauses(TinyScalaParser.ParamClausesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterParamClause(TinyScalaParser.ParamClauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParamClause(TinyScalaParser.ParamClauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -353,30 +317,6 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterParamType(TinyScalaParser.ParamTypeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParamType(TinyScalaParser.ParamTypeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTypeDef(TinyScalaParser.TypeDefContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTypeDef(TinyScalaParser.TypeDefContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterType_(TinyScalaParser.Type_Context ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -389,18 +329,6 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFunctionArgTypes(TinyScalaParser.FunctionArgTypesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFunctionArgTypes(TinyScalaParser.FunctionArgTypesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterSimpleType(TinyScalaParser.SimpleTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -408,6 +336,18 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSimpleType(TinyScalaParser.SimpleTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayType(TinyScalaParser.ArrayTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayType(TinyScalaParser.ArrayTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -473,30 +413,6 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCaseClauses(TinyScalaParser.CaseClausesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCaseClauses(TinyScalaParser.CaseClausesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCaseClause(TinyScalaParser.CaseClauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCaseClause(TinyScalaParser.CaseClauseContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterPattern(TinyScalaParser.PatternContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -516,18 +432,6 @@ public class TinyScalaBaseListener implements TinyScalaListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPattern1(TinyScalaParser.Pattern1Context ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSimplePattern(TinyScalaParser.SimplePatternContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSimplePattern(TinyScalaParser.SimplePatternContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

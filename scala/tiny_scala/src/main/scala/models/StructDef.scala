@@ -9,7 +9,7 @@ case class StructDef(
     val types = properties.map { prop =>
       (prop._type match {
         case primitive: Type.Primitive => primitive.llvmRepr
-        case _ => s"${prop._type.llvmRepr}*"
+        case _ => s"ptr"
       }) -> prop.name
     }.reverse
 
