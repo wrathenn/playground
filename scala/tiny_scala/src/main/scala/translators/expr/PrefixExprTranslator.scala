@@ -1,21 +1,24 @@
 package com.wrathenn.compilers
 package translators.expr
 
-import models.{Operator, ReturnedValue, Type}
+import models.{CodeTarget, Operator, ReturnedValue, Type}
 import models.Type.Primitive
-import translators.{TranslationContext, Translator}
+import translators.Translator
 import util.Util
+
 import cats.syntax.all._
+import com.wrathenn.compilers.context.TranslationContext
+
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class PrefixExprTranslator(isGlobal: Boolean) extends Translator[TinyScalaParser.PrefixExprContext, ReturnedValue] {
+class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.PrefixExprContext, ReturnedValue] {
 
   override def translate(context: TranslationContext, node: TinyScalaParser.PrefixExprContext): ReturnedValue = {
     if (node.simpleExpr1 != null) {
-      val res = new SimpleExpr1Translator(isGlobal).translate(context, node.simpleExpr1)
+      val res = new SimpleExpr1Translator(target).translate(context, node.simpleExpr1)
       if (node.opNoPrecedence == null) return res
 
-      context.writeCode(isGlobal) { "; applying prefix op\n" }
+      context.writeCode(target) { "; applying prefix op\n" }
 
       if (res._type.isEmpty) throw new IllegalStateException(s"Type unknown, can't use operator ${node.opNoPrecedence.children.get(1).getText}")
       val resType = res._type.get
@@ -38,8 +41,7 @@ class PrefixExprTranslator(isGlobal: Boolean) extends Translator[TinyScalaParser
           res
         }
         case Operator.Minus => {
-          val tempVal = s"%v_${context.localCounter}"
-          context.localCounter += 1
+          val tempVal = context.genLocalVariableName()
 
           val (sub, zero) = primitiveType match {
             case Primitive._Int => "sub" -> "0"
@@ -49,7 +51,7 @@ class PrefixExprTranslator(isGlobal: Boolean) extends Translator[TinyScalaParser
             case _ => throw new IllegalStateException(s"Unapplicable operator $prefixOp for type $primitiveType")
           }
 
-          context.writeCode(isGlobal) { s"$tempVal = $sub ${primitiveType.llvmRepr} $zero, ${res.llvmName}\n" }
+          context.writeCode(target) { s"$tempVal = $sub ${primitiveType.llvmRepr} $zero, ${res.llvmName}\n" }
           ReturnedValue(llvmName = tempVal, _type = primitiveType.some)
         }
         case Operator.Not => {
@@ -57,13 +59,13 @@ class PrefixExprTranslator(isGlobal: Boolean) extends Translator[TinyScalaParser
         }
       }
 
-      context.writeCode(isGlobal) { "; applied prefix op\n" }
+      context.writeCode(target) { "; applied prefix op\n" }
       return retValue
     }
     else {
       val newClassExpr = node.newClassExpr
       val argumentExpressions = newClassExpr.argumentExprs.exprs.expr().asScala
-      val expressions = argumentExpressions.map { e => new ExprTranslator(isGlobal).translate(context, e) }
+      val expressions = argumentExpressions.map { e => new ExprTranslator(target).translate(context, e) }
 
 
       ???

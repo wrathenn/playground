@@ -1,6 +1,7 @@
 package com.wrathenn.compilers
 package translators
 
+import com.wrathenn.compilers.context.TranslationContext
 import com.wrathenn.compilers.translators.templates.TmplDefTranslator
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala

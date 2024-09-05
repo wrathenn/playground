@@ -1,18 +1,18 @@
 package com.wrathenn.compilers
 package translators.expr
 
-import models.{Literal, ReturnedValue, Type}
-import translators.{TranslationContext, Translator}
+import models.{CodeTarget, Literal, ReturnedValue, Type}
+import translators.Translator
 import util.Util
 
 import cats.syntax.all._
+import com.wrathenn.compilers.context.TranslationContext
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class SimpleExpr1Translator(isGlobal: Boolean) extends Translator[TinyScalaParser.SimpleExpr1Context, ReturnedValue] {
+class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaParser.SimpleExpr1Context, ReturnedValue] {
   private def translateLiteral(context: TranslationContext, node: TinyScalaParser.LiteralContext): ReturnedValue = {
-    val tempVal = s"%v_${context.localCounter}"
-    context.localCounter += 1
+    val tempVal = context.genLocalVariableName()
     val literal = Util.getLiteral(node)
 
     literal match {
@@ -29,7 +29,7 @@ class SimpleExpr1Translator(isGlobal: Boolean) extends Translator[TinyScalaParse
               }
               val strSize = strBytes.size + 1
               val strValue = s"""c"${strBytes.mkString("")}\\00""""
-              context.globalCode.append(s"$strLiteralName = global [$strSize x i8] $strValue\n")
+              context.writeCodeLn(CodeTarget.GLOBAL)(s"$strLiteralName = global [$strSize x i8] $strValue")
 
               strLiteralName
             } else context.stringLiterals(litValue)
@@ -37,25 +37,15 @@ class SimpleExpr1Translator(isGlobal: Boolean) extends Translator[TinyScalaParse
             ReturnedValue(llvmName = llvmStrGlobalName, _type.some)
           }
           case _ => {
-            if (isGlobal) {
-              context.initCode.append(s"$tempVal = alloca ${_type.llvmRepr}\n")
-              context.initCode.append(s"store ${_type.llvmRepr} ${litValue}, ptr $tempVal\n")
-              context.initCode.append(s"$tempVal.value = load ${_type.llvmRepr}, ptr $tempVal\n")
-            } else {
-              context.localCode.append(s"$tempVal = alloca ${_type.llvmRepr}\n")
-              context.localCode.append(s"store ${_type.llvmRepr} ${litValue}, ptr $tempVal\n")
-              context.localCode.append(s"$tempVal.value = load ${_type.llvmRepr}, ptr $tempVal\n")
-            }
+            context.writeCodeLn(target) { s"$tempVal = alloca ${_type.llvmRepr}" }
+            context.writeCodeLn(target) { s"store ${_type.llvmRepr} ${litValue}, ptr $tempVal" }
+            context.writeCodeLn(target) { s"$tempVal.value = load ${_type.llvmRepr}, ptr $tempVal" }
             ReturnedValue(llvmName = s"$tempVal.value", _type.some)
           }
         }
       }
       case Literal.Null => {
-        if (isGlobal) {
-          context.initCode.append(s"$tempVal = ptr null\n")
-        } else {
-          context.localCode.append(s"$tempVal = ptr null\n")
-        }
+        context.writeCodeLn(target) { s"$tempVal = ptr null\n" }
         ReturnedValue(llvmName = tempVal, _type = None)
       }
     }
@@ -66,10 +56,9 @@ class SimpleExpr1Translator(isGlobal: Boolean) extends Translator[TinyScalaParse
     val (llvmName, _type) = context.findVariableById(scalaName)
       .getOrElse { throw new IllegalStateException(s"Cant find $scalaName at this point") }
 
-    val tempVal = s"%v_${context.localCounter}"
-    context.localCounter += 1
+    val tempVal = context.genLocalVariableName()
 
-    context.writeCode(isGlobal) { s"$tempVal.value = load ${_type.llvmRepr}, ptr $llvmName\n" }
+    context.writeCode(target) { s"$tempVal.value = load ${_type.llvmRepr}, ptr $llvmName\n" }
     ReturnedValue(llvmName = s"$tempVal.value", _type = _type.some)
   }
 
@@ -79,13 +68,13 @@ class SimpleExpr1Translator(isGlobal: Boolean) extends Translator[TinyScalaParse
     argumentExprs: TinyScalaParser.ArgumentExprsContext,
   ): ReturnedValue = {
     val argumentExpressions = argumentExprs.exprs.expr().asScala
-    val expressions = argumentExpressions.map { e => new ExprTranslator(isGlobal).translate(context, e) }
+    val expressions = argumentExpressions.map { e => new ExprTranslator(target).translate(context, e) }
     ???
   }
 
   override def translate(context: TranslationContext, node: TinyScalaParser.SimpleExpr1Context): ReturnedValue = {
     if (node.expr != null) {
-      return new ExprTranslator(isGlobal).translate(context, node.expr)
+      return new ExprTranslator(target).translate(context, node.expr)
     }
 
     if (node.literal != null) {

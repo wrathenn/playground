@@ -1,6 +1,7 @@
 package com.wrathenn.compilers
 
-import translators.{CompilationUnitTranslator, TranslationContext}
+import translators.CompilationUnitTranslator
+import com.wrathenn.compilers.context.TranslationContext
 
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 
@@ -13,6 +14,7 @@ object Main {
           |object Test extends App {
           |  val a: Int = 727
           |  val test_value: Int = a + 3 * 4 / 2
+          |  def foo(a: Int): Long = 1
           |}
           |""".stripMargin
     }

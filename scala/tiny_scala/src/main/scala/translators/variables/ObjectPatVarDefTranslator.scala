@@ -1,9 +1,11 @@
 package com.wrathenn.compilers
 package translators.variables
 
-import models.VariableDef
+import models.{CodeTarget, VariableDef}
 import translators.expr.ExprTranslator
-import translators.{TranslationContext, Translator}
+import translators.Translator
+
+import com.wrathenn.compilers.context.TranslationContext
 
 class ObjectPatVarDefTranslator(
   val objectName: String,
@@ -18,11 +20,11 @@ class ObjectPatVarDefTranslator(
 
     val variableDef = VariableDef(tinyScalaRepr, llvmNameRepr, incomplete._type, incomplete.decl)
     context.globalVariables.addOne(tinyScalaRepr -> variableDef)
-    context.localVariables.addOne(incomplete.name -> variableDef)
-    context.globalCode.append(s"$llvmNameRepr = global ptr undef\n")
+    context.localContext.variables.addOne(incomplete.name -> variableDef)
+    context.writeCodeLn(CodeTarget.GLOBAL) { s"$llvmNameRepr = global ptr undef" }
 
     val expr = node.patDef.expr
-    val exprValue = new ExprTranslator(isGlobal = true).translate(context, expr)
+    val exprValue = new ExprTranslator(CodeTarget.INIT).translate(context, expr)
 
     context.initCode.append(s"store ${exprValue._type.getOrElse(incomplete._type).llvmRepr} ${exprValue.llvmName}, ptr $llvmNameRepr ; init done\n\n")
   }

@@ -1,9 +1,11 @@
 package com.wrathenn.compilers
 package translators.templates
 
-import models.{StructDef, Type}
-import translators.{TranslationContext, Translator}
+import models.{CodeTarget, StructDef, Type}
+import translators.Translator
 import util.Util
+
+import com.wrathenn.compilers.context.TranslationContext
 
 object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCaseClassContext, Unit] {
   override def translate(context: TranslationContext, node: TinyScalaParser.TmplDefCaseClassContext): Unit = {
@@ -20,6 +22,6 @@ object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCase
 
     val structDef = StructDef(tinyScalaRepr = id, properties = properties)
     context.structDefinitions.addOne(id -> structDef)
-    context.globalCode.append(structDef.llvm ++ "\n")
+    context.writeCodeLn(CodeTarget.GLOBAL) { structDef.llvm }
   }
 }

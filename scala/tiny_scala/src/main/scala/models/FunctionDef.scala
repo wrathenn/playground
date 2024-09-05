@@ -1,16 +1,19 @@
 package com.wrathenn.compilers
 package models
 
+import com.wrathenn.compilers.util.Aliases.{LlvmName, TinyScalaName}
+
 case class FunctionDef(
-  tinyScalaName: String,
-  llvmName: String,
+  tinyScalaName: TinyScalaName,
+  llvmName: LlvmName,
   params: List[FunctionDef.Param],
   returns: Option[Type],
 )
 
 object FunctionDef {
   case class Param(
-    name: String,
+    tinyScalaName: TinyScalaName,
+    llvmName: LlvmName,
     _type: Type,
   )
 }

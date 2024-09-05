@@ -1,6 +1,6 @@
 package com.wrathenn.compilers
 
-import translators.TranslationContext
+import context.TranslationContext
 
 object ProgramBuilder {
   def buildProgram(context: TranslationContext): String = {
@@ -9,13 +9,21 @@ object ProgramBuilder {
     sb.append("declare ptr @malloc(i64)\n")
     sb.append("declare i32 @printf(ptr noundef, ...)\n")
 
-    sb.append(context.globalCode)
+    sb.append("; --- GLOBAL CODE: ---\n")
+    sb.append(context.readGlobalCode)
+    sb.append("\n")
+
+    sb.append("; --- LOCAL CODE: ---\n")
+    sb.append(context.readLocalCode)
     sb.append("\n")
 
     sb.append("define i32 @main() #0 {\n")
+    sb.append("; --- INIT CODE: ---\n")
     sb.append("entry:\n")
     sb.append(context.initCode)
     sb.append("\n")
+
+    sb.append("; --- MAIN CODE: ---\n")
     sb.append(context.mainCode)
     sb.append("ret i32 0\n")
     sb.append("}\n")
