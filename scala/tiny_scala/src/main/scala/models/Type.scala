@@ -37,13 +37,14 @@ object Type {
     case object _Float extends Primitive("Float", "float")
     case object _Double extends Primitive("Double", "double")
     case object _Chr extends Primitive("Chr", "i8")
-    case object _String extends Primitive("String", "ptr")
   }
 
+  case object _String extends Primitive("String", "ptr")
   case class Array(override val tinyScalaRepr: String, _type: Type)
     extends Type(tinyScalaRepr, "ptr")
   case class Struct(override val tinyScalaRepr: String)
     extends Type(tinyScalaRepr, "ptr")
+  case object _Unit extends Type("Unit", "void")
 
   def fromRepr(str: String): Type = {
     str match {
@@ -52,7 +53,8 @@ object Type {
       case Primitive._Float.tinyScalaRepr => Primitive._Float
       case Primitive._Double.tinyScalaRepr => Primitive._Double
       case Primitive._Chr.tinyScalaRepr => Primitive._Chr
-      case Primitive._String.tinyScalaRepr => Primitive._String
+      case _String.tinyScalaRepr => _String
+      case _Unit.tinyScalaRepr => _Unit
       case str if str.matches("Array\\[(.*)]") => {
         val nestedTypeRepr = "Array\\[(.*)]".r.findFirstMatchIn(str).get.group(1)
         val nestedType = fromRepr(nestedTypeRepr)

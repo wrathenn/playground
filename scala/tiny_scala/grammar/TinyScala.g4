@@ -109,8 +109,8 @@ patDef
 
 // function:
 funDef
-    : funSig (Colon type_)? '=' expr
-    | funSig (Colon type_)? '=' '{' block '}'
+    : funSig Colon type_ '=' NL* '{' NL* block NL* '}' NL*
+    | funSig Colon type_ '=' expr
     ;
 
 block : expr+ ;

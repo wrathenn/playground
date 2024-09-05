@@ -100,14 +100,14 @@ class TranslationContext(
     context
   }
 
-  def createNewContext(): LocalContext = {
-    val newContext = LocalContext()
+  def createNewContext(defining: Option[FunctionDef]): LocalContext = {
+    val newContext = LocalContext(defining)
     this.local.push(newContext)
     newContext
   }
 
-  def inLocalContext[A](f: => A): A = {
-    this.createNewContext()
+  def inLocalContext[A](defining: Option[FunctionDef])(f: => A): A = {
+    this.createNewContext(defining)
     val ret = f // should work
     this.finishLocalContext()
     ret
@@ -134,10 +134,6 @@ object TranslationContext {
     mainCode = new StringBuilder(),
     localCode = new StringBuilder(),
 
-    local = {
-      val l = new mutable.Stack[LocalContext]()
-      l.push(LocalContext())
-      l
-    },
+    local = new mutable.Stack[LocalContext]()
   )
 }

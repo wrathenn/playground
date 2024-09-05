@@ -15,9 +15,7 @@ class DefTranslator(
       new ObjectPatVarDefTranslator(objectName).translate(context, node.patVarDef)
     }
     else {
-      val functionContext = context.createNewContext()
       new FunDefTranslator(objectName).translate(context, node.funDef)
-      context.finishLocalContext()
     }
   }
 }

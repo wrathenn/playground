@@ -14,7 +14,9 @@ object Main {
           |object Test extends App {
           |  val a: Int = 727
           |  val test_value: Int = a + 3 * 4 / 2
-          |  def foo(a: Int): Long = 1
+          |  def foo(a: Int): Int = {
+          |    return a + 3
+          |  }
           |}
           |
           |object A {

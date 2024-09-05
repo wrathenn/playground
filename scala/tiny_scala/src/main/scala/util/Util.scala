@@ -43,10 +43,19 @@ object Util {
     lazy val sign = if (node.Minus != null) "-" else ""
       
     if (node.IntegerLiteral != null) {
-      Literal.Value(llvmValue = s"$sign${node.IntegerLiteral}", _type = Type.Primitive._Int)
+      val lastSymbol = node.IntegerLiteral.toString.last
+      lastSymbol match {
+        case 'l' | 'L' => Literal.Value(llvmValue = s"$sign${node.IntegerLiteral}", _type = Type.Primitive._Long)
+        case _ => Literal.Value(llvmValue = s"$sign${node.IntegerLiteral}", _type = Type.Primitive._Int)
+      }
+
     }
     else if (node.FloatingPointLiteral != null) {
-      Literal.Value(llvmValue = s"$sign${node.FloatingPointLiteral}", _type = Type.Primitive._Double) // can be float as well!
+      val lastSymbol = node.FloatingPointLiteral.toString.last
+      lastSymbol match {
+        case 'f' | 'F' => Literal.Value(llvmValue = s"$sign${node.FloatingPointLiteral}", _type = Type.Primitive._Float)
+        case _ => Literal.Value(llvmValue = s"$sign${node.FloatingPointLiteral}", _type = Type.Primitive._Double)
+      }
     }
     else if (node.BooleanLiteral != null) {
       val repr = node.BooleanLiteral().getText match {
@@ -59,7 +68,7 @@ object Util {
       Literal.Value(llvmValue = node.CharacterLiteral().getText, _type = Type.Primitive._Chr) // todo char to i8 table?
     }
     else if (node.StringLiteral != null) {
-      Literal.Value(llvmValue = node.StringLiteral().getText, _type = Type.Primitive._String) // should be added to globals?
+      Literal.Value(llvmValue = node.StringLiteral().getText, _type = Type._String)
     }
     else {
       Literal.Null

@@ -13,7 +13,7 @@ object TmplDefObjectTranslator extends Translator[TinyScalaParser.TmplDefObjectC
 
     val templateStats = body.templateStat.asScala
 
-    context.inLocalContext {
+    context.inLocalContext(None) {
       templateStats.foreach { ts =>
         new DefTranslator(objectName = id).translate(context, ts.def_)
       }

@@ -32,7 +32,7 @@ class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParse
     }
     val paramsDef = collectParams(params)
 
-    val returnType = if (node.type_ != null) Util.collectType(node.type_).some else None
+    val returnType = Util.collectType(node.type_)
 
     val globalFunctionDef = FunctionDef(
       tinyScalaName = tinyScalaGlobalName,
@@ -49,21 +49,16 @@ class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParse
   override def translate(context: TranslationContext, node: TinyScalaParser.FunDefContext): Unit = {
     val functionDef = getFunctionDefAndAddToContext(context, node)
 
-    val returnsLlvm = functionDef.returns.map(_.llvmRepr).getOrElse("void")
+    val returnsLlvm = functionDef.returns.llvmRepr
     val paramsLlvm = functionDef.params.map { p => s"${p._type.llvmRepr} ${p.llvmName}"}.mkString(", ")
     context.writeCodeLn(CodeTarget.LOCAL) { s"define $returnsLlvm ${functionDef.llvmName} ($paramsLlvm) {" }
     context.>>()
 
-    {
-      if (node.expr != null) {
-        // todo return this value
-        val ret = new ExprTranslator(CodeTarget.LOCAL).translate(context, node.expr)
-      }
-      else {
-        // todo not that easy ofc
-        node.block.expr.asScala.map { e =>
-          new ExprTranslator(CodeTarget.LOCAL).translate(context, e)
-        }
+    context.inLocalContext(defining = functionDef.some) {
+      val exprs = if (node.expr != null) List(node.expr) else node.block.expr.asScala.toList
+      exprs.map { e =>
+        // todo return value from a function
+        new ExprTranslator(CodeTarget.LOCAL).translate(context, e)
       }
     }
 

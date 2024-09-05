@@ -18,7 +18,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
     literal match {
       case Literal.Value(litValue, _type) => {
         _type match {
-          case _: Type.Primitive._String.type => {
+          case _: Type._String.type => {
             val llvmStrGlobalName =  if (!context.stringLiterals.contains(litValue)) {
               val strLiteralName = s"@str.${context.stringLiterals.size}"
 

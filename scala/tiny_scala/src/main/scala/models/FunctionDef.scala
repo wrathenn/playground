@@ -7,7 +7,7 @@ case class FunctionDef(
   tinyScalaName: TinyScalaName,
   llvmName: LlvmName,
   params: List[FunctionDef.Param],
-  returns: Option[Type],
+  returns: Type,
 )
 
 object FunctionDef {
