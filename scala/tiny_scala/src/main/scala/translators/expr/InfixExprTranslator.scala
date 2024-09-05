@@ -23,7 +23,7 @@ class InfixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser
 
     if (e1Type == e2Type) return (e1.llvmName, e2.llvmName, e1Type)
 
-    val tempVal = context.genLocalVariableName()
+    val tempVal = context.genLocalVariableName(target)
 
     // im sorry ok
     e1Type match {
@@ -148,7 +148,7 @@ class InfixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser
 
     val (e1, e2, commonType) = castTwoResults(context, expr1, expr2)
 
-    val tempVal = context.genLocalVariableName()
+    val tempVal = context.genLocalVariableName(target)
 
     val llvmF = Util.getOperatorLlvm(infixOp, commonType)
     context.writeCode(target) { s"$tempVal = $llvmF ${commonType.llvmRepr} $e1, $e2\n" }

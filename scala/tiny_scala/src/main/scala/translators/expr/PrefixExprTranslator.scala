@@ -41,7 +41,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
           res
         }
         case Operator.Minus => {
-          val tempVal = context.genLocalVariableName()
+          val tempVal = context.genLocalVariableName(target)
 
           val (sub, zero) = primitiveType match {
             case Primitive._Int => "sub" -> "0"

@@ -21,6 +21,8 @@ class TranslationContext(
 
   val local: mutable.Stack[LocalContext],
 ) {
+  private var mainCounter: Int = 0
+
   private def searchStack[A](f: LocalContext => Option[A]): Option[A] = {
     local.foreach { c =>
       f(c) match {
@@ -61,11 +63,21 @@ class TranslationContext(
    * Сгенерировать новую локальную переменную в текущем локальном скоупе.
    * @return llvm-ir название переменной
    */
-  def genLocalVariableName(): String = {
-    val localContext = local.top
-    val tempVal = s"%v_${localContext.counter}"
-    localContext.counter += 1
-    tempVal
+  def genLocalVariableName(target: CodeTarget): String = {
+    target match {
+      case CodeTarget.LOCAL => {
+        val localContext = local.top
+        val tempVal = s"%v_${localContext.counter}"
+        localContext.counter += 1
+        tempVal
+      }
+      case CodeTarget.INIT | CodeTarget.Main => {
+        val tempVal = s"%v_${mainCounter}"
+        mainCounter += 1
+        tempVal
+      }
+      case CodeTarget.GLOBAL => throw new IllegalStateException("Trying to get local variable for global scope")
+    }
   }
 
   def writeCode(target: CodeTarget)(code: String): Unit = {
@@ -122,6 +134,10 @@ object TranslationContext {
     mainCode = new StringBuilder(),
     localCode = new StringBuilder(),
 
-    local = new mutable.Stack(),
+    local = {
+      val l = new mutable.Stack[LocalContext]()
+      l.push(LocalContext())
+      l
+    },
   )
 }

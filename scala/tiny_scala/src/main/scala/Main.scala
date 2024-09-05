@@ -16,6 +16,10 @@ object Main {
           |  val test_value: Int = a + 3 * 4 / 2
           |  def foo(a: Int): Long = 1
           |}
+          |
+          |object A {
+          |  val a: Double = 1.0
+          |}
           |""".stripMargin
     }
     val charStream = CharStreams.fromString(text)

@@ -1,18 +1,18 @@
 package com.wrathenn.compilers
 package translators.expr
 
+import context.TranslationContext
 import models.{CodeTarget, Literal, ReturnedValue, Type}
 import translators.Translator
 import util.Util
 
 import cats.syntax.all._
-import com.wrathenn.compilers.context.TranslationContext
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaParser.SimpleExpr1Context, ReturnedValue] {
   private def translateLiteral(context: TranslationContext, node: TinyScalaParser.LiteralContext): ReturnedValue = {
-    val tempVal = context.genLocalVariableName()
+    val tempVal = context.genLocalVariableName(target)
     val literal = Util.getLiteral(node)
 
     literal match {
@@ -56,7 +56,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
     val (llvmName, _type) = context.findVariableById(scalaName)
       .getOrElse { throw new IllegalStateException(s"Cant find $scalaName at this point") }
 
-    val tempVal = context.genLocalVariableName()
+    val tempVal = context.genLocalVariableName(target)
 
     context.writeCode(target) { s"$tempVal.value = load ${_type.llvmRepr}, ptr $llvmName\n" }
     ReturnedValue(llvmName = s"$tempVal.value", _type = _type.some)
