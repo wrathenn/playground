@@ -20,7 +20,7 @@ object Main {
           |}
           |
           |object A {
-          |  val a: Double = 1.0
+          |  val a: A = new A(1, 2.0)
           |}
           |""".stripMargin
     }

@@ -19,9 +19,9 @@ import scala.util.matching.Regex
  * }
  *
  * Array[MyClass]
- * %Array.MyClass = type {
+ * %Array = type {
  *   i32, ; len
- *   %MyClass** ; content
+ *   ptr ; content
  * }
  */
 sealed class Type(

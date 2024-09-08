@@ -8,6 +8,26 @@ import util.Util
 import com.wrathenn.compilers.context.TranslationContext
 
 object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCaseClassContext, Unit] {
+  private def genStructRepr(structDef: StructDef): String = {
+    val types = structDef.properties.map { prop =>
+      (prop._type match {
+        case primitive: Type.Primitive => primitive.llvmRepr
+        case _ => s"ptr"
+      }) -> prop.name
+    }.reverse
+
+    val last = types.head
+    val rest = types.tail
+
+    val lastRepr = s"  ${last._1} ; ${last._2}\n"
+    val restReprs = rest.map { case (r, n) => s"  ${r}, ; ${n}\n" }
+
+    s"${structDef.llvmRepr} = type {\n" ++
+      restReprs.reverse.mkString("") ++
+      lastRepr ++
+      "}\n"
+  }
+
   override def translate(context: TranslationContext, node: TinyScalaParser.TmplDefCaseClassContext): Unit = {
     val id = node.Id.getText
     val classParams = node.classParamClause.classParams
@@ -22,6 +42,6 @@ object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCase
 
     val structDef = StructDef(tinyScalaRepr = id, properties = properties)
     context.structDefinitions.addOne(id -> structDef)
-    context.writeCodeLn(CodeTarget.GLOBAL) { structDef.llvm }
+    context.writeCodeLn(CodeTarget.GLOBAL) { genStructRepr(structDef) }
   }
 }
