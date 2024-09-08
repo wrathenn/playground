@@ -18,6 +18,10 @@ class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.Expr
       return new ExprReturnTranslator(target).translate(context, node)
     }
 
+    if (node.children.get(0).getText == "if") {
+
+    }
+
     ???
   }
 }

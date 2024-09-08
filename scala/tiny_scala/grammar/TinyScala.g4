@@ -45,6 +45,7 @@ expr
     | 'do' expr 'while' '(' expr ')'
     | 'for' ('(' enumerators ')' | '{' enumerators '}') 'yield'? expr
     | 'return' expr?
+    | '{' expr '}'
     | stableId '=' expr
     | infixExpr
     ;

@@ -37,6 +37,7 @@ object Type {
     case object _Float extends Primitive("Float", "float")
     case object _Double extends Primitive("Double", "double")
     case object _Chr extends Primitive("Chr", "i8")
+    case object _Boolean extends Primitive("Boolean", "i1")
   }
 
   case object _String extends Primitive("String", "ptr")
@@ -53,6 +54,7 @@ object Type {
       case Primitive._Float.tinyScalaRepr => Primitive._Float
       case Primitive._Double.tinyScalaRepr => Primitive._Double
       case Primitive._Chr.tinyScalaRepr => Primitive._Chr
+      case Primitive._Boolean.tinyScalaRepr => Primitive._Boolean
       case _String.tinyScalaRepr => _String
       case _Unit.tinyScalaRepr => _Unit
       case str if str.matches("Array\\[(.*)]") => {

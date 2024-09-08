@@ -62,7 +62,7 @@ object Util {
         case "true" => "1"
         case _ => "0"
       }
-      Literal.Value(llvmValue = repr, _type = Type.Primitive._Chr)
+      Literal.Value(llvmValue = repr, _type = Type.Primitive._Boolean)
     }
     else if (node.CharacterLiteral != null) {
       Literal.Value(llvmValue = node.CharacterLiteral().getText, _type = Type.Primitive._Chr) // todo char to i8 table?
@@ -134,6 +134,7 @@ object Util {
         case Primitive._Chr => "srem"
         case _ => ???
       }
+      // todo boolean
       case Operator.And => ???
       case Operator.Or => ???
       case Operator.Less => ???
