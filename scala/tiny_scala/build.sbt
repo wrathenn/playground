@@ -8,7 +8,7 @@ val versions = new {
   val circe = "0.14.1"
   val betterMonadicFor = "0.3.1"
 }
-
+scalacOptions += "-Wconf:cat=other-match-analysis:error"
 addCompilerPlugin("com.olegpy" %% "better-monadic-for" % versions.betterMonadicFor)
 
 libraryDependencies ++= Seq(

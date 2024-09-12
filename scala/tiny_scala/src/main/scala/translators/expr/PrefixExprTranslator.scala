@@ -24,16 +24,14 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
 
     context.writeCode(target) { "; applying prefix op\n" }
 
-    if (res._type.isEmpty) throw new IllegalStateException(s"Type unknown, can't use operator ${node.opNoPrecedence.children.get(1).getText}")
-    val resType = res._type.get
     val prefixOp = Util.getOperator(node.opNoPrecedence.getText) match {
       case prefix: Operator.Prefix => prefix
       case _ => throw new IllegalStateException(s"Operator not a prefix operator ${node.opNoPrecedence.getText}")
     }
 
-    val primitiveType = resType match {
+    val primitiveType = res._type match {
       case primitive: Type.Primitive => primitive
-      case _ => throw new IllegalStateException(s"No prefix operators for non-primitive type $resType")
+      case _ => throw new IllegalStateException(s"No prefix operators for non-primitive type $res._type")
     }
 
     val retValue = prefixOp match {
@@ -56,7 +54,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
         }
 
         context.writeCode(target) { s"$tempVal = $sub ${primitiveType.llvmRepr} $zero, ${res.llvmName}\n" }
-        ReturnedValue(llvmName = tempVal, _type = primitiveType.some)
+        ReturnedValue(llvmName = tempVal, _type = primitiveType)
       }
       case Operator.Not => {
         ???

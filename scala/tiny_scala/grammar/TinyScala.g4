@@ -23,6 +23,7 @@ templateBody
 templateStat
     : def_
     | expr
+    | statement
     ;
 
 // class:
@@ -39,11 +40,13 @@ classParam
     ;
 
 // ---------- EXPRESSIONS ----------
+statement
+    : 'while' '(' expr ')' NL* expr
+    | 'do' expr 'while' '(' expr ')'
+    ;
+
 expr
     : 'if' '(' expr ')' NL* expr ('else' expr)?
-    | 'while' '(' expr ')' NL* expr
-    | 'do' expr 'while' '(' expr ')'
-    | 'for' ('(' enumerators ')' | '{' enumerators '}') 'yield'? expr
     | 'return' expr?
     | '{' expr '}'
     | stableId '=' expr

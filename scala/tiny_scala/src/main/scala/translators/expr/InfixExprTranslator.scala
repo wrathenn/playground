@@ -12,11 +12,11 @@ import com.wrathenn.compilers.context.TranslationContext
 class InfixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.InfixExprContext, ReturnedValue] {
 
   private def castTwoResults(context: TranslationContext, e1: ReturnedValue, e2: ReturnedValue): (String, String, Primitive) = {
-    val e1Type = e1._type.get match {
+    val e1Type = e1._type match {
       case primitive: Primitive => primitive
       case _ => throw new IllegalStateException("Infix operator between non-primitives")
     }
-    val e2Type = e2._type.get match {
+    val e2Type = e2._type match {
       case primitive: Primitive => primitive
       case _ => throw new IllegalStateException("Infix operator between non-primitives")
     }

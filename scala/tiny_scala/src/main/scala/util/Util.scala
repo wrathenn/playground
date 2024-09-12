@@ -5,6 +5,7 @@ import models.Operator.Infix
 import models.Type.Primitive
 import models.{Literal, Operator, Type}
 
+import com.wrathenn.compilers.models.Type.Ref._String
 import org.antlr.v4.runtime.tree.TerminalNode
 
 import scala.collection.mutable.ArrayBuffer
@@ -68,7 +69,7 @@ object Util {
       Literal.Value(llvmValue = node.CharacterLiteral().getText, _type = Type.Primitive._Chr) // todo char to i8 table?
     }
     else if (node.StringLiteral != null) {
-      Literal.Value(llvmValue = node.StringLiteral().getText, _type = Type._String)
+      Literal.Value(llvmValue = node.StringLiteral().getText, _type = _String)
     }
     else {
       Literal.Null
@@ -94,7 +95,7 @@ object Util {
     }
   }
 
-  def getOperatorLlvm(op: Operator with Infix, commonType: Primitive): String = {
+  def getOperatorLlvm(op: Operator with Infix, commonType: Type): String = {
     op match {
       case Operator.Plus => commonType match {
         case Primitive._Int => "add"
@@ -134,15 +135,66 @@ object Util {
         case Primitive._Chr => "srem"
         case _ => ???
       }
-      // todo boolean
-      case Operator.And => ???
-      case Operator.Or => ???
-      case Operator.Less => ???
-      case Operator.LessOrEq => ???
-      case Operator.Greater => ???
-      case Operator.GreaterOrEq => ???
-      case Operator.Equals => ???
-      case _ => ???
+      case Operator.And => commonType match {
+        case Primitive._Int
+             |  Primitive._Long
+             |  Primitive._Chr
+             |  Primitive._Boolean => "and"
+        case _ => ???
+      }
+      case Operator.Or => commonType match {
+        case Primitive._Int
+             |  Primitive._Long
+             |  Primitive._Chr
+             |  Primitive._Boolean => "or"
+        case _ => ???
+      }
+      case Operator.Less => commonType match {
+        case Primitive._Int
+             |  Primitive._Long
+             |  Primitive._Chr
+             |  Primitive._Boolean => "icmp slt"
+        case Primitive._Float => "fcmp ult"
+        case Primitive._Double => "dcmp ult"
+        case _ => ???
+      }
+      case Operator.LessOrEq => commonType match {
+        case Primitive._Int
+             |  Primitive._Long
+             |  Primitive._Chr
+             |  Primitive._Boolean => "icmp sle"
+        case Primitive._Float => "fcmp ule"
+        case Primitive._Double => "dcmp ule"
+        case _ => ???
+      }
+      case Operator.Greater => commonType match {
+        case Primitive._Int
+             |  Primitive._Long
+             |  Primitive._Chr
+             |  Primitive._Boolean => "icmp sgt"
+        case Primitive._Float => "fcmp ugt"
+        case Primitive._Double => "dcmp ugt"
+        case _ => ???
+      }
+      case Operator.GreaterOrEq => commonType match {
+        case Primitive._Int
+             |  Primitive._Long
+             |  Primitive._Chr
+             |  Primitive._Boolean => "icmp sge"
+        case Primitive._Float => "fcmp uge"
+        case Primitive._Double => "dcmp uge"
+        case _ => ???
+      }
+      case Operator.Equals => commonType match {
+        case Primitive._Int
+             |  Primitive._Long
+             |  Primitive._Chr
+             |  Primitive._Boolean => "icmp eq"
+        case Primitive._Float => "fcmp ueq"
+        case Primitive._Double => "dcmp ueq"
+        // non primitives -- pointers comparison
+        case _ => "icmp eq"
+      }
     }
   }
 }

@@ -40,7 +40,7 @@ class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParse
       params = paramsDef,
       returns = returnType,
     )
-    context.globalFunctions.addOne(tinyScalaGlobalName -> globalFunctionDef)
+    context.addGlobalFunction(globalFunctionDef)
     context.localContext.functions.addOne(name -> globalFunctionDef)
 
     globalFunctionDef

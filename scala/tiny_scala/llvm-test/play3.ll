@@ -28,7 +28,7 @@ define i32 @main() #0 {
   %A_v2_ptr = getelementptr %A, ptr %A_ptr, i32 0, i32 1
   store double 3.0, ptr %A_v2_ptr
 
-  %B_size = getelementptr %B, ptr null, i32 0
+  %B_size = entanglement %B, ptr null, i32 0
   %B_size_i = ptrtoint ptr %B_size to i64
   %B_ptr = call ptr @malloc(i64 %B_size_i)
 
