@@ -1,9 +1,11 @@
 package com.wrathenn.compilers
 package models
 
+import util.Aliases.{LlvmName, TinyScalaName}
+
 case class VariableDef(
-  tinyScalaRepr: String,
-  llvmNameRepr: String,
+  tinyScalaRepr: TinyScalaName,
+  llvmNameRepr: LlvmName,
   _type: Type,
   decl: VariableDecl,
 )

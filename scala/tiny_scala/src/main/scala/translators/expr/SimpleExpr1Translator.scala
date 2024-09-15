@@ -7,6 +7,7 @@ import translators.Translator
 import util.Util
 
 import cats.syntax.all._
+import com.wrathenn.compilers.models.Type.Ref._Null
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
@@ -22,7 +23,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
             val llvmStrGlobalName =  if (!context.stringLiterals.contains(litValue)) {
               val strLiteralName = s"@str.${context.stringLiterals.size}"
 
-              context.stringLiterals.addOne(litValue, strLiteralName)
+              context.addStringLiteral(litValue, strLiteralName)
               val strBytes = litValue.stripSuffix("\"").stripPrefix("\"").map { b =>
                 if ((b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z')) b.toString
                 else f"\\$b%X"
@@ -34,19 +35,19 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
               strLiteralName
             } else context.stringLiterals(litValue)
 
-            ReturnedValue(llvmName = llvmStrGlobalName, _type.some)
+            ReturnedValue(llvmName = llvmStrGlobalName, _type)
           }
           case _ => {
             context.writeCodeLn(target) { s"$tempVal = alloca ${_type.llvmRepr}" }
             context.writeCodeLn(target) { s"store ${_type.llvmRepr} ${litValue}, ptr $tempVal" }
             context.writeCodeLn(target) { s"$tempVal.value = load ${_type.llvmRepr}, ptr $tempVal" }
-            ReturnedValue(llvmName = s"$tempVal.value", _type.some)
+            ReturnedValue(llvmName = s"$tempVal.value", _type)
           }
         }
       }
       case Literal.Null => {
         context.writeCodeLn(target) { s"$tempVal = ptr null\n" }
-        ReturnedValue(llvmName = tempVal, _type = None)
+        ReturnedValue(llvmName = tempVal, _type = _Null)
       }
     }
   }
@@ -59,7 +60,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
     val tempVal = context.genLocalVariableName(target)
 
     context.writeCode(target) { s"$tempVal.value = load ${_type.llvmRepr}, ptr $llvmName\n" }
-    ReturnedValue(llvmName = s"$tempVal.value", _type = _type.some)
+    ReturnedValue(llvmName = s"$tempVal.value", _type = _type)
   }
 
   private def translateFunctionStableId(

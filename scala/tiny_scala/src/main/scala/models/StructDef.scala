@@ -1,8 +1,10 @@
 package com.wrathenn.compilers
 package models
 
+import util.Aliases.TinyScalaName
+
 case class StructDef(
-  tinyScalaRepr: String,
+  tinyScalaRepr: TinyScalaName,
   properties: List[StructDef.Property],
 ) {
   val llvmRepr = s"%$tinyScalaRepr"
@@ -10,7 +12,7 @@ case class StructDef(
 
 object StructDef {
   case class Property(
-    name: String,
+    name: TinyScalaName,
     _type: Type,
     index: Int,
   )

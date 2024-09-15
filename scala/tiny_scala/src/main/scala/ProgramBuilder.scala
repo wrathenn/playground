@@ -20,11 +20,11 @@ object ProgramBuilder {
     sb.append("define i32 @main() #0 {\n")
     sb.append("; --- INIT CODE: ---\n")
     sb.append("entry:\n")
-    sb.append(context.initCode)
+    sb.append(context.readInitCode)
     sb.append("\n")
 
     sb.append("; --- MAIN CODE: ---\n")
-    sb.append(context.mainCode)
+    sb.append(context.readMainCode)
     sb.append("ret i32 0\n")
     sb.append("}\n")
 

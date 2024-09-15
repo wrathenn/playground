@@ -2,7 +2,8 @@ package com.wrathenn.compilers
 package translators.expr
 
 import context.TranslationContext
-import models.Type.{Primitive, Struct}
+import models.Type.Primitive
+import models.Type.Ref.Struct
 import models._
 import translators.Translator
 import util.Util
@@ -84,12 +85,14 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     }
 
     structDef.properties.zip(expressions).foreach { case (p, e) =>
-      if (e._type.isDefined) {
-        if (p._type != e._type.get)
-          throw new IllegalStateException(s"Type mismatch: expected ${p._type}, got ${e._type}")
+      if (p._type.isInstanceOf[Type.Primitive] && e._type.isInstanceOf[Type.Ref]) {
+        throw new IllegalStateException(s"todo unboxing")
       }
-      else if (p._type.isInstanceOf[Type.Primitive]) {
-        throw new IllegalStateException(s"Type mismatch: expected ${p._type}, got null")
+      else if (p._type.isInstanceOf[Type.Ref] && e._type.isInstanceOf[Type.Primitive]) {
+        throw new IllegalStateException(s"todo boxing")
+      }
+      else if (p._type != e._type) {
+        throw new IllegalStateException(s"Type mismatch: expected ${p._type}, got ${e._type}")
       }
     }
 
@@ -100,7 +103,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
       context.writeCodeLn(target) { s"$fieldPointer = getelementptr ${structDef.llvmRepr}, ptr $exprVal, i32 0, i32 $i" }
       context.writeCodeLn(target) { s"store ${prop._type.llvmRepr} ${expr.llvmName}, ptr $fieldPointer" }
     }
-    return ReturnedValue(llvmName = exprVal, _type = Struct(tinyScalaRepr = structName).some)
+    return ReturnedValue(llvmName = exprVal, _type = Struct(tinyScalaRepr = structName))
   }
 
   private def allocateStruct(exprValName: String, context: TranslationContext, structDef: StructDef): Unit = {

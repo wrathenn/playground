@@ -30,7 +30,7 @@ object Main {
     val parser = new TinyScalaParser(tokenStream)
     val res = parser.compilationUnit()
 
-    val translationContext = TranslationContext()
+    val translationContext = TranslationContext.create
     CompilationUnitTranslator.translate(translationContext, res)
     val program = ProgramBuilder.buildProgram(context = translationContext)
     println(program)

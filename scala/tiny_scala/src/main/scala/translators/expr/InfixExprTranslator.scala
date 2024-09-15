@@ -152,6 +152,6 @@ class InfixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser
 
     val llvmF = Util.getOperatorLlvm(infixOp, commonType)
     context.writeCode(target) { s"$tempVal = $llvmF ${commonType.llvmRepr} $e1, $e2\n" }
-    ReturnedValue(llvmName = tempVal, _type = commonType.some)
+    ReturnedValue(llvmName = tempVal, _type = commonType)
   }
 }

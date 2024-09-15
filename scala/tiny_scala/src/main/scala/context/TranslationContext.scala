@@ -44,7 +44,7 @@ trait TranslationContext {
 case class TranslationContextImpl(
   override val structDefinitions: mutable.Map[TinyScalaName, StructDef],
   override val globalVariables: mutable.Map[TinyScalaName, VariableDef],
-  override val stringLiterals: mutable.Map[TinyScalaName, LlvmName],
+  override val stringLiterals: mutable.Map[String, LlvmName],
   override val globalFunctions: mutable.Map[TinyScalaName, FunctionDef],
 
   private val globalCode: StringBuilder,
@@ -165,7 +165,7 @@ case class TranslationContextImpl(
 
   override def localContext: LocalContext = this.local.top
 
-  def finishLocalContext(): LocalContext = {
+  private def finishLocalContext(): LocalContext = {
     val context = this.local.pop()
     context
   }
@@ -193,13 +193,22 @@ case class TranslationContextImpl(
   override def readInitCode: AbstractSeq[Char] = this.initCode
   override def readMainCode: AbstractSeq[Char] = this.mainCode
 
-  override def addStructDefinition(structDef: StructDef): Unit = ???
+  override def addStructDefinition(structDef: StructDef): Unit = {
+    this.structDefinitions.addOne(structDef.tinyScalaRepr -> structDef)
+    this.addType(Type.Ref.Struct(structDef.tinyScalaRepr))
+  }
 
-  override def addGlobalVariable(variableDef: VariableDef): Unit = ???
+  override def addGlobalVariable(variableDef: VariableDef): Unit = {
+    this.globalVariables.addOne(variableDef.tinyScalaRepr -> variableDef)
+  }
 
-  override def addStringLiteral(str: LlvmName, llvmName: LlvmName): Unit = ???
+  override def addStringLiteral(str: LlvmName, llvmName: LlvmName): Unit = {
+    this.stringLiterals.addOne(str -> llvmName)
+  }
 
-  override def addGlobalFunction(functionDef: FunctionDef): Unit = ???
+  override def addGlobalFunction(functionDef: FunctionDef): Unit = {
+    this.globalFunctions.addOne(functionDef.tinyScalaName -> functionDef)
+  }
 
 
 }

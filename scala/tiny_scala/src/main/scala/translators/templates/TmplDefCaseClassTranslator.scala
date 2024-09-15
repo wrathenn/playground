@@ -19,13 +19,15 @@ object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCase
     val last = types.head
     val rest = types.tail
 
-    val lastRepr = s"  ${last._1} ; ${last._2}\n"
+    val lastRepr = s"  ${last._1} ; ${last._2}"
     val restReprs = rest.map { case (r, n) => s"  ${r}, ; ${n}\n" }
 
-    s"${structDef.llvmRepr} = type {\n" ++
-      restReprs.reverse.mkString("") ++
-      lastRepr ++
-      "}\n"
+    s"""
+       |${structDef.llvmRepr} = type {
+       |  i32 ; type tag
+       |${restReprs.reverse.mkString("")}$lastRepr
+       |}
+       |""".stripMargin
   }
 
   override def translate(context: TranslationContext, node: TinyScalaParser.TmplDefCaseClassContext): Unit = {
@@ -41,7 +43,7 @@ object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCase
     } yield StructDef.Property(name = paramId, _type = paramType, index = i)
 
     val structDef = StructDef(tinyScalaRepr = id, properties = properties)
-    context.structDefinitions.addOne(id -> structDef)
+    context.addStructDefinition(structDef)
     context.writeCodeLn(CodeTarget.GLOBAL) { genStructRepr(structDef) }
   }
 }

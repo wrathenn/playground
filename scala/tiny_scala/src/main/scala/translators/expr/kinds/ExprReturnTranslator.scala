@@ -27,13 +27,14 @@ class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     }
 
     val returnedValue = new ExprTranslator(target).translate(context, returnExpr)
-    if (returnedValue._type.isInstanceOf[_Null.type]) {
-      if (shouldReturn != returnedValue._type) {
-        throw new IllegalStateException(s"Expected return type is $shouldReturn, actual: ${returnedValue._type}")
-      }
+    if (shouldReturn.isInstanceOf[Type.Primitive] && returnedValue._type.isInstanceOf[Type.Ref]) {
+      throw new IllegalStateException(s"TODO: unboxing")
     }
-    else if (shouldReturn.isInstanceOf[Type.Primitive]) {
-      throw new IllegalStateException(s"Expected return type is primitive $shouldReturn, actual is null")
+    else if (shouldReturn.isInstanceOf[Type.Ref] && returnedValue._type.isInstanceOf[Type.Primitive]) {
+      throw new IllegalStateException(s"TODO: boxing")
+    }
+    else if (shouldReturn != returnedValue._type) {
+      throw new IllegalStateException(s"Type mismatch. Expected: $shouldReturn, actual: ${returnedValue._type}")
     }
 
     context.writeCodeLn(target) { s"ret ${shouldReturn.llvmRepr} ${returnedValue.llvmName}" }

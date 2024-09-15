@@ -1,31 +1,8 @@
 package com.wrathenn.compilers
 package models
 
-import com.wrathenn.compilers.models.Type.Primitive._Unit
+import models.Type.Primitive._Unit
 
-import scala.util.matching.Regex
-
-/**
- * Array[Int]
- * %Array.Int = type {
- *   i32, ; len
- *   i32* ; content
- * }
- *
- * Str == i8*
- *
- * Array[Str]
- * %Array.Str = type {
- *   i32, ; len
- *   i8** ; content
- * }
- *
- * Array[MyClass]
- * %Array = type {
- *   i32, ; len
- *   ptr ; content
- * }
- */
 sealed class Type(
   val tinyScalaRepr: String,
   val llvmRepr: String
@@ -47,6 +24,14 @@ object Type {
   sealed class Ref(override val tinyScalaRepr: String)
     extends Type(tinyScalaRepr = tinyScalaRepr, llvmRepr = "ptr")
   object Ref {
+    // tinyScalaRepr of these should be irrelevant
+    case object _BooleanBox extends Ref("b_Boolean")
+    case object _ChrBox extends Ref("b_Chr")
+    case object _IntBox extends Ref("b_Int")
+    case object _LongBox extends Ref("b_Long")
+    case object _FloatBox extends Ref("b_Float")
+    case object _DoubleBox extends Ref("b_Double")
+
     case object _Any extends Ref("Any")
     case object _Null extends Ref("Null")
     case object _String extends Ref("String")
