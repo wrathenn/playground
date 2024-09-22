@@ -1,7 +1,7 @@
 package com.wrathenn.compilers
 package translators.expr
 
-import models.{CodeTarget, Operator, ReturnedValue}
+import models.{CodeTarget, Operator, ReturnedValue, Type}
 import models.Type.Primitive
 import translators.Translator
 import util.Util
@@ -152,6 +152,9 @@ class InfixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser
 
     val llvmF = Util.getOperatorLlvm(infixOp, commonType)
     context.writeCode(target) { s"$tempVal = $llvmF ${commonType.llvmRepr} $e1, $e2\n" }
-    ReturnedValue(llvmName = tempVal, _type = commonType)
+    val retType = if (infixOp.isInstanceOf[Operator.BooleanOp]) {
+      Type.Primitive._Boolean
+    } else commonType
+    ReturnedValue(llvmName = tempVal, _type = retType)
   }
 }

@@ -48,7 +48,7 @@ statement
 expr
     : 'if' '(' expr ')' NL* expr ('else' expr)?
     | 'return' expr?
-    | '{' expr '}'
+    | exprBlock
     | stableId '=' expr
     | infixExpr
     ;
@@ -96,6 +96,15 @@ exprs
     : expr (',' expr)*
     ;
 
+exprBlock
+    : '{' (NL | WS)* (exprBlockStat (NL | ';')+)* '}'
+    ;
+
+exprBlockStat
+    : expr
+    | patVarDef
+    ;
+
 // ---------- DEFINITIONS ----------
 def_
     : patVarDef
@@ -113,11 +122,8 @@ patDef
 
 // function:
 funDef
-    : funSig Colon type_ '=' NL* '{' NL* block NL* '}' NL*
-    | funSig Colon type_ '=' expr
+    : funSig Colon type_ '=' expr
     ;
-
-block : expr+ ;
 
 funSig
     : Id '(' params? ')'

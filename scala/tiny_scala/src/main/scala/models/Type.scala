@@ -25,12 +25,13 @@ object Type {
     extends Type(tinyScalaRepr = tinyScalaRepr, llvmRepr = "ptr")
   object Ref {
     // tinyScalaRepr of these should be irrelevant
-    case object _BooleanBox extends Ref("b_Boolean")
-    case object _ChrBox extends Ref("b_Chr")
-    case object _IntBox extends Ref("b_Int")
-    case object _LongBox extends Ref("b_Long")
-    case object _FloatBox extends Ref("b_Float")
-    case object _DoubleBox extends Ref("b_Double")
+    // case object _UnitBox extends Ref("b_Unit")
+    // case object _BooleanBox extends Ref("b_Boolean")
+    // case object _ChrBox extends Ref("b_Chr")
+    // case object _IntBox extends Ref("b_Int")
+    // case object _LongBox extends Ref("b_Long")
+    // case object _FloatBox extends Ref("b_Float")
+    // case object _DoubleBox extends Ref("b_Double")
 
     case object _Any extends Ref("Any")
     case object _Null extends Ref("Null")

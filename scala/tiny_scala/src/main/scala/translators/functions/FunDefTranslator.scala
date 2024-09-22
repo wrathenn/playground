@@ -54,12 +54,11 @@ class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParse
     context.writeCodeLn(CodeTarget.LOCAL) { s"define $returnsLlvm ${functionDef.llvmName} ($paramsLlvm) {" }
     context.>>()
 
-    context.inLocalContext(defining = functionDef.some) {
-      val exprs = if (node.expr != null) List(node.expr) else node.block.expr.asScala.toList
-      exprs.map { e =>
-        // todo return value from a function
-        new ExprTranslator(CodeTarget.LOCAL).translate(context, e)
-      }
+    val exprResult = context.inLocalContext(defining = functionDef.some) {
+      new ExprTranslator(CodeTarget.LOCAL).translate(context, node.expr)
+    }
+    if (exprResult._type != functionDef.returns) {
+      throw new IllegalStateException(s"Type mismatch for function ${functionDef.tinyScalaName}, expected: ${functionDef.returns}, actual: ${exprResult._type}")
     }
 
     context.<<()
