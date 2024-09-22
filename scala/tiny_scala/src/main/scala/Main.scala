@@ -1,7 +1,7 @@
 package com.wrathenn.compilers
 
 import translators.CompilationUnitTranslator
-import com.wrathenn.compilers.context.TranslationContext
+import context.TranslationContext
 
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 
@@ -11,6 +11,10 @@ object Main {
        """|
           |object Test extends App {
           |  val a: Int = if (1 == 2) 2 else 3
+          |  while (1 == 1) {
+          |    val d: Int = 3
+          |    val c: Int = d + 4
+          |  }
           |}
           |""".stripMargin
     }

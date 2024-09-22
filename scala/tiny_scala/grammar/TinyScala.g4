@@ -81,11 +81,7 @@ simpleExpr1
     : literal
     | stableId argumentExprs
     | stableId
-//    | '_'
     | '(' expr ')'
-//    | newClassExpr '.' Id // ?
-//    | simpleExpr1 '_'? '.' Id // ?
-//    | simpleExpr1 argumentExprs
     ;
 
 argumentExprs
@@ -103,6 +99,7 @@ exprBlock
 exprBlockStat
     : expr
     | patVarDef
+    | statement
     ;
 
 // ---------- DEFINITIONS ----------

@@ -5,7 +5,7 @@ import models.{CodeTarget, StructDef, Type}
 import translators.Translator
 import util.Util
 
-import com.wrathenn.compilers.context.TranslationContext
+import context.TranslationContext
 
 object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCaseClassContext, Unit] {
   private def genStructRepr(structDef: StructDef): String = {

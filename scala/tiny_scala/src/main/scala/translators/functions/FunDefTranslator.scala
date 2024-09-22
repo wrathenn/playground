@@ -7,7 +7,7 @@ import translators.Translator
 import util.Util
 
 import cats.syntax.all._
-import com.wrathenn.compilers.context.TranslationContext
+import context.TranslationContext
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 

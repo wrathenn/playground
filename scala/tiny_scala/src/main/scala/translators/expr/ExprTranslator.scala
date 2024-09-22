@@ -4,9 +4,9 @@ package translators.expr
 import models.{CodeTarget, ReturnedValue, VariableDecl}
 import translators.Translator
 
-import com.wrathenn.compilers.context.TranslationContext
-import com.wrathenn.compilers.translators.expr.kinds.{ExprBlockTranslator, ExprReturnTranslator, IfExprTranslator, InfixExprTranslator}
-import com.wrathenn.compilers.util.Util
+import context.TranslationContext
+import translators.expr.kinds.{ExprBlockTranslator, ExprReturnTranslator, IfExprTranslator, InfixExprTranslator}
+import util.Util
 
 class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.ExprContext, ReturnedValue] {
 

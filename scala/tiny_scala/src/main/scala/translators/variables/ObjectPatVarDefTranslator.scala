@@ -5,7 +5,7 @@ import models.{CodeTarget, VariableDef}
 import translators.expr.ExprTranslator
 import translators.Translator
 
-import com.wrathenn.compilers.context.TranslationContext
+import context.TranslationContext
 
 class ObjectPatVarDefTranslator(
   val objectName: String,

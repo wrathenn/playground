@@ -26,7 +26,7 @@ class ExprPatVarDefTranslator(val target: CodeTarget) extends Translator[TinySca
       throw new IllegalStateException(s"Type mismatch in variable declaration, expected: ${variableDef._type}, actual: ${exprResult._type}")
     }
 
-    context.writeCodeLn(target) { s"store ${variableDef._type} ${exprResult._type}, ptr ${variableDef.llvmNameRepr}" }
+    context.writeCodeLn(target) { s"store ${variableDef._type.llvmRepr} ${exprResult.llvmName}, ptr ${variableDef.llvmNameRepr}" }
     ReturnedValue(llvmName = "unit_value_unused", _type = Type.Primitive._Unit)
   }
 }

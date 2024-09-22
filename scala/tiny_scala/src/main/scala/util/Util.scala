@@ -5,7 +5,7 @@ import models.Operator.Infix
 import models.Type.Primitive
 import models.{Literal, Operator, Type}
 
-import com.wrathenn.compilers.models.Type.Ref._String
+import models.Type.Ref._String
 import org.antlr.v4.runtime.tree.TerminalNode
 
 import scala.collection.mutable.ArrayBuffer

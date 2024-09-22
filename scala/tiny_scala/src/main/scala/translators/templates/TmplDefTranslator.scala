@@ -2,7 +2,7 @@ package com.wrathenn.compilers
 package translators.templates
 
 import translators.Translator
-import com.wrathenn.compilers.context.TranslationContext
+import context.TranslationContext
 
 object TmplDefTranslator extends Translator[TinyScalaParser.TmplDefContext, Unit] {
   override def translate(context: TranslationContext, node: TinyScalaParser.TmplDefContext): Unit = {

@@ -4,9 +4,6 @@ package context
 import models.{CodeTarget, FunctionDef, StructDef, Type, VariableDef}
 import util.Aliases.{LlvmName, TinyScalaName}
 
-import cats.syntax.all._
-import com.wrathenn.compilers.context
-
 import scala.collection.{AbstractSeq, mutable}
 
 class CodeStorage(

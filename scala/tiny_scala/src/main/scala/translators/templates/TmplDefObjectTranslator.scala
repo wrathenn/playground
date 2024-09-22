@@ -1,9 +1,9 @@
 package com.wrathenn.compilers
 package translators.templates
 
+import context.TranslationContext
 import translators.Translator
-import cats.syntax.all._
-import com.wrathenn.compilers.context.TranslationContext
+
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object TmplDefObjectTranslator extends Translator[TinyScalaParser.TmplDefObjectContext, Unit] {
@@ -13,9 +13,9 @@ object TmplDefObjectTranslator extends Translator[TinyScalaParser.TmplDefObjectC
 
     val templateStats = body.templateStat.asScala
 
-    context.inLocalContext(None) {
+    context.inLocalContext(defining = None) {
       templateStats.foreach { ts =>
-        new DefTranslator(objectName = id).translate(context, ts.def_)
+        new TemplateStatTranslator(objectName = id).translate(context, ts)
       }
     }
   }

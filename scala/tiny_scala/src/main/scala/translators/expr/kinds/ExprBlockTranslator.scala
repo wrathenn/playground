@@ -9,17 +9,6 @@ import translators.variables.ExprPatVarDefTranslator
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class ExprBlockStatTranslator(val target: CodeTarget) extends Translator[TinyScalaParser.ExprBlockStatContext, ReturnedValue] {
-
-  override def translate(context: TranslationContext, node: TinyScalaParser.ExprBlockStatContext): ReturnedValue = {
-    if (node.expr() != null) {
-      new ExprTranslator(target).translate(context, node.expr)
-    } else {
-      new ExprPatVarDefTranslator(target).translate(context, node.patVarDef)
-    }
-  }
-}
-
 class ExprBlockTranslator(val target: CodeTarget) extends Translator[TinyScalaParser.ExprBlockContext, ReturnedValue] {
 
   override def translate(context: TranslationContext, node: TinyScalaParser.ExprBlockContext): ReturnedValue = {

@@ -58,7 +58,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
 
     val tempVal = context.genLocalVariableName(target)
 
-    context.writeCode(target) { s"$tempVal.value = load ${variable.llvmNameRepr}, ptr ${variable.llvmNameRepr}\n" }
+    context.writeCode(target) { s"$tempVal.value = load ${variable._type.llvmRepr}, ptr ${variable.llvmNameRepr}\n" }
     ReturnedValue(llvmName = s"$tempVal.value", _type = variable._type)
   }
 

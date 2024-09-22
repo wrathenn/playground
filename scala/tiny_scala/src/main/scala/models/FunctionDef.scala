@@ -1,7 +1,7 @@
 package com.wrathenn.compilers
 package models
 
-import com.wrathenn.compilers.util.Aliases.{LlvmName, TinyScalaName}
+import util.Aliases.{LlvmName, TinyScalaName}
 
 case class FunctionDef(
   tinyScalaName: TinyScalaName,
