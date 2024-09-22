@@ -1,14 +1,13 @@
 package com.wrathenn.compilers
-package translators.expr
+package translators.expr.kinds
 
 import context.TranslationContext
 import models.Type.Primitive
 import models.Type.Ref.Struct
 import models._
 import translators.Translator
+import translators.expr.ExprTranslator
 import util.Util
-
-import cats.syntax.all._
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
