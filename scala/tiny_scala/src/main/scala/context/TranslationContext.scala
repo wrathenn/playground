@@ -9,11 +9,31 @@ import com.wrathenn.compilers.context
 
 import scala.collection.{AbstractSeq, mutable}
 
+class CodeStorage(
+  val globalCode: StringBuilder = new StringBuilder(),
+  val initCode: StringBuilder = new StringBuilder(),
+  val mainCode: StringBuilder = new StringBuilder(),
+  val localCode: StringBuilder = new StringBuilder(),
+) {
+  def readGlobalCode: AbstractSeq[Char] = this.globalCode
+  def readLocalCode: AbstractSeq[Char] = this.localCode
+  def readInitCode: AbstractSeq[Char] = this.initCode
+  def readMainCode: AbstractSeq[Char] = this.mainCode
+
+  def append(other: CodeStorage): Unit = {
+    this.globalCode.append(other.globalCode)
+    this.initCode.append(other.initCode)
+    this.mainCode.append(other.mainCode)
+    this.localCode.append(other.localCode)
+  }
+}
+
 trait TranslationContext {
   val structDefinitions: collection.Map[TinyScalaName, StructDef]
   val globalVariables: collection.Map[TinyScalaName, VariableDef]
   val stringLiterals: collection.Map[TinyScalaName, LlvmName]
   val globalFunctions: collection.Map[TinyScalaName, FunctionDef]
+  val code: CodeStorage
 
   def addStructDefinition(structDef: StructDef): Unit
   def addGlobalVariable(variableDef: VariableDef): Unit
@@ -23,22 +43,19 @@ trait TranslationContext {
   def getTypeTag(_type: Type): Int
   def getType(tag: Int): Type
 
-  def findVariableById(id: String): Option[(String, Type)]
-  def findFunctionById(id: String): Option[FunctionDef]
-  def genLocalVariableName(target: CodeTarget): String
-
-  def writeCode(target: CodeTarget)(code: String): Unit
-  def writeCodeLn(target: CodeTarget)(code: String): Unit
-  def >>(): Unit
-  def <<(): Unit
+  def findVariableById(id: TinyScalaName): Option[VariableDef]
+  def findFunctionById(id: TinyScalaName): Option[FunctionDef]
+  def genLocalVariableName(target: CodeTarget): LlvmName
 
   def localContext: LocalContext
+  def createNewContext(defining: Option[FunctionDef]): LocalContext
+  def finishLocalContext(): LocalContext
   def inLocalContext[A](defining: Option[FunctionDef])(f: => A): A
 
-  def readGlobalCode: AbstractSeq[Char]
-  def readInitCode: AbstractSeq[Char]
-  def readMainCode: AbstractSeq[Char]
-  def readLocalCode: AbstractSeq[Char]
+  def writeCode(target: CodeTarget)(codeStr: String): Unit
+  def writeCodeLn(target: CodeTarget)(codeStr: String): Unit
+  def >>(): Unit
+  def <<(): Unit
 }
 
 case class TranslationContextImpl(
@@ -46,11 +63,7 @@ case class TranslationContextImpl(
   override val globalVariables: mutable.Map[TinyScalaName, VariableDef],
   override val stringLiterals: mutable.Map[String, LlvmName],
   override val globalFunctions: mutable.Map[TinyScalaName, FunctionDef],
-
-  private val globalCode: StringBuilder,
-  private val initCode: StringBuilder,
-  private val mainCode: StringBuilder,
-  private val localCode: StringBuilder,
+  override val code: CodeStorage,
 
   private val local: mutable.Stack[LocalContext],
 ) extends TranslationContext {
@@ -106,25 +119,17 @@ case class TranslationContextImpl(
   /**
    * Поиск по tinyScala-представлению.
    */
-  override def findVariableById(id: String): Option[(String, Type)] = {
-    if (globalVariables.contains(id)) {
-      val global = globalVariables(id)
-      (global.llvmNameRepr -> global._type).some
-    }
-    else searchStack { c =>
+  override def findVariableById(id: TinyScalaName): Option[VariableDef] = {
+    globalVariables.get(id) orElse searchStack { c =>
       c.variables.get(id)
-        .map { l => l.llvmNameRepr -> l._type }
     }
   }
 
   /**
    * Поиск по tinyScala-представлению.
    */
-  override def findFunctionById(id: String): Option[FunctionDef] = {
-    if (globalFunctions.contains(id)) {
-      globalFunctions(id).some
-    }
-    else searchStack { c =>
+  override def findFunctionById(id: TinyScalaName): Option[FunctionDef] = {
+    globalFunctions.get(id) orElse searchStack { c =>
       c.functions.get(id)
     }
   }
@@ -133,7 +138,7 @@ case class TranslationContextImpl(
    * Сгенерировать новую локальную переменную в текущем локальном скоупе.
    * @return llvm-ir название переменной
    */
-  override def genLocalVariableName(target: CodeTarget): String = {
+  override def genLocalVariableName(target: CodeTarget): LlvmName = {
     target match {
       case CodeTarget.LOCAL => {
         val localContext = local.top
@@ -150,27 +155,14 @@ case class TranslationContextImpl(
     }
   }
 
-  override def writeCode(target: CodeTarget)(code: String): Unit = {
-    target match {
-      case CodeTarget.LOCAL => localCode.append(" ".repeat(localWriteOffset) ++ code)
-      case CodeTarget.INIT => initCode.append(code)
-      case CodeTarget.GLOBAL => globalCode.append(code)
-      case CodeTarget.Main => mainCode.append(code)
-    }
-  }
-
-  override def writeCodeLn(target: CodeTarget)(code: String): Unit = {
-    writeCode(target)(code ++ "\n")
-  }
-
   override def localContext: LocalContext = this.local.top
 
-  private def finishLocalContext(): LocalContext = {
+  def finishLocalContext(): LocalContext = {
     val context = this.local.pop()
     context
   }
 
-  private def createNewContext(defining: Option[FunctionDef]): LocalContext = {
+  def createNewContext(defining: Option[FunctionDef]): LocalContext = {
     val newContext = LocalContext(defining)
     this.local.push(newContext)
     newContext
@@ -188,10 +180,18 @@ case class TranslationContextImpl(
   override def >>(): Unit = localWriteOffset += 2
   override def <<(): Unit = localWriteOffset -= 2
 
-  override def readGlobalCode: AbstractSeq[Char] = this.globalCode
-  override def readLocalCode: AbstractSeq[Char] = this.localCode
-  override def readInitCode: AbstractSeq[Char] = this.initCode
-  override def readMainCode: AbstractSeq[Char] = this.mainCode
+  override def writeCode(target: CodeTarget)(codeStr: String): Unit = {
+    target match {
+      case CodeTarget.LOCAL => code.localCode.append(" ".repeat(localWriteOffset) ++ codeStr)
+      case CodeTarget.INIT => code.initCode.append(codeStr)
+      case CodeTarget.GLOBAL => code.globalCode.append(codeStr)
+      case CodeTarget.Main => code.mainCode.append(codeStr)
+    }
+  }
+
+  override def writeCodeLn(target: CodeTarget)(codeStr: String): Unit = {
+    writeCode(target)(codeStr ++ "\n")
+  }
 
   override def addStructDefinition(structDef: StructDef): Unit = {
     this.structDefinitions.addOne(structDef.tinyScalaRepr -> structDef)
@@ -209,8 +209,6 @@ case class TranslationContextImpl(
   override def addGlobalFunction(functionDef: FunctionDef): Unit = {
     this.globalFunctions.addOne(functionDef.tinyScalaName -> functionDef)
   }
-
-
 }
 
 object TranslationContext {
@@ -219,11 +217,7 @@ object TranslationContext {
     globalVariables = mutable.HashMap(),
     stringLiterals = mutable.HashMap(),
     globalFunctions = mutable.HashMap(),
-
-    globalCode = new StringBuilder(),
-    initCode = new StringBuilder(),
-    mainCode = new StringBuilder(),
-    localCode = new StringBuilder(),
+    code = new CodeStorage(),
 
     local = new mutable.Stack[LocalContext]()
   )
