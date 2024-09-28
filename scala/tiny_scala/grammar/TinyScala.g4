@@ -209,6 +209,10 @@ generator
     ;
 
 // Lexer
+BooleanLiteral
+    : 'true'
+    | 'false'
+    ;
 
 Id
     : Plainid
@@ -224,11 +228,6 @@ OpPrecedence6: OpCharPrecedence6 OpCharAnyPrecedence* ;
 OpPrecedence7: OpCharPrecedence7 OpCharAnyPrecedence* ;
 OpPrecedence8: OpCharPrecedence8 OpCharAnyPrecedence* ;
 OpPrecedence9: OpCharPrecedence9 OpCharAnyPrecedence* ;
-
-BooleanLiteral
-    : 'true'
-    | 'false'
-    ;
 
 CharacterLiteral
     : '\'' (PrintableChar | CharEscapeSeq) '\''

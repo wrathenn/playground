@@ -10,9 +10,7 @@ import translators.statement.StatementTranslator
 class TemplateStatTranslator(objectName: String) extends Translator[TinyScalaParser.TemplateStatContext, Unit] {
   override def translate(context: TranslationContext, node: TinyScalaParser.TemplateStatContext): Unit = {
     if (node.def_ != null) {
-      context.inLocalContext(defining = None) {
-        new DefTranslator(objectName).translate(context, node.def_)
-      }
+      new DefTranslator(objectName).translate(context, node.def_)
     }
     else if (node.expr != null) {
       new ExprTranslator(target = CodeTarget.INIT).translate(context, node.expr)

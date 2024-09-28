@@ -8,6 +8,7 @@ case class FunctionDef(
   llvmName: LlvmName,
   params: List[FunctionDef.Param],
   returns: Type,
+  isVarArg: Boolean,
 )
 
 object FunctionDef {

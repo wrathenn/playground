@@ -4,10 +4,12 @@ package util
 import models.Operator.Infix
 import models.Type.Primitive
 import models.{Literal, Operator, Type}
-
 import models.Type.Ref._String
+
+import com.wrathenn.compilers.util.Aliases.TinyScalaName
 import org.antlr.v4.runtime.tree.TerminalNode
 
+import java.nio.charset.StandardCharsets
 import scala.collection.mutable.ArrayBuffer
 
 object Util {
@@ -30,12 +32,12 @@ object Util {
     Type.fromRepr(typeRepr)
   }
 
-  def collectTypeRepr(node: TinyScalaParser.Type_Context): String = {
+  def collectTypeRepr(node: TinyScalaParser.Type_Context): TinyScalaName = {
     if (node.simpleType != null) collectStableIdRepr(node.simpleType.stableId)
     else "Array[" ++ collectTypeRepr(node.arrayType.type_) ++ "]"
   }
 
-  def collectStableIdRepr(node: TinyScalaParser.StableIdContext): String = {
+  def collectStableIdRepr(node: TinyScalaParser.StableIdContext): TinyScalaName = {
     if (node.stableId == null) node.Id.getText
     else collectStableIdRepr(node.stableId) ++ s".${node.Id.getText}"
   }
@@ -196,5 +198,30 @@ object Util {
         case _ => "icmp eq"
       }
     }
+  }
+
+  def strToByteRepr(str: String): (String, Int)= {
+    def decodeEscapeSequences(input: String): String = {
+      input.replace("\\n", "\n")
+        .replace("\\t", "\t")
+        .replace("\\r", "\r")
+        .replace("\\\\", "\\")
+    }
+
+    // Function to encode the string in LLVM format
+    def toLLVMString(input: String): (String, Int) = {
+      val byteArray = input.getBytes("UTF-8")
+      val llvmEncoded = byteArray.map { b =>
+        if (b >= 32 && b < 127 && b != 34 && b != 92) {
+          b.toChar.toString
+        } else {
+          "\\%02X".format(b)
+        }
+      }.mkString
+
+      llvmEncoded + "\\00" -> (byteArray.size + 1)
+    }
+
+    toLLVMString(decodeEscapeSequences(str))
   }
 }

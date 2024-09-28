@@ -1,13 +1,40 @@
 package com.wrathenn.compilers
 
 import context.TranslationContext
+import models.{CodeTarget, FunctionDef, Type}
+
+import com.wrathenn.compilers.translators.CompilationUnitTranslator
+import io.circe.parser
 
 object ProgramBuilder {
-  def buildProgram(context: TranslationContext): String = {
-    val sb = new StringBuilder()
+  private def addDefaultFunctions(context: TranslationContext): Unit = {
+    // add malloc
+    context.writeCodeLn(target = CodeTarget.GLOBAL) { "declare ptr @malloc(i64)" }
 
-    sb.append("declare ptr @malloc(i64)\n")
-    sb.append("declare i32 @printf(ptr noundef, ...)\n")
+    // add printf
+    context.writeCodeLn(target = CodeTarget.GLOBAL) { "declare i32 @printf(ptr noundef, ...)" }
+    context.addGlobalFunction(FunctionDef(
+      tinyScalaName = "print",
+      llvmName = "@printf",
+      params = List(
+        FunctionDef.Param(
+          tinyScalaName = "fmt",
+          llvmName = "fmt",
+          _type = Type.Ref._String
+        ),
+      ),
+      returns = Type.Primitive._Int,
+      isVarArg = true,
+    ))
+  }
+
+  def buildProgram(parser: TinyScalaParser, context: TranslationContext): String = {
+    addDefaultFunctions(context)
+
+    val treeRoot = parser.compilationUnit()
+    CompilationUnitTranslator.translate(context, treeRoot)
+
+    val sb = new StringBuilder()
 
     sb.append("; --- GLOBAL CODE: ---\n")
     sb.append(context.code.readGlobalCode)

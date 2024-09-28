@@ -1,6 +1,5 @@
 package com.wrathenn.compilers
 
-import translators.CompilationUnitTranslator
 import context.TranslationContext
 
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
@@ -11,22 +10,18 @@ object Main {
        """|
           |object Test extends App {
           |  val a: Int = if (1 == 2) 2 else 3
-          |  while (1 == 1) {
-          |    val d: Int = 3
-          |    val c: Int = d + 4
-          |  }
+          |  val b: Int = 3 - 2 * 6 + 8 / 2
+          |  print("%d\n", 3 + 2 - 1)
           |}
           |""".stripMargin
     }
     val charStream = CharStreams.fromString(text)
     val lexer = new TinyScalaLexer(charStream)
     val tokenStream = new CommonTokenStream(lexer)
-    val parser = new TinyScalaParser(tokenStream)
-    val res = parser.compilationUnit()
+    val parser: TinyScalaParser = new TinyScalaParser(tokenStream)
 
     val translationContext = TranslationContext.create
-    CompilationUnitTranslator.translate(translationContext, res)
-    val program = ProgramBuilder.buildProgram(context = translationContext)
+    val program = ProgramBuilder.buildProgram(context = translationContext, parser = parser)
     println(program)
   }
 }

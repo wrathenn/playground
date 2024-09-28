@@ -39,6 +39,7 @@ class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParse
       llvmName = llvmName,
       params = paramsDef,
       returns = returnType,
+      isVarArg = false,
     )
     context.addGlobalFunction(globalFunctionDef)
     context.localContext.functions.addOne(name -> globalFunctionDef)
