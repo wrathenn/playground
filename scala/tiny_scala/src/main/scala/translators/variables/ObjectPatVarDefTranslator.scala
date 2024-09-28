@@ -18,9 +18,14 @@ class ObjectPatVarDefTranslator(
     val llvmNameRepr = s"@${objectName}.${incomplete.name}"
     context.writeCode(CodeTarget.INIT)(s"; start of init for $tinyScalaRepr\n")
 
-    val variableDef = VariableDef(tinyScalaRepr, llvmNameRepr, incomplete._type, incomplete.decl)
+    val variableDef = VariableDef(
+      tinyScalaRepr = tinyScalaRepr,
+      llvmNameRepr = llvmNameRepr,
+      _type = incomplete._type,
+      decl = incomplete.decl
+    )
     context.addGlobalVariable(variableDef)
-    context.localContext.variables.addOne(incomplete.name -> variableDef)
+    context.addLocalVariable(variableDef.copy(tinyScalaRepr = incomplete.name))
     context.writeCodeLn(CodeTarget.GLOBAL) { s"$llvmNameRepr = global ptr undef" }
 
     val expr = node.patDef.expr

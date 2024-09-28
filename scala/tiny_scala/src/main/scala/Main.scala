@@ -8,10 +8,10 @@ object Main {
   def main(args: Array[String]): Unit = {
     val text = {
        """|
+          |case class Test(a: Int, b: Double)
+          |
           |object Test extends App {
-          |  val a: Int = if (1 == 2) 2 else 3
-          |  val b: Int = 3 - 2 * 6 + 8 / 2
-          |  print("%d\n", 3 + 2 - 1)
+          |  val c: Test = new Test(1, 2.0)
           |}
           |""".stripMargin
     }

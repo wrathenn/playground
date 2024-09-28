@@ -1,8 +1,11 @@
 package com.wrathenn.compilers
 package translators.templates
 
-import context.TranslationContext
+import context.{LocalContext, TranslationContext}
+import models.CodeTarget
 import translators.Translator
+
+import cats.syntax.all._
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
@@ -12,10 +15,11 @@ object TmplDefObjectTranslator extends Translator[TinyScalaParser.TmplDefObjectC
     val body = node.templateBody
 
     val templateStats = body.templateStat.asScala
+    val codeTarget = if (node.objectIsMain != null) CodeTarget.MAIN else CodeTarget.INIT
 
-    context.inLocalContext(defining = None) {
+    context.inLocalContext(defining = LocalContext.Defining.Object(objectName = id).some) {
       templateStats.foreach { ts =>
-        new TemplateStatTranslator(objectName = id).translate(context, ts)
+        new TemplateStatTranslator(target = codeTarget).translate(context, ts)
       }
     }
   }

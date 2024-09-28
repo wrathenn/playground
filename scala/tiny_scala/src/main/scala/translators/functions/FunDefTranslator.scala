@@ -7,11 +7,11 @@ import translators.Translator
 import util.Util
 
 import cats.syntax.all._
-import context.TranslationContext
+import context.{LocalContext, TranslationContext}
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParser.FunDefContext, Unit] {
+object FunDefTranslator extends Translator[TinyScalaParser.FunDefContext, Unit] {
   private def collectParams(params: List[TinyScalaParser.ParamContext]): List[FunctionDef.Param] = {
     params.map { param =>
       val name = param.Id.getText
@@ -22,6 +22,9 @@ class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParse
 
   private def getFunctionDefAndAddToContext(context: TranslationContext, node: TinyScalaParser.FunDefContext): FunctionDef = {
     val name = node.funSig.Id.getText
+
+    val definingObject = context.getDefiningObjectOrDie
+    val objectName = definingObject.objectName
     val tinyScalaGlobalName = s"$objectName.$name"
     val llvmName = s"@$objectName.$name"
 
@@ -42,7 +45,9 @@ class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParse
       isVarArg = false,
     )
     context.addGlobalFunction(globalFunctionDef)
-    context.localContext.functions.addOne(name -> globalFunctionDef)
+
+    val localFunctionDef = globalFunctionDef.copy(tinyScalaName = name)
+    context.addLocalFunction(localFunctionDef)
 
     globalFunctionDef
   }
@@ -55,7 +60,7 @@ class FunDefTranslator(val objectName: String) extends Translator[TinyScalaParse
     context.writeCodeLn(CodeTarget.LOCAL) { s"define $returnsLlvm ${functionDef.llvmName} ($paramsLlvm) {" }
     context.>>()
 
-    val exprResult = context.inLocalContext(defining = functionDef.some) {
+    val exprResult = context.inLocalContext(defining = LocalContext.Defining.Function(functionDef).some) {
       new ExprTranslator(CodeTarget.LOCAL).translate(context, node.expr)
     }
     if (exprResult._type != functionDef.returns) {

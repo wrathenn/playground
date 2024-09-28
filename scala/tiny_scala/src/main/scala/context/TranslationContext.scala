@@ -1,8 +1,11 @@
 package com.wrathenn.compilers
 package context
 
-import models.{CodeTarget, FunctionDef, StructDef, Type, VariableDef}
+import context.LocalContext.Defining
+import models._
 import util.Aliases.{LlvmName, TinyScalaName}
+
+import cats.syntax.all._
 
 import scala.collection.{AbstractSeq, mutable}
 
@@ -44,10 +47,16 @@ trait TranslationContext {
   def findFunctionById(id: TinyScalaName): Option[FunctionDef]
   def genLocalVariableName(target: CodeTarget): LlvmName
 
-  def localContext: LocalContext
-  def createNewContext(defining: Option[FunctionDef]): LocalContext
+  def addLocalVariable(variableDef: VariableDef): Unit
+  def addLocalFunction(functionDef: FunctionDef): Unit
+  def localContainsVariable(name: TinyScalaName): Boolean
+  def createNewContext(defining: Option[LocalContext.Defining]): LocalContext
   def finishLocalContext(): LocalContext
-  def inLocalContext[A](defining: Option[FunctionDef])(f: => A): A
+  def inLocalContext[A](defining: Option[LocalContext.Defining])(f: => A): A
+  def getDefiningObject: Option[LocalContext.Defining.Object]
+  def getDefiningObjectOrDie: LocalContext.Defining.Object
+  def getDefiningFunction: Option[LocalContext.Defining.Function]
+  def getDefiningFunctionOrDie: LocalContext.Defining.Function
 
   def writeCode(target: CodeTarget)(codeStr: String): Unit
   def writeCodeLn(target: CodeTarget)(codeStr: String): Unit
@@ -143,7 +152,7 @@ case class TranslationContextImpl(
         localContext.counter += 1
         tempVal
       }
-      case CodeTarget.INIT | CodeTarget.Main => {
+      case CodeTarget.INIT | CodeTarget.MAIN => {
         val tempVal = s"%v_${mainCounter}"
         mainCounter += 1
         tempVal
@@ -152,24 +161,67 @@ case class TranslationContextImpl(
     }
   }
 
-  override def localContext: LocalContext = this.local.top
-
   def finishLocalContext(): LocalContext = {
     val context = this.local.pop()
     context
   }
 
-  def createNewContext(defining: Option[FunctionDef]): LocalContext = {
+  def createNewContext(defining: Option[LocalContext.Defining]): LocalContext = {
     val newContext = LocalContext(defining)
     this.local.push(newContext)
     newContext
   }
 
-  override def inLocalContext[A](defining: Option[FunctionDef])(f: => A): A = {
+  override def inLocalContext[A](defining: Option[LocalContext.Defining])(f: => A): A = {
     this.createNewContext(defining)
     val ret = f // should work
     this.finishLocalContext()
     ret
+  }
+
+  private def getLocalContextOrDie: LocalContext = this.local.headOption.getOrElse {
+    throw new IllegalStateException("No local context")
+  }
+
+  override def addLocalVariable(variableDef: VariableDef): Unit = {
+    val localContext = getLocalContextOrDie
+    localContext.variables.addOne(variableDef.tinyScalaRepr -> variableDef)
+  }
+
+  override def addLocalFunction(functionDef: FunctionDef): Unit = {
+    val localContext = getLocalContextOrDie
+    localContext.functions.addOne(functionDef.tinyScalaName -> functionDef)
+  }
+
+  override def localContainsVariable(name: TinyScalaName): Boolean = {
+    val localContext = getLocalContextOrDie
+    localContext.variables.contains(name)
+  }
+
+  override def getDefiningObject: Option[Defining.Object] = for {
+    top <- this.local.headOption
+    defining <- top.defining
+    res: Defining.Object <- defining match {
+      case obj: Defining.Object => obj.some
+      case _ => None
+    }
+  } yield res
+
+  override def getDefiningObjectOrDie: Defining.Object = getDefiningObject.getOrElse {
+    throw new IllegalStateException("Not in object definition")
+  }
+
+  override def getDefiningFunction: Option[Defining.Function] = for {
+    top <- this.local.headOption
+    defining <- top.defining
+    res: Defining.Function <- defining match {
+      case fun: Defining.Function => fun.some
+      case _ => None
+    }
+  } yield res
+
+  override def getDefiningFunctionOrDie: Defining.Function = getDefiningFunction.getOrElse {
+    throw new IllegalStateException("Not in function definition")
   }
 
   // Для отступов:
@@ -182,7 +234,7 @@ case class TranslationContextImpl(
       case CodeTarget.LOCAL => code.localCode.append(" ".repeat(localWriteOffset) ++ codeStr)
       case CodeTarget.INIT => code.initCode.append(codeStr)
       case CodeTarget.GLOBAL => code.globalCode.append(codeStr)
-      case CodeTarget.Main => code.mainCode.append(codeStr)
+      case CodeTarget.MAIN => code.mainCode.append(codeStr)
     }
   }
 

@@ -10,13 +10,13 @@ class ExprPatVarDefTranslator(val target: CodeTarget) extends Translator[TinySca
   override def translate(context: TranslationContext, node: TinyScalaParser.PatVarDefContext): ReturnedValue = {
     val incomplete = PatVarDefTranslatorHelper.getVariableDef(node)
 
-    if (context.localContext.variables.contains(incomplete.name))
+    if (context.localContainsVariable(incomplete.name))
       throw new IllegalStateException(s"Redeclaration of ${incomplete.name}")
 
     val tinyScalaRepr = incomplete.name
 
     val variableDef = VariableDef(tinyScalaRepr, s"%$tinyScalaRepr", incomplete._type, incomplete.decl)
-    context.localContext.variables.addOne(variableDef.tinyScalaRepr -> variableDef)
+    context.addLocalVariable(variableDef)
     context.writeCodeLn(target) { s"${variableDef.llvmNameRepr} = alloca ${variableDef._type.llvmRepr}" }
 
     val expr = node.patDef.expr

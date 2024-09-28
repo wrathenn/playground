@@ -6,16 +6,14 @@ import translators.Translator
 import translators.functions.FunDefTranslator
 import translators.variables.ObjectPatVarDefTranslator
 
-class DefTranslator(
-  val objectName: String,
-) extends Translator[TinyScalaParser.Def_Context, Unit] {
-  // todo clear context or even make it stack-like (please)
+object DefTranslator extends Translator[TinyScalaParser.Def_Context, Unit] {
   override def translate(context: TranslationContext, node: TinyScalaParser.Def_Context): Unit = {
     if (node.patVarDef != null) {
-      new ObjectPatVarDefTranslator(objectName).translate(context, node.patVarDef)
+      val definingObject = context.getDefiningObjectOrDie
+      new ObjectPatVarDefTranslator(definingObject.objectName).translate(context, node.patVarDef)
     }
     else {
-      new FunDefTranslator(objectName).translate(context, node.funDef)
+      FunDefTranslator.translate(context, node.funDef)
     }
   }
 }
