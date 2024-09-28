@@ -15,6 +15,7 @@ object Main {
           |}
           |""".stripMargin
     }
+
     val charStream = CharStreams.fromString(text)
     val lexer = new TinyScalaLexer(charStream)
     val tokenStream = new CommonTokenStream(lexer)
