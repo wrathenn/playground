@@ -32,8 +32,18 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test
 libraryDependencies += "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test
 libraryDependencies += "org.antlr" % "antlr4" % "4.13.2"
 
+ThisBuild / assemblyMergeStrategy  := {
+  case PathList("module-info.class") => MergeStrategy.discard
+  case x if x.endsWith("/module-info.class") => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
+    oldStrategy(x)
+}
+
 lazy val root = (project in file("."))
   .settings(
     name := "tiny_scala",
-    idePackagePrefix := Some("com.wrathenn.compilers")
+    idePackagePrefix := Some("com.wrathenn.compilers"),
+    assembly / mainClass := Some("com.wrathenn.compilers.Main"),
+    assembly / assemblyJarName := "miniScala.jar",
   )
