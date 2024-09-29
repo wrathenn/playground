@@ -32,6 +32,8 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test
 libraryDependencies += "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test
 libraryDependencies += "org.antlr" % "antlr4" % "4.13.2"
 
+libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0"
+
 ThisBuild / assemblyMergeStrategy  := {
   case PathList("module-info.class") => MergeStrategy.discard
   case x if x.endsWith("/module-info.class") => MergeStrategy.discard

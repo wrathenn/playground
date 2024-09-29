@@ -2,36 +2,69 @@ package com.wrathenn.compilers
 
 import context.TranslationContext
 
+import cats.effect.{ExitCode, IO, IOApp}
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
+import scopt.OParser
 
-object Main {
-  def main(args: Array[String]): Unit = {
-    val text = {
-       """|
-          |object FibTest {
-          |
-          |  def fib(a: Int): Int = {
-          |    if (a == 1) return 1
-          |    if (a == 2) return 1
-          |    val res: Int = fib(a - 1) + fib(a - 2)
-          |    res
-          |  }
-          |}
-          |
-          |object Test extends App {
-          |  val f: Int = FibTest.fib(10)
-          |  print("%d\n", f)
-          |}
-          |""".stripMargin
+import java.nio.file.{Files, Paths}
+import scala.io.Source
+import scala.sys.exit
+
+object Main extends IOApp {
+  case class Config(
+    file: String = "program.tinyScala",
+    output: String = "program.ll",
+  )
+
+  private val builder = OParser.builder[Config]
+  private val argParser = {
+    import builder._
+    OParser.sequence(
+      programName("MiniScala compiler"),
+      cmd("compile")
+        .children(
+          opt[String]('f', "file")
+            .action((f, c) => c.copy(file = f) )
+            .text("File to compile"),
+          opt[String]('o', "output")
+            .action((o, c) => c.copy(output = o))
+            .text("Output llvm ir file")
+        )
+    )
+  }
+
+  private def readFile(path: String): IO[String] =
+    IO blocking {
+      val source = scala.io.Source.fromFile(path)
+      val res = source.getLines().mkString("\n")
+      source.close()
+      res
     }
 
-    val charStream = CharStreams.fromString(text)
-    val lexer = new TinyScalaLexer(charStream)
-    val tokenStream = new CommonTokenStream(lexer)
-    val parser: TinyScalaParser = new TinyScalaParser(tokenStream)
+  private def compile(sourceFilename: String, outputFilename: String): IO[Unit] = for {
+    code <- readFile(sourceFilename)
 
-    val translationContext = TranslationContext.create
-    val program = ProgramBuilder.buildProgram(context = translationContext, parser = parser)
-    println(program)
+    charStream <- IO delay CharStreams.fromString(code)
+    lexer <- IO delay new TinyScalaLexer(charStream)
+    tokenStream <- IO delay new CommonTokenStream(lexer)
+    parser: TinyScalaParser <- IO delay new TinyScalaParser(tokenStream)
+
+    translationContext = TranslationContext.create
+    llvmCode <- IO delay ProgramBuilder.buildProgram(context = translationContext, parser = parser)
+    _ <- IO blocking {
+      Files.writeString(
+        Paths.get(outputFilename),
+        llvmCode
+      )
+    }
+  } yield ()
+
+  override def run(args: List[String]): IO[ExitCode] = {
+    OParser.parse(argParser, args, Config()) match {
+      case Some(config) => for {
+        _ <- compile(config.file, config.output)
+      } yield ExitCode.Success
+      case None => exit(-1)
+    }
   }
 }
