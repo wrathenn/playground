@@ -15,7 +15,13 @@ class ExprPatVarDefTranslator(val target: CodeTarget) extends Translator[TinySca
 
     val tinyScalaRepr = incomplete.name
 
-    val variableDef = VariableDef(tinyScalaRepr, s"%$tinyScalaRepr", incomplete._type, incomplete.decl)
+    val variableDef = VariableDef(
+      tinyScalaRepr = tinyScalaRepr,
+      llvmNameRepr =  s"%$tinyScalaRepr",
+      _type = incomplete._type,
+      decl = incomplete.decl,
+      isFunctionParam = false,
+    )
     context.addLocalVariable(variableDef)
     context.writeCodeLn(target) { s"${variableDef.llvmNameRepr} = alloca ${variableDef._type.llvmRepr}" }
 

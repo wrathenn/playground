@@ -1,7 +1,7 @@
 package com.wrathenn.compilers
 
 import context.TranslationContext
-import models.{CodeTarget, FunctionDef, Type}
+import models.{CodeTarget, FunctionDef, Type, VariableDecl, VariableDef}
 
 import com.wrathenn.compilers.translators.CompilationUnitTranslator
 import io.circe.parser
@@ -17,10 +17,12 @@ object ProgramBuilder {
       tinyScalaName = "print",
       llvmName = "@printf",
       params = List(
-        FunctionDef.Param(
-          tinyScalaName = "fmt",
-          llvmName = "fmt",
-          _type = Type.Ref._String
+        VariableDef(
+          tinyScalaRepr = "fmt",
+          llvmNameRepr = "fmt",
+          _type = Type.Ref._String,
+          decl = VariableDecl.VAL,
+          isFunctionParam = true,
         ),
       ),
       returns = Type.Primitive._Int,

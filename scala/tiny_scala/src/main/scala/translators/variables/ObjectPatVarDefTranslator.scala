@@ -22,7 +22,8 @@ class ObjectPatVarDefTranslator(
       tinyScalaRepr = tinyScalaRepr,
       llvmNameRepr = llvmNameRepr,
       _type = incomplete._type,
-      decl = incomplete.decl
+      decl = incomplete.decl,
+      isFunctionParam = false,
     )
     context.addGlobalVariable(variableDef)
     context.addLocalVariable(variableDef.copy(tinyScalaRepr = incomplete.name))

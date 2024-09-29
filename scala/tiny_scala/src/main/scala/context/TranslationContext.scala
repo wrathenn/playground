@@ -127,7 +127,15 @@ case class TranslationContextImpl(
    */
   override def findVariableById(id: TinyScalaName): Option[VariableDef] = {
     globalVariables.get(id) orElse searchStack { c =>
-      c.variables.get(id)
+      c.variables.get(id).orElse {
+        for {
+          defining <- c.defining
+          r <- defining match {
+            case Defining.Object(_) => None
+            case Defining.Function(functionDef) => functionDef.params.find { p => p.tinyScalaRepr == id }
+          }
+        } yield r
+      }
     }
   }
 
@@ -147,7 +155,7 @@ case class TranslationContextImpl(
   override def genLocalVariableName(target: CodeTarget): LlvmName = {
     target match {
       case CodeTarget.LOCAL => {
-        val localContext = local.top
+        val localContext = local.last
         val tempVal = s"%v_${localContext.counter}"
         localContext.counter += 1
         tempVal

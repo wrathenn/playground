@@ -8,6 +8,7 @@ case class VariableDef(
   llvmNameRepr: LlvmName,
   _type: Type,
   decl: VariableDecl,
+  isFunctionParam: Boolean, // crutch
 )
 
 //case class LocalVariableDef(

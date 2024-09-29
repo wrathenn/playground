@@ -48,12 +48,25 @@ class IfExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.Ex
     if (thenResult._type.isInstanceOf[Type.Primitive] && elseResult.isInstanceOf[Type.Ref]) {
       val thenType = thenResult._type.asInstanceOf[Type.Primitive]
       throw new IllegalStateException("todo boxing")
-    } else if (thenResult._type.isInstanceOf[Type.Ref] && elseResult.isInstanceOf[Type.Primitive]) {
+    }
+    else if (thenResult._type.isInstanceOf[Type.Ref] && elseResult.isInstanceOf[Type.Primitive]) {
       throw new IllegalStateException("todo boxing")
-    } else if (thenResult._type == elseResult._type) {
-      context.writeCodeLn(target) { s"$tempVal = phi ${thenResult._type.llvmRepr} [${thenResult.llvmName}, %$thenLabel], [${elseResult.llvmName}, %$elseLabel]" }
+    }
+    else if (thenResult._type == elseResult._type) {
+      if (thenResult._type != Type.Primitive._Unit) {
+        context.writeCodeLn(target) {
+          s"$tempVal = phi ${thenResult._type.llvmRepr} [${thenResult.llvmName}, %$thenLabel], [${elseResult.llvmName}, %$elseLabel]"
+        }
+      }
       ReturnedValue(llvmName = tempVal, _type = thenResult._type)
-    } else {
+    }
+    else if (thenResult._type == Type._Nothing) {
+      ReturnedValue(llvmName = elseResult.llvmName, _type = elseResult._type)
+    }
+    else if (elseResult._type == Type._Nothing) {
+      ReturnedValue(llvmName = thenResult.llvmName, _type = thenResult._type)
+    }
+    else {
       throw new IllegalStateException(s"Type mismatch. Then: ${thenResult._type}. Else: ${elseResult._type}")
     }
   }

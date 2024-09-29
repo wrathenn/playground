@@ -1,7 +1,7 @@
 package com.wrathenn.compilers
 package translators.functions
 
-import models.{CodeTarget, FunctionDef}
+import models.{CodeTarget, FunctionDef, Type, VariableDecl, VariableDef}
 import translators.expr.ExprTranslator
 import translators.Translator
 import util.Util
@@ -12,11 +12,17 @@ import context.{LocalContext, TranslationContext}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object FunDefTranslator extends Translator[TinyScalaParser.FunDefContext, Unit] {
-  private def collectParams(params: List[TinyScalaParser.ParamContext]): List[FunctionDef.Param] = {
+  private def collectParams(params: List[TinyScalaParser.ParamContext]): List[VariableDef] = {
     params.map { param =>
       val name = param.Id.getText
       val _type = Util.collectType(param.type_)
-      FunctionDef.Param(tinyScalaName = name, llvmName = s"%$name" , _type = _type)
+      VariableDef(
+        tinyScalaRepr = name,
+        llvmNameRepr = s"%$name" ,
+        _type = _type,
+        decl = VariableDecl.VAL,
+        isFunctionParam = true,
+      )
     }
   }
 
@@ -56,14 +62,21 @@ object FunDefTranslator extends Translator[TinyScalaParser.FunDefContext, Unit] 
     val functionDef = getFunctionDefAndAddToContext(context, node)
 
     val returnsLlvm = functionDef.returns.llvmRepr
-    val paramsLlvm = functionDef.params.map { p => s"${p._type.llvmRepr} ${p.llvmName}"}.mkString(", ")
+    val paramsLlvm = functionDef.params.map { p => s"${p._type.llvmRepr} ${p.llvmNameRepr}"}.mkString(", ")
     context.writeCodeLn(CodeTarget.LOCAL) { s"define $returnsLlvm ${functionDef.llvmName} ($paramsLlvm) {" }
     context.>>()
 
     val exprResult = context.inLocalContext(defining = LocalContext.Defining.Function(functionDef).some) {
       new ExprTranslator(CodeTarget.LOCAL).translate(context, node.expr)
     }
-    if (exprResult._type != functionDef.returns) {
+
+    if (exprResult._type == Type._Nothing) {
+
+    }
+    else if (exprResult._type == functionDef.returns) {
+      context.writeCodeLn(CodeTarget.LOCAL) { s"ret ${exprResult._type.llvmRepr} ${exprResult.llvmName}" }
+    }
+    else {
       throw new IllegalStateException(s"Type mismatch for function ${functionDef.tinyScalaName}, expected: ${functionDef.returns}, actual: ${exprResult._type}")
     }
 

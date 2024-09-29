@@ -3,12 +3,9 @@ package translators.expr.kinds
 
 import context.TranslationContext
 import models.Type.Primitive._Unit
-import models.Type.Ref._Null
 import models.{CodeTarget, ReturnedValue, Type}
 import translators.Translator
 import translators.expr.ExprTranslator
-
-import com.wrathenn.compilers.context.LocalContext.Defining
 
 class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParser.ExprContext, ReturnedValue] {
   private val dummyReturnValue = ReturnedValue(llvmName = "RETURNED", _Unit)
@@ -40,6 +37,6 @@ class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     }
 
     context.writeCodeLn(target) { s"ret ${shouldReturn.llvmRepr} ${returnedValue.llvmName}" }
-    dummyReturnValue
+    ReturnedValue(llvmName = "RETURNS_NOTHING", _type = Type._Nothing)
   }
 }

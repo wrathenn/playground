@@ -8,10 +8,19 @@ object Main {
   def main(args: Array[String]): Unit = {
     val text = {
        """|
-          |case class Test(a: Int, b: Double)
+          |object FibTest {
+          |
+          |  def fib(a: Int): Int = {
+          |    if (a == 1) return 1
+          |    if (a == 2) return 1
+          |    val res: Int = fib(a - 1) + fib(a - 2)
+          |    res
+          |  }
+          |}
           |
           |object Test extends App {
-          |  val c: Test = new Test(1, 2.0)
+          |  val f: Int = FibTest.fib(10)
+          |  print("%d\n", f)
           |}
           |""".stripMargin
     }

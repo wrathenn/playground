@@ -18,7 +18,7 @@ class ExprBlockStatTranslator(val target: CodeTarget) extends Translator[TinySca
       new StatementTranslator(target).translate(context, node.statement)
       ReturnedValue("unit from expr block stat", Type.Primitive._Unit)
     } else {
-      throw new IllegalStateException("Unknow exprBlockStat, check grammar")
+      throw new IllegalStateException("Unknown exprBlockStat, check grammar")
     }
   }
 }

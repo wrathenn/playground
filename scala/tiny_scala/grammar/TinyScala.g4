@@ -46,7 +46,7 @@ statement
     ;
 
 expr
-    : 'if' '(' expr ')' NL* expr ('else' expr)?
+    : 'if' '(' expr ')' NL* expr NL* ('else' expr)?
     | 'return' expr?
     | exprBlock
     | stableId '=' expr

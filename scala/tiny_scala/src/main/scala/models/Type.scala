@@ -42,6 +42,8 @@ object Type {
       extends Ref(tinyScalaRepr)
   }
 
+  case object _Nothing extends Type(tinyScalaRepr = "Nothing", llvmRepr = "nothing_type_error_if_in_llvm")
+
   def fromRepr(str: String): Type = {
     str match {
       case Primitive._Int.tinyScalaRepr => Primitive._Int
