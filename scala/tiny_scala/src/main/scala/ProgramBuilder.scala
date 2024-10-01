@@ -30,11 +30,11 @@ object ProgramBuilder {
     ))
   }
 
-  def buildProgram(parser: TinyScalaParser, context: TranslationContext): String = {
+  def buildProgram(parser: TinyScalaParser)(implicit context: TranslationContext): String = {
     addDefaultFunctions(context)
 
     val treeRoot = parser.compilationUnit()
-    CompilationUnitTranslator.translate(context, treeRoot)
+    CompilationUnitTranslator.translate(treeRoot)
 
     val sb = new StringBuilder()
 

@@ -7,7 +7,7 @@ import translators.Translator
 import translators.expr.ExprTranslator
 
 class ExprPatVarDefTranslator(val target: CodeTarget) extends Translator[TinyScalaParser.PatVarDefContext, ReturnedValue] {
-  override def translate(context: TranslationContext, node: TinyScalaParser.PatVarDefContext): ReturnedValue = {
+  override def translate(node: TinyScalaParser.PatVarDefContext)(implicit context: TranslationContext): ReturnedValue = {
     val incomplete = PatVarDefTranslatorHelper.getVariableDef(node)
 
     if (context.localContainsVariable(incomplete.name))
@@ -26,7 +26,7 @@ class ExprPatVarDefTranslator(val target: CodeTarget) extends Translator[TinySca
     context.writeCodeLn(target) { s"${variableDef.llvmNameRepr} = alloca ${variableDef._type.llvmRepr}" }
 
     val expr = node.patDef.expr
-    val exprResult = new ExprTranslator(target).translate(context, expr)
+    val exprResult = new ExprTranslator(target).translate(expr)
 
     if (exprResult._type != variableDef._type) {
       throw new IllegalStateException(s"Type mismatch in variable declaration, expected: ${variableDef._type}, actual: ${exprResult._type}")

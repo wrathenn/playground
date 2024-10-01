@@ -27,16 +27,6 @@ object Util {
     result.toList
   }
 
-  def collectType(typeNode: TinyScalaParser.Type_Context): Type = {
-    val typeRepr = Util.collectTypeRepr(typeNode)
-    Type.fromRepr(typeRepr)
-  }
-
-  def collectTypeRepr(node: TinyScalaParser.Type_Context): TinyScalaName = {
-    if (node.simpleType != null) collectStableIdRepr(node.simpleType.stableId)
-    else "Array[" ++ collectTypeRepr(node.arrayType.type_) ++ "]"
-  }
-
   def collectStableIdRepr(node: TinyScalaParser.StableIdContext): TinyScalaName = {
     if (node.stableId == null) node.Id.getText
     else collectStableIdRepr(node.stableId) ++ s".${node.Id.getText}"

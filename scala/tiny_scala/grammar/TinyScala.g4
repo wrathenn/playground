@@ -9,7 +9,7 @@ tmplDef
     | tmplDefObject
     ;
 
-tmplDefCaseClass : 'case class' Id classParamClause /*templateBody?*/ ;
+tmplDefCaseClass : 'case class' Id sigTypeParams? classParamClause /*templateBody?*/ ;
 tmplDefObject : 'object' Id objectIsMain? templateBody ;
 objectIsMain : 'extends' 'App' ;
 
@@ -36,7 +36,7 @@ classParams
     ;
 
 classParam
-    : /*('val' | 'var')?*/ Id Colon type_
+    : /*('val' | 'var')?*/ Id Colon typeDefinition
     ;
 
 // ---------- EXPRESSIONS ----------
@@ -72,7 +72,7 @@ prefixExpr
     ;
 
 newClassExpr
-    : 'new' Id argumentExprs
+    : 'new' typeDefinition argumentExprs
     ;
 
 // Dublicate lines to prevent left-recursive code.
@@ -114,38 +114,44 @@ patVarDef
     ;
 
 patDef
-    : Id Colon type_ '=' expr
+    : Id Colon typeDefinition '=' expr
     ;
 
 // function:
 funDef
-    : funSig Colon type_ '=' expr
+    : funSig Colon typeDefinition '=' expr
     ;
 
 funSig
-    : Id '(' params? ')'
+    : Id sigTypeParams? '(' params? ')'
     ;
+
+sigTypeParams
+    : '[' sigTypeParam (',' sigTypeParam) * ']'
+    ;
+
+sigTypeParam : Id ;
 
 params
     : param (',' param)*
     ;
 
 param
-    : Id Colon type_
+    : Id Colon typeDefinition
     ;
 
 // type:
-type_
-    : simpleType
-    | arrayType
+typeDefinition
+    : genericType
+    | simpleType
     ;
 
-simpleType : stableId ;
+simpleType : Id ;
 
-arrayType : 'Array[' type_ ']' ;
+genericType : Id '[' typeParams ']' ;
 
-types
-    : type_ (',' type_)*
+typeParams
+    : typeDefinition (',' typeDefinition)*
     ;
 
 // ---------- REST ----------
@@ -182,7 +188,7 @@ pattern
     ;
 
 pattern1
-    : (BoundVarid | '_' | Id) Colon type_
+    : (BoundVarid | '_' | Id) Colon typeDefinition
 //    | simplePattern
 //    | simplePattern (Id NL? simplePattern)*
     ;

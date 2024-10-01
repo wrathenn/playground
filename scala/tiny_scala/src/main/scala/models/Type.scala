@@ -36,30 +36,9 @@ object Type {
     case object _Any extends Ref("Any")
     case object _Null extends Ref("Null")
     case object _String extends Ref("String")
-    case class Array(override val tinyScalaRepr: String, _type: Type)
-      extends Ref(tinyScalaRepr)
-    case class Struct(override val tinyScalaRepr: String)
+    case class Struct(override val tinyScalaRepr: String, val structDef: StructDef)
       extends Ref(tinyScalaRepr)
   }
 
   case object _Nothing extends Type(tinyScalaRepr = "Nothing", llvmRepr = "nothing_type_error_if_in_llvm")
-
-  def fromRepr(str: String): Type = {
-    str match {
-      case Primitive._Int.tinyScalaRepr => Primitive._Int
-      case Primitive._Long.tinyScalaRepr => Primitive._Long
-      case Primitive._Float.tinyScalaRepr => Primitive._Float
-      case Primitive._Double.tinyScalaRepr => Primitive._Double
-      case Primitive._Chr.tinyScalaRepr => Primitive._Chr
-      case Primitive._Boolean.tinyScalaRepr => Primitive._Boolean
-      case Primitive._Unit.tinyScalaRepr => _Unit
-      case Ref._String.tinyScalaRepr => Ref._String
-      case str if str.matches("Array\\[(.*)]") => {
-        val nestedTypeRepr = "Array\\[(.*)]".r.findFirstMatchIn(str).get.group(1)
-        val nestedType = fromRepr(nestedTypeRepr)
-        Ref.Array(tinyScalaRepr = str, _type = nestedType)
-      }
-      case _ => Ref.Struct(str)
-    }
-  }
 }

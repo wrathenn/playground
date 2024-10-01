@@ -10,21 +10,21 @@ import util.Util
 
 class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.ExprContext, ReturnedValue] {
 
-  override def translate(context: TranslationContext, node: TinyScalaParser.ExprContext): ReturnedValue = {
+  override def translate(node: TinyScalaParser.ExprContext)(implicit context: TranslationContext): ReturnedValue = {
     if (node.infixExpr != null) {
-      return new InfixExprTranslator(target).translate(context, node.infixExpr)
+      return new InfixExprTranslator(target).translate(node.infixExpr)
     }
 
     if (node.exprBlock != null) {
-      return new ExprBlockTranslator(target).translate(context, node.exprBlock)
+      return new ExprBlockTranslator(target).translate(node.exprBlock)
     }
 
     if (node.children.get(0).getText == "return") {
-      return new ExprReturnTranslator(target).translate(context, node)
+      return new ExprReturnTranslator(target).translate(node)
     }
 
     if (node.children.get(0).getText == "if") {
-      return new IfExprTranslator(target).translate(context, node)
+      return new IfExprTranslator(target).translate(node)
     }
 
     if (node.stableId != null) {
@@ -39,7 +39,7 @@ class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.Expr
         case VariableDecl.VAR => {}
       }
 
-      val exprValue = this.translate(context, node)
+      val exprValue = this.translate(node)
       if (exprValue._type != variable._type) {
         throw new IllegalStateException(s"Type mismatch for assignment expression to ${variable.tinyScalaRepr} -- expected: ${variable._type}, actual: ${exprValue._type}")
       }

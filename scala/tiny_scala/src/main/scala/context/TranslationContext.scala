@@ -29,19 +29,18 @@ class CodeStorage(
 }
 
 trait TranslationContext {
-  val structDefinitions: collection.Map[TinyScalaName, StructDef]
+  val structDefinitions: collection.Map[StructKey, StructDef]
+  val genericStructDefinitions: collection.Map[TinyScalaName, GenericStructDef]
   val globalVariables: collection.Map[TinyScalaName, VariableDef]
   val stringLiterals: collection.Map[TinyScalaName, LlvmName]
   val globalFunctions: collection.Map[TinyScalaName, FunctionDef]
   val code: CodeStorage
 
   def addStructDefinition(structDef: StructDef): Unit
+  def addGenericStructDefinition(genericStructDef: GenericStructDef): Unit
   def addGlobalVariable(variableDef: VariableDef): Unit
   def addStringLiteral(str: String, llvmName: LlvmName): Unit
   def addGlobalFunction(functionDef: FunctionDef): Unit
-
-  def getTypeTag(_type: Type): Int
-  def getType(tag: Int): Type
 
   def findVariableById(id: TinyScalaName): Option[VariableDef]
   def findFunctionById(id: TinyScalaName): Option[FunctionDef]
@@ -65,7 +64,8 @@ trait TranslationContext {
 }
 
 case class TranslationContextImpl(
-  override val structDefinitions: mutable.Map[TinyScalaName, StructDef],
+  override val structDefinitions: mutable.Map[StructKey, StructDef],
+  override val genericStructDefinitions: mutable.Map[TinyScalaName, GenericStructDef],
   override val globalVariables: mutable.Map[TinyScalaName, VariableDef],
   override val stringLiterals: mutable.Map[String, LlvmName],
   override val globalFunctions: mutable.Map[TinyScalaName, FunctionDef],
@@ -74,43 +74,6 @@ case class TranslationContextImpl(
   private val local: mutable.Stack[LocalContext],
 ) extends TranslationContext {
   private var mainCounter: Int = 0
-
-  private var typeTagCounter: Int = 0
-  private val tagToType: mutable.Map[Int, Type] = mutable.Map()
-  private val typeToTag: mutable.Map[Type, Int] = mutable.Map()
-
-  {
-    List(
-      Type.Primitive._Unit,
-      Type.Primitive._Boolean,
-      Type.Primitive._Chr,
-      Type.Primitive._Int,
-      Type.Primitive._Long,
-      Type.Primitive._Float,
-      Type.Primitive._Double,
-      Type.Ref._Any,
-      Type.Ref._Null,
-      Type.Ref._String,
-    ).foreach(addType(_))
-  }
-
-  private def addType(_type: Type): Unit = {
-    if (typeToTag.contains(_type)) {
-      throw new IllegalStateException(s"Type ${_type} already exists")
-    }
-    val tag = typeTagCounter
-    typeTagCounter += 1
-    tagToType.addOne(tag -> _type)
-    typeToTag.addOne(_type -> tag)
-  }
-
-  override def getTypeTag(_type: Type): Int = {
-    typeToTag(_type)
-  }
-
-  override def getType(tag: Int): Type = {
-    tagToType(tag)
-  }
 
   private def searchStack[A](f: LocalContext => Option[A]): Option[A] = {
     local.foreach { c =>
@@ -251,8 +214,11 @@ case class TranslationContextImpl(
   }
 
   override def addStructDefinition(structDef: StructDef): Unit = {
-    this.structDefinitions.addOne(structDef.tinyScalaRepr -> structDef)
-    this.addType(Type.Ref.Struct(structDef.tinyScalaRepr))
+    this.structDefinitions.addOne(structDef.key -> structDef)
+  }
+
+  override def addGenericStructDefinition(genericStructDef: GenericStructDef): Unit = {
+    this.genericStructDefinitions.addOne(genericStructDef.tinyScalaName -> genericStructDef)
   }
 
   override def addGlobalVariable(variableDef: VariableDef): Unit = {
@@ -271,6 +237,7 @@ case class TranslationContextImpl(
 object TranslationContext {
   def create: TranslationContext = TranslationContextImpl(
     structDefinitions = mutable.HashMap(),
+    genericStructDefinitions = mutable.HashMap(),
     globalVariables = mutable.HashMap(),
     stringLiterals = mutable.HashMap(),
     globalFunctions = mutable.HashMap(),

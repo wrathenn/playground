@@ -7,19 +7,19 @@ import models.Type.Ref.Struct
 import models._
 import translators.Translator
 import translators.expr.ExprTranslator
-import util.Util
+import util.{TypeResolver, Util}
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.PrefixExprContext, ReturnedValue] {
 
-  override def translate(context: TranslationContext, node: TinyScalaParser.PrefixExprContext): ReturnedValue = {
-    if (node.simpleExpr1 != null) translateSimpleExpr1(context, node)
-    else translateNewExpr(context, node)
+  override def translate(node: TinyScalaParser.PrefixExprContext)(implicit context: TranslationContext): ReturnedValue = {
+    if (node.simpleExpr1 != null) translateSimpleExpr1(node)
+    else translateNewExpr(node)
   }
 
-  private def translateSimpleExpr1(context: TranslationContext, node: TinyScalaParser.PrefixExprContext): ReturnedValue = {
-    val res = new SimpleExpr1Translator(target).translate(context, node.simpleExpr1)
+  private def translateSimpleExpr1(node: TinyScalaParser.PrefixExprContext)(implicit context: TranslationContext): ReturnedValue = {
+    val res = new SimpleExpr1Translator(target).translate(node.simpleExpr1)
     if (node.opNoPrecedence == null) return res
 
     context.writeCode(target) { "; applying prefix op\n" }
@@ -65,21 +65,19 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     return retValue
   }
 
-  private def translateNewExpr(context: TranslationContext, node: TinyScalaParser.PrefixExprContext): ReturnedValue = {
+  private def translateNewExpr(node: TinyScalaParser.PrefixExprContext)(implicit context: TranslationContext): ReturnedValue = {
     val newClassExpr = node.newClassExpr
     val argumentExpressions = newClassExpr.argumentExprs.exprs.expr().asScala
-    val expressions = argumentExpressions.map { e => new ExprTranslator(target).translate(context, e) }
+    val expressions = argumentExpressions.map { e => new ExprTranslator(target).translate(e) }
 
     val exprVal = context.genLocalVariableName(target)
 
-    val structName = newClassExpr.Id.getText
-    val structDef = context.structDefinitions.get(structName).getOrElse {
-      throw new IllegalStateException(s"Definition of struct $structName not found")
-    }
+    val struct = TypeResolver.getStructFromDefinition(newClassExpr.typeDefinition)
+    val structDef: StructDef = struct.structDef
 
     if (expressions.size != structDef.properties.size) {
       throw new IllegalStateException(
-        s"Provided ${expressions.size} arguments for $structName, which has ${structDef.properties.size}"
+        s"Provided ${expressions.size} arguments for ${structDef.tinyScalaRepr}, which has ${structDef.properties.size}"
       )
     }
 
@@ -102,7 +100,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
       context.writeCodeLn(target) { s"$fieldPointer = getelementptr ${structDef.llvmRepr}, ptr $exprVal, i32 0, i32 $i" }
       context.writeCodeLn(target) { s"store ${prop._type.llvmRepr} ${expr.llvmName}, ptr $fieldPointer" }
     }
-    return ReturnedValue(llvmName = exprVal, _type = Struct(tinyScalaRepr = structName))
+    return ReturnedValue(llvmName = exprVal, _type = struct)
   }
 
   private def allocateStruct(exprValName: String, context: TranslationContext, structDef: StructDef): Unit = {

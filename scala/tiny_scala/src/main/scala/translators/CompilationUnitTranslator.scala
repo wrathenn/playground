@@ -8,11 +8,11 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object CompilationUnitTranslator extends Translator[TinyScalaParser.CompilationUnitContext, Unit] {
 
-  override def translate(context: TranslationContext, node: TinyScalaParser.CompilationUnitContext): Unit = {
+  override def translate(node: TinyScalaParser.CompilationUnitContext)(implicit context: TranslationContext): Unit = {
     val tmplDefs = node.tmplDef()
 
     tmplDefs.asScala.foreach { tmplDef =>
-      TmplDefTranslator.translate(context, tmplDef)
+      TmplDefTranslator.translate(tmplDef)
     }
   }
 }

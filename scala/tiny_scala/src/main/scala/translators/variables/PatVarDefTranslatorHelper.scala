@@ -1,8 +1,9 @@
 package com.wrathenn.compilers
 package translators.variables
 
+import context.TranslationContext
 import models.{Type, VariableDecl}
-import util.Util
+import util.TypeResolver
 
 object PatVarDefTranslatorHelper {
   case class IncompleteVariableDef(
@@ -11,7 +12,7 @@ object PatVarDefTranslatorHelper {
     decl: VariableDecl,
   )
 
-  def getVariableDef(node: TinyScalaParser.PatVarDefContext): IncompleteVariableDef = {
+  def getVariableDef(node: TinyScalaParser.PatVarDefContext)(implicit context: TranslationContext): IncompleteVariableDef = {
     val decl = node.children.get(0).getText match {
       case "val" => VariableDecl.VAL
       case "var" => VariableDecl.VAR
@@ -21,9 +22,8 @@ object PatVarDefTranslatorHelper {
     val patDef = node.patDef
     val variableId = patDef.Id.getText
 
-    val typeNode = patDef.type_
-    val typeRepr = Util.collectTypeRepr(typeNode)
-    val _type = Type.fromRepr(typeRepr)
+    val typeNode = patDef.typeDefinition
+    val _type = TypeResolver.getTypeFromDefinition(typeNode)
 
     IncompleteVariableDef(variableId, _type, decl)
   }

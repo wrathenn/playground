@@ -134,11 +134,11 @@ class InfixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser
     }
   }
 
-  override def translate(context: TranslationContext, node: TinyScalaParser.InfixExprContext): ReturnedValue = {
-    if (node.prefixExpr != null) { return new PrefixExprTranslator(target).translate(context, node.prefixExpr) }
+  override def translate(node: TinyScalaParser.InfixExprContext)(implicit context: TranslationContext): ReturnedValue = {
+    if (node.prefixExpr != null) { return new PrefixExprTranslator(target).translate(node.prefixExpr) }
 
-    val expr1 = this.translate(context, node.infixExpr(0))
-    val expr2 = this.translate(context, node.infixExpr(1))
+    val expr1 = this.translate(node.infixExpr(0))
+    val expr2 = this.translate(node.infixExpr(1))
     val infixOp = Util.getOperator(node.children.get(1).getText) match {
       case infix: Operator.Infix => infix
       case _ => throw new IllegalStateException(s"Not an infix operator ${node.children.get(1).getText}")

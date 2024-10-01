@@ -11,7 +11,7 @@ class ObjectPatVarDefTranslator(
   val objectName: String,
 ) extends Translator[TinyScalaParser.PatVarDefContext, Unit] {
 
-  override def translate(context: TranslationContext, node: TinyScalaParser.PatVarDefContext): Unit = {
+  override def translate(node: TinyScalaParser.PatVarDefContext)(implicit context: TranslationContext): Unit = {
     val incomplete = PatVarDefTranslatorHelper.getVariableDef(node)
 
     val tinyScalaRepr = s"${objectName}.${incomplete.name}"
@@ -30,7 +30,7 @@ class ObjectPatVarDefTranslator(
     context.writeCodeLn(CodeTarget.GLOBAL) { s"$llvmNameRepr = global ptr undef" }
 
     val expr = node.patDef.expr
-    val exprValue = new ExprTranslator(CodeTarget.INIT).translate(context, expr)
+    val exprValue = new ExprTranslator(CodeTarget.INIT).translate(expr)
 
     context.writeCode(CodeTarget.INIT)(
       s"store ${exprValue._type.llvmRepr} ${exprValue.llvmName}, ptr $llvmNameRepr ; init done\n\n"

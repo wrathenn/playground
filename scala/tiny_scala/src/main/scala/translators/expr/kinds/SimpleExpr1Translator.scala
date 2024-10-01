@@ -13,7 +13,9 @@ import sun.jvm.hotspot.HelloWorld.e
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaParser.SimpleExpr1Context, ReturnedValue] {
-  private def translateLiteral(context: TranslationContext, node: TinyScalaParser.LiteralContext): ReturnedValue = {
+  private def translateLiteral(node: TinyScalaParser.LiteralContext)(
+    implicit context: TranslationContext
+  ): ReturnedValue = {
     val tempVal = context.genLocalVariableName(target)
     val literal = Util.getLiteral(node)
 
@@ -48,7 +50,9 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
     }
   }
 
-  private def translateSimpleStableId(context: TranslationContext, node: TinyScalaParser.StableIdContext): ReturnedValue = {
+  private def translateSimpleStableId(node: TinyScalaParser.StableIdContext)(
+    implicit context: TranslationContext
+  ): ReturnedValue = {
     val scalaName = Util.collectStableIdRepr(node)
     val variable = context.findVariableById(scalaName).getOrElse {
       throw new IllegalStateException(s"Cant find $scalaName at this point")
@@ -63,10 +67,9 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
   }
 
   private def translateFunctionStableId(
-    context: TranslationContext,
     stableId: TinyScalaParser.StableIdContext,
     argumentExprs: TinyScalaParser.ArgumentExprsContext,
-  ): ReturnedValue = {
+  )(implicit context: TranslationContext): ReturnedValue = {
     val functionName = Util.collectStableIdRepr(stableId)
 
     val functionDef = context.findFunctionById(functionName).getOrElse {
@@ -76,7 +79,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
     val argumentExpressions = argumentExprs.exprs.expr().asScala
 
     val res = context.inLocalContext(defining = None) {
-      val expressions = argumentExpressions.map { e => new ExprTranslator(target).translate(context, e) }
+      val expressions = argumentExpressions.map { e => new ExprTranslator(target).translate(e) }
 
       functionDef.params.zip(expressions).foreach { case (p, e) =>
         if (p._type != e._type) {
@@ -107,22 +110,22 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
     res
   }
 
-  override def translate(context: TranslationContext, node: TinyScalaParser.SimpleExpr1Context): ReturnedValue = {
+  override def translate(node: TinyScalaParser.SimpleExpr1Context)(implicit context: TranslationContext): ReturnedValue = {
     if (node.expr != null) {
-      return new ExprTranslator(target).translate(context, node.expr)
+      return new ExprTranslator(target).translate(node.expr)
     }
 
     if (node.literal != null) {
-      return translateLiteral(context, node.literal)
+      return translateLiteral(node.literal)
     }
 
     val stableId = node.stableId
     val argumentExprs = node.argumentExprs
 
     if (argumentExprs == null) {
-      translateSimpleStableId(context, stableId)
+      translateSimpleStableId(stableId)
     } else {
-      translateFunctionStableId(context, stableId, argumentExprs)
+      translateFunctionStableId(stableId, argumentExprs)
     }
   }
 }

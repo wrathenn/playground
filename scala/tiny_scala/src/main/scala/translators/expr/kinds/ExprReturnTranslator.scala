@@ -10,7 +10,7 @@ import translators.expr.ExprTranslator
 class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParser.ExprContext, ReturnedValue] {
   private val dummyReturnValue = ReturnedValue(llvmName = "RETURNED", _Unit)
 
-  override def translate(context: TranslationContext, node: TinyScalaParser.ExprContext): ReturnedValue = {
+  override def translate(node: TinyScalaParser.ExprContext)(implicit context: TranslationContext): ReturnedValue = {
     val returnExpr = node.expr(0)
     val definingFunction = context.getDefiningFunction.getOrElse {
       throw new IllegalStateException("Return statement not in a scope of a function")
@@ -25,7 +25,7 @@ class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParse
       return dummyReturnValue
     }
 
-    val returnedValue = new ExprTranslator(target).translate(context, returnExpr)
+    val returnedValue = new ExprTranslator(target).translate(returnExpr)
     if (shouldReturn.isInstanceOf[Type.Primitive] && returnedValue._type.isInstanceOf[Type.Ref]) {
       throw new IllegalStateException(s"TODO: unboxing")
     }

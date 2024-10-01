@@ -7,5 +7,5 @@ import context.TranslationContext
 import org.antlr.v4.runtime.ParserRuleContext
 
 trait Translator[A <: ParserRuleContext, R] {
-  def translate(context: TranslationContext, node: A): R
+  def translate(node: A)(implicit context: TranslationContext): R
 }

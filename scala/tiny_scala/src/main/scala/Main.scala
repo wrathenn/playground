@@ -49,8 +49,8 @@ object Main extends IOApp {
     tokenStream <- IO delay new CommonTokenStream(lexer)
     parser: TinyScalaParser <- IO delay new TinyScalaParser(tokenStream)
 
-    translationContext = TranslationContext.create
-    llvmCode <- IO delay ProgramBuilder.buildProgram(context = translationContext, parser = parser)
+    implicit0(translationContext: TranslationContext) = TranslationContext.create
+    llvmCode <- IO delay ProgramBuilder.buildProgram(parser = parser)
     _ <- IO blocking {
       Files.writeString(
         Paths.get(outputFilename),
