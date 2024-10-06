@@ -3,6 +3,8 @@ package context
 
 import context.LocalContext.Defining
 import models._
+import models.function.{FunctionDef, FunctionDefGeneric}
+import models.struct.{StructDef, StructDefGeneric}
 import util.Aliases.{LlvmName, TinyScalaName}
 
 import cats.syntax.all._
@@ -29,25 +31,32 @@ class CodeStorage(
 }
 
 trait TranslationContext {
-  val structDefinitions: collection.Map[StructKey, StructDef]
-  val genericStructDefinitions: collection.Map[TinyScalaName, GenericStructDef]
+  val structDefinitions: collection.Map[GenericKey, StructDef]
+  val genericStructDefinitions: collection.Map[TinyScalaName, StructDefGeneric]
+  val functionDefinitions: collection.Map[GenericKey, FunctionDef]
+  val genericFunctionDefinitions: collection.Map[TinyScalaName, FunctionDefGeneric]
+
   val globalVariables: collection.Map[TinyScalaName, VariableDef]
   val stringLiterals: collection.Map[TinyScalaName, LlvmName]
-  val globalFunctions: collection.Map[TinyScalaName, FunctionDef]
+
   val code: CodeStorage
 
   def addStructDefinition(structDef: StructDef): Unit
-  def addGenericStructDefinition(genericStructDef: GenericStructDef): Unit
+  def addGenericStructDefinition(genericStructDef: StructDefGeneric): Unit
+  def addFunctionDefinition(functionDef: FunctionDef): Unit
+  def addGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit
+  def addLocalFunctionDefinition(functionDef: FunctionDef): Unit
+  def addLocalGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit
+
   def addGlobalVariable(variableDef: VariableDef): Unit
   def addStringLiteral(str: String, llvmName: LlvmName): Unit
-  def addGlobalFunction(functionDef: FunctionDef): Unit
 
   def findVariableById(id: TinyScalaName): Option[VariableDef]
-  def findFunctionById(id: TinyScalaName): Option[FunctionDef]
+  def findFunctionByKey(key: GenericKey): Option[FunctionDef]
+  def findGenericFunctionByName(id: TinyScalaName): Option[FunctionDef]
   def genLocalVariableName(target: CodeTarget): LlvmName
 
   def addLocalVariable(variableDef: VariableDef): Unit
-  def addLocalFunction(functionDef: FunctionDef): Unit
   def localContainsVariable(name: TinyScalaName): Boolean
   def createNewContext(defining: Option[LocalContext.Defining]): LocalContext
   def finishLocalContext(): LocalContext
@@ -64,11 +73,13 @@ trait TranslationContext {
 }
 
 case class TranslationContextImpl(
-  override val structDefinitions: mutable.Map[StructKey, StructDef],
-  override val genericStructDefinitions: mutable.Map[TinyScalaName, GenericStructDef],
+  override val structDefinitions: mutable.Map[GenericKey, StructDef],
+  override val genericStructDefinitions: mutable.Map[TinyScalaName, StructDefGeneric],
+  override val functionDefinitions: mutable.Map[GenericKey, FunctionDef],
+  override val genericFunctionDefinitions: mutable.Map[TinyScalaName, FunctionDefGeneric],
+
   override val globalVariables: mutable.Map[TinyScalaName, VariableDef],
   override val stringLiterals: mutable.Map[String, LlvmName],
-  override val globalFunctions: mutable.Map[TinyScalaName, FunctionDef],
   override val code: CodeStorage,
 
   private val local: mutable.Stack[LocalContext],
@@ -95,7 +106,7 @@ case class TranslationContextImpl(
           defining <- c.defining
           r <- defining match {
             case Defining.Object(_) => None
-            case Defining.Function(functionDef) => functionDef.params.find { p => p.tinyScalaRepr == id }
+            case Defining.Function(functionDef) => functionDef.params.find { p => p.tinyScalaName == id }
           }
         } yield r
       }
@@ -106,7 +117,7 @@ case class TranslationContextImpl(
    * Поиск по tinyScala-представлению.
    */
   override def findFunctionById(id: TinyScalaName): Option[FunctionDef] = {
-    globalFunctions.get(id) orElse searchStack { c =>
+    functionDefinitions.get(id) orElse searchStack { c =>
       c.functions.get(id)
     }
   }
@@ -156,12 +167,7 @@ case class TranslationContextImpl(
 
   override def addLocalVariable(variableDef: VariableDef): Unit = {
     val localContext = getLocalContextOrDie
-    localContext.variables.addOne(variableDef.tinyScalaRepr -> variableDef)
-  }
-
-  override def addLocalFunction(functionDef: FunctionDef): Unit = {
-    val localContext = getLocalContextOrDie
-    localContext.functions.addOne(functionDef.tinyScalaName -> functionDef)
+    localContext.variables.addOne(variableDef.tinyScalaName -> variableDef)
   }
 
   override def localContainsVariable(name: TinyScalaName): Boolean = {
@@ -217,20 +223,33 @@ case class TranslationContextImpl(
     this.structDefinitions.addOne(structDef.key -> structDef)
   }
 
-  override def addGenericStructDefinition(genericStructDef: GenericStructDef): Unit = {
+  override def addGenericStructDefinition(genericStructDef: StructDefGeneric): Unit = {
     this.genericStructDefinitions.addOne(genericStructDef.tinyScalaName -> genericStructDef)
   }
 
   override def addGlobalVariable(variableDef: VariableDef): Unit = {
-    this.globalVariables.addOne(variableDef.tinyScalaRepr -> variableDef)
+    this.globalVariables.addOne(variableDef.tinyScalaName -> variableDef)
+  }
+
+  override def addFunctionDefinition(functionDef: FunctionDef): Unit = {
+    this.functionDefinitions.addOne(functionDef.key -> functionDef)
+  }
+
+  override def addGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit = {
+    this.genericFunctionDefinitions.addOne(genericFunctionDef.tinyScalaName -> genericFunctionDef)
+  }
+
+  override def addLocalFunctionDefinition(functionDef: FunctionDef): Unit = {
+    val localContext = getLocalContextOrDie
+    localContext.functions.addOne(functionDef.key -> functionDef)
+  }
+  override def addLocalGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit = {
+    val localContext = getLocalContextOrDie
+    localContext.genericFunctions.addOne(genericFunctionDef.tinyScalaName -> genericFunctionDef)
   }
 
   override def addStringLiteral(str: LlvmName, llvmName: LlvmName): Unit = {
     this.stringLiterals.addOne(str -> llvmName)
-  }
-
-  override def addGlobalFunction(functionDef: FunctionDef): Unit = {
-    this.globalFunctions.addOne(functionDef.tinyScalaName -> functionDef)
   }
 }
 
@@ -240,7 +259,8 @@ object TranslationContext {
     genericStructDefinitions = mutable.HashMap(),
     globalVariables = mutable.HashMap(),
     stringLiterals = mutable.HashMap(),
-    globalFunctions = mutable.HashMap(),
+    functionDefinitions = mutable.HashMap(),
+    genericFunctionDefinitions = mutable.HashMap(),
     code = new CodeStorage(),
 
     local = new mutable.Stack[LocalContext]()

@@ -4,21 +4,12 @@ package models
 import util.Aliases.{LlvmName, TinyScalaName}
 
 case class VariableDef(
-  tinyScalaRepr: TinyScalaName,
+  tinyScalaName: TinyScalaName,
   llvmNameRepr: LlvmName,
   _type: Type,
   decl: VariableDecl,
   isFunctionParam: Boolean, // crutch
 )
-
-//case class LocalVariableDef(
-//  tinyScalaRepr: String,
-//  _type: Type,
-//  decl: VariableDecl,
-//  var lastValueIndex: Int,
-//) {
-//  def llvmNameRepr = s"%${tinyScalaRepr}.$lastValueIndex"
-//}
 
 sealed trait VariableDecl
 object VariableDecl {

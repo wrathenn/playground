@@ -13,11 +13,11 @@ class ExprPatVarDefTranslator(val target: CodeTarget) extends Translator[TinySca
     if (context.localContainsVariable(incomplete.name))
       throw new IllegalStateException(s"Redeclaration of ${incomplete.name}")
 
-    val tinyScalaRepr = incomplete.name
+    val tinyScalaName = incomplete.name
 
     val variableDef = VariableDef(
-      tinyScalaRepr = tinyScalaRepr,
-      llvmNameRepr =  s"%$tinyScalaRepr",
+      tinyScalaName = tinyScalaName,
+      llvmNameRepr =  s"%$tinyScalaName",
       _type = incomplete._type,
       decl = incomplete.decl,
       isFunctionParam = false,

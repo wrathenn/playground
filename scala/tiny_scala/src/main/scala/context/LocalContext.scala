@@ -1,17 +1,17 @@
 package com.wrathenn.compilers
 package context
 
-import models.{FunctionDef, VariableDef}
+import models.function.{FunctionDef, FunctionDefGeneric}
+import models.{GenericKey, VariableDef}
 import util.Aliases._
-
-import com.wrathenn.compilers.context.LocalContext.Defining
 
 import scala.collection.mutable
 
 class LocalContext(
   val variables: mutable.Map[TinyScalaName, VariableDef],
   var counter: Int,
-  val functions: mutable.Map[TinyScalaName, FunctionDef],
+  val functions: mutable.Map[GenericKey, FunctionDef],
+  val genericFunctions: mutable.Map[TinyScalaName, FunctionDefGeneric],
   var defining: Option[LocalContext.Defining],
 )
 
@@ -20,6 +20,7 @@ object LocalContext {
     variables = mutable.Map(),
     counter = 0,
     functions = mutable.Map(),
+    genericFunctions = mutable.Map(),
     defining = definingFunction,
   )
 

@@ -3,14 +3,16 @@ package models
 
 import models.Type.Primitive._Unit
 
+import com.wrathenn.compilers.models.struct.StructDef
+
 sealed class Type(
-  val tinyScalaRepr: String,
+  val tinyScalaName: String,
   val llvmRepr: String
 )
 
 object Type {
-  sealed class Primitive(override val tinyScalaRepr: String, override val llvmRepr: String)
-    extends Type(tinyScalaRepr, llvmRepr)
+  sealed class Primitive(override val tinyScalaName: String, override val llvmRepr: String)
+    extends Type(tinyScalaName, llvmRepr)
   object Primitive {
     case object _Unit extends Primitive("Unit", "void")
     case object _Boolean extends Primitive("Boolean", "i1")
@@ -21,24 +23,15 @@ object Type {
     case object _Double extends Primitive("Double", "double")
   }
 
-  sealed class Ref(override val tinyScalaRepr: String)
-    extends Type(tinyScalaRepr = tinyScalaRepr, llvmRepr = "ptr")
+  sealed class Ref(override val tinyScalaName: String)
+    extends Type(tinyScalaName = tinyScalaName, llvmRepr = "ptr")
   object Ref {
-    // tinyScalaRepr of these should be irrelevant
-    // case object _UnitBox extends Ref("b_Unit")
-    // case object _BooleanBox extends Ref("b_Boolean")
-    // case object _ChrBox extends Ref("b_Chr")
-    // case object _IntBox extends Ref("b_Int")
-    // case object _LongBox extends Ref("b_Long")
-    // case object _FloatBox extends Ref("b_Float")
-    // case object _DoubleBox extends Ref("b_Double")
-
     case object _Any extends Ref("Any")
     case object _Null extends Ref("Null")
     case object _String extends Ref("String")
-    case class Struct(override val tinyScalaRepr: String, val structDef: StructDef)
-      extends Ref(tinyScalaRepr)
+    case class Struct(override val tinyScalaName: String, val structDef: StructDef)
+      extends Ref(tinyScalaName)
   }
 
-  case object _Nothing extends Type(tinyScalaRepr = "Nothing", llvmRepr = "nothing_type_error_if_in_llvm")
+  case object _Nothing extends Type(tinyScalaName = "Nothing", llvmRepr = "nothing_type_error_if_in_llvm")
 }

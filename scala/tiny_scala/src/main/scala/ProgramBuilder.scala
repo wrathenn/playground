@@ -1,8 +1,9 @@
 package com.wrathenn.compilers
 
 import context.TranslationContext
-import models.{CodeTarget, FunctionDef, Type, VariableDecl, VariableDef}
+import models.{CodeTarget, Type, VariableDecl, VariableDef, function}
 
+import com.wrathenn.compilers.models.function.FunctionDef
 import com.wrathenn.compilers.translators.CompilationUnitTranslator
 import io.circe.parser
 
@@ -13,12 +14,12 @@ object ProgramBuilder {
 
     // add printf
     context.writeCodeLn(target = CodeTarget.GLOBAL) { "declare i32 @printf(ptr noundef, ...)" }
-    context.addGlobalFunction(FunctionDef(
+    context.addGlobalFunction(function.FunctionDef(
       tinyScalaName = "print",
       llvmName = "@printf",
       params = List(
         VariableDef(
-          tinyScalaRepr = "fmt",
+          tinyScalaName = "fmt",
           llvmNameRepr = "fmt",
           _type = Type.Ref._String,
           decl = VariableDecl.VAL,

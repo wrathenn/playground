@@ -36,7 +36,7 @@ classParams
     ;
 
 classParam
-    : /*('val' | 'var')?*/ Id Colon typeDefinition
+    : Id Colon typeDefinition
     ;
 
 // ---------- EXPRESSIONS ----------
@@ -79,7 +79,7 @@ newClassExpr
 // can't use (newClassExpr|simpleExpr1) '.' Id
 simpleExpr1
     : literal
-    | stableId argumentExprs
+    | stableId typeParamsBlock? argumentExprs
     | stableId
     | '(' expr ')'
     ;
@@ -148,7 +148,11 @@ typeDefinition
 
 simpleType : Id ;
 
-genericType : Id '[' typeParams ']' ;
+genericType : Id typeParamsBlock ;
+
+typeParamsBlock
+    : '[' typeParams ']'
+    ;
 
 typeParams
     : typeDefinition (',' typeDefinition)*

@@ -1,44 +1,40 @@
 package com.wrathenn.compilers
 package translators.functions
 
-import models.{CodeTarget, FunctionDef, Type, VariableDecl, VariableDef}
-import translators.expr.ExprTranslator
+import context.{LocalContext, TranslationContext}
+import models.function.FunctionDefGeneric
+import models.{CodeTarget, GenericProperty, Type}
 import translators.Translator
-import util.{TypeResolver, Util}
+import translators.expr.ExprTranslator
+import util.TypeResolver
 
 import cats.syntax.all._
-import context.{LocalContext, TranslationContext}
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object FunDefTranslator extends Translator[TinyScalaParser.FunDefContext, Unit] {
+
   private def collectParams(params: List[TinyScalaParser.ParamContext])(
     implicit context: TranslationContext,
-  ): List[VariableDef] = {
+  ): List[GenericProperty] = {
     params.map { param =>
       val name = param.Id.getText
-      val _type = TypeResolver.getTypeFromDefinition(param.typeDefinition)
+      val typeKey = TypeResolver.getStructKey(param.typeDefinition)
 
-      VariableDef(
-        tinyScalaRepr = name,
-        llvmNameRepr = s"%$name" ,
-        _type = _type,
-        decl = VariableDecl.VAL,
-        isFunctionParam = true,
-      )
+      GenericProperty(name, typeKey)
     }
   }
 
-  private def getFunctionDefAndAddToContext(node: TinyScalaParser.FunDefContext)(
+  private def buildFunctionDefAndAddToContext(node: TinyScalaParser.FunDefContext)(
     implicit context: TranslationContext,
-  ): FunctionDef = {
+  ): Unit = {
     val name = node.funSig.Id.getText
 
     val definingObject = context.getDefiningObjectOrDie
     val objectName = definingObject.objectName
     val tinyScalaGlobalName = s"$objectName.$name"
-    val llvmName = s"@$objectName.$name"
 
+    val typeParamAliases = node.funSig.sigTypeParams.sigTypeParam.asScala.map(_.Id.getText).toList
     val params = {
       val _params = node.funSig.params
       if (_params == null) List()
@@ -46,25 +42,23 @@ object FunDefTranslator extends Translator[TinyScalaParser.FunDefContext, Unit] 
     }
     val paramsDef = collectParams(params)
 
-    val returnType = TypeResolver.getTypeFromDefinition(node.typeDefinition)
+    val returns = TypeResolver.getStructKey(node.typeDefinition)
 
-    val globalFunctionDef = FunctionDef(
-      tinyScalaName = tinyScalaGlobalName,
-      llvmName = llvmName,
+    val localGenericFunctionDef = FunctionDefGeneric(
+      tinyScalaName = name,
+      typeParamAliases = typeParamAliases,
       params = paramsDef,
-      returns = returnType,
-      isVarArg = false,
+      returns = returns,
+      expression = node.expr
     )
-    context.addGlobalFunction(globalFunctionDef)
+    context.addLocalGenericFunctionDefinition(localGenericFunctionDef)
 
-    val localFunctionDef = globalFunctionDef.copy(tinyScalaName = name)
-    context.addLocalFunction(localFunctionDef)
-
-    globalFunctionDef
+    val globalGenericFunctionDef = localGenericFunctionDef.copy(tinyScalaName = tinyScalaGlobalName)
+    context.addGenericFunctionDefinition(globalGenericFunctionDef)
   }
 
   override def translate(node: TinyScalaParser.FunDefContext)(implicit context: TranslationContext): Unit = {
-    val functionDef = getFunctionDefAndAddToContext(node)
+    buildFunctionDefAndAddToContext(node)
 
     val returnsLlvm = functionDef.returns.llvmRepr
     val paramsLlvm = functionDef.params.map { p => s"${p._type.llvmRepr} ${p.llvmNameRepr}"}.mkString(", ")

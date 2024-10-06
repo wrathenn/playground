@@ -41,7 +41,7 @@ class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.Expr
 
       val exprValue = this.translate(node)
       if (exprValue._type != variable._type) {
-        throw new IllegalStateException(s"Type mismatch for assignment expression to ${variable.tinyScalaRepr} -- expected: ${variable._type}, actual: ${exprValue._type}")
+        throw new IllegalStateException(s"Type mismatch for assignment expression to ${variable.tinyScalaName} -- expected: ${variable._type}, actual: ${exprValue._type}")
       }
 
 

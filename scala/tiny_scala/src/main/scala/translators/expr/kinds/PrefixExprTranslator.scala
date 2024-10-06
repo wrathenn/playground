@@ -9,6 +9,8 @@ import translators.Translator
 import translators.expr.ExprTranslator
 import util.{TypeResolver, Util}
 
+import com.wrathenn.compilers.models.struct.StructDef
+
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.PrefixExprContext, ReturnedValue] {
@@ -77,7 +79,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
 
     if (expressions.size != structDef.properties.size) {
       throw new IllegalStateException(
-        s"Provided ${expressions.size} arguments for ${structDef.tinyScalaRepr}, which has ${structDef.properties.size}"
+        s"Provided ${expressions.size} arguments for ${structDef.tinyScalaName}, which has ${structDef.properties.size}"
       )
     }
 
