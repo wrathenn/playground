@@ -11,7 +11,7 @@ import com.wrathenn.compilers.models.struct.{StructDef, StructDefGeneric}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCaseClassContext, Unit] {
-  private def genStructRepr(structDef: StructDef): String = {
+  def genStructRepr(structDef: StructDef): String = {
     val types = structDef.properties.map { prop =>
       (prop._type match {
         case primitive: Type.Primitive => primitive.llvmRepr
@@ -26,8 +26,7 @@ object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCase
     val restReprs = rest.map { case (r, n) => s"  ${r}, ; ${n}\n" }
 
     s"""
-       |${structDef.llvmRepr} = type {
-       |  i32 ; type tag
+       |${structDef.llvmName} = type {
        |${restReprs.reverse.mkString("")}$lastRepr
        |}
        |""".stripMargin

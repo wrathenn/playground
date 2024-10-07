@@ -2,7 +2,7 @@ package com.wrathenn.compilers
 package context
 
 import models.function.{FunctionDef, FunctionDefGeneric}
-import models.{GenericKey, VariableDef}
+import models.{CompletedKey, GenericKey, Type, VariableDef}
 import util.Aliases._
 
 import scala.collection.mutable
@@ -10,7 +10,7 @@ import scala.collection.mutable
 class LocalContext(
   val variables: mutable.Map[TinyScalaName, VariableDef],
   var counter: Int,
-  val functions: mutable.Map[GenericKey, FunctionDef],
+  val functions: mutable.Map[CompletedKey, FunctionDef],
   val genericFunctions: mutable.Map[TinyScalaName, FunctionDefGeneric],
   var defining: Option[LocalContext.Defining],
 )
@@ -26,7 +26,8 @@ object LocalContext {
 
   sealed trait Defining
   object Defining {
-    case class Object(val objectName: String) extends Defining
-    case class Function(val functionDef: FunctionDef) extends Defining
+    case class Object(objectName: String) extends Defining
+    case class Function(functionDef: FunctionDef) extends Defining
+    case class WithConcreteGenerics(genericAliases: Map[TinyScalaName, Type]) extends Defining
   }
 }

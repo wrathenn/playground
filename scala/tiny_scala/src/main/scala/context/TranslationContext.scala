@@ -31,32 +31,35 @@ class CodeStorage(
 }
 
 trait TranslationContext {
-  val structDefinitions: collection.Map[GenericKey, StructDef]
+  val structDefinitions: collection.Map[CompletedKey, StructDef]
   val genericStructDefinitions: collection.Map[TinyScalaName, StructDefGeneric]
-  val functionDefinitions: collection.Map[GenericKey, FunctionDef]
+  val functionDefinitions: collection.Map[CompletedKey, FunctionDef]
   val genericFunctionDefinitions: collection.Map[TinyScalaName, FunctionDefGeneric]
 
   val globalVariables: collection.Map[TinyScalaName, VariableDef]
   val stringLiterals: collection.Map[TinyScalaName, LlvmName]
 
   val code: CodeStorage
-
+  // struct
   def addStructDefinition(structDef: StructDef): Unit
   def addGenericStructDefinition(genericStructDef: StructDefGeneric): Unit
+  // functions
+  def findFunctionByKey(key: CompletedKey): Option[FunctionDef]
   def addFunctionDefinition(functionDef: FunctionDef): Unit
-  def addGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit
   def addLocalFunctionDefinition(functionDef: FunctionDef): Unit
+  // generic functions
+  def findGenericFunctionByName(id: TinyScalaName): Option[FunctionDefGeneric]
+  def addGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit
   def addLocalGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit
-
+  // variables
   def addGlobalVariable(variableDef: VariableDef): Unit
+  def addLocalVariable(variableDef: VariableDef): Unit
+  def findVariableById(id: TinyScalaName): Option[VariableDef]
+  // other:
   def addStringLiteral(str: String, llvmName: LlvmName): Unit
 
-  def findVariableById(id: TinyScalaName): Option[VariableDef]
-  def findFunctionByKey(key: GenericKey): Option[FunctionDef]
-  def findGenericFunctionByName(id: TinyScalaName): Option[FunctionDef]
   def genLocalVariableName(target: CodeTarget): LlvmName
 
-  def addLocalVariable(variableDef: VariableDef): Unit
   def localContainsVariable(name: TinyScalaName): Boolean
   def createNewContext(defining: Option[LocalContext.Defining]): LocalContext
   def finishLocalContext(): LocalContext
@@ -65,6 +68,7 @@ trait TranslationContext {
   def getDefiningObjectOrDie: LocalContext.Defining.Object
   def getDefiningFunction: Option[LocalContext.Defining.Function]
   def getDefiningFunctionOrDie: LocalContext.Defining.Function
+  def collectDefiningWithConcreteGenerics(): Map[TinyScalaName, Type]
 
   def writeCode(target: CodeTarget)(codeStr: String): Unit
   def writeCodeLn(target: CodeTarget)(codeStr: String): Unit
@@ -73,9 +77,9 @@ trait TranslationContext {
 }
 
 case class TranslationContextImpl(
-  override val structDefinitions: mutable.Map[GenericKey, StructDef],
+  override val structDefinitions: mutable.Map[CompletedKey, StructDef],
   override val genericStructDefinitions: mutable.Map[TinyScalaName, StructDefGeneric],
-  override val functionDefinitions: mutable.Map[GenericKey, FunctionDef],
+  override val functionDefinitions: mutable.Map[CompletedKey, FunctionDef],
   override val genericFunctionDefinitions: mutable.Map[TinyScalaName, FunctionDefGeneric],
 
   override val globalVariables: mutable.Map[TinyScalaName, VariableDef],
@@ -105,8 +109,8 @@ case class TranslationContextImpl(
         for {
           defining <- c.defining
           r <- defining match {
-            case Defining.Object(_) => None
             case Defining.Function(functionDef) => functionDef.params.find { p => p.tinyScalaName == id }
+            case _ => None
           }
         } yield r
       }
@@ -116,9 +120,15 @@ case class TranslationContextImpl(
   /**
    * Поиск по tinyScala-представлению.
    */
-  override def findFunctionById(id: TinyScalaName): Option[FunctionDef] = {
-    functionDefinitions.get(id) orElse searchStack { c =>
-      c.functions.get(id)
+  override def findFunctionByKey(key: CompletedKey): Option[FunctionDef] = {
+    functionDefinitions.get(key) orElse searchStack { c =>
+      c.functions.get(key)
+    }
+  }
+
+  override def findGenericFunctionByName(id: TinyScalaName): Option[FunctionDefGeneric] = {
+    genericFunctionDefinitions.get(id) orElse searchStack { c =>
+      c.genericFunctions.get(id)
     }
   }
 
@@ -200,6 +210,16 @@ case class TranslationContextImpl(
   override def getDefiningFunctionOrDie: Defining.Function = getDefiningFunction.getOrElse {
     throw new IllegalStateException("Not in function definition")
   }
+
+  def collectDefiningWithConcreteGenerics(): Map[TinyScalaName, Type] = local.toList.flatMap { c =>
+    for {
+      defining <- c.defining
+    } yield defining match {
+      case Defining.WithConcreteGenerics(genericAliases) => genericAliases
+      case _ => Map()
+    }
+  }.reduce { (a, b) => a.concat(b)}
+
 
   // Для отступов:
   private var localWriteOffset: Int = 0

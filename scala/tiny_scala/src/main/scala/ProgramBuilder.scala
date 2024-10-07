@@ -14,7 +14,7 @@ object ProgramBuilder {
 
     // add printf
     context.writeCodeLn(target = CodeTarget.GLOBAL) { "declare i32 @printf(ptr noundef, ...)" }
-    context.addGlobalFunction(function.FunctionDef(
+    context.addFunctionDefinition(function.FunctionDef(
       tinyScalaName = "print",
       llvmName = "@printf",
       params = List(
@@ -28,6 +28,7 @@ object ProgramBuilder {
       ),
       returns = Type.Primitive._Int,
       isVarArg = true,
+      concreteGenericTypes = Map(),
     ))
   }
 

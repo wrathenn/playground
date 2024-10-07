@@ -3,7 +3,7 @@ package translators.templates
 
 import context.TranslationContext
 import translators.Translator
-import translators.functions.FunDefTranslator
+import translators.functions.FunDefSignatureTranslator
 import translators.variables.ObjectPatVarDefTranslator
 
 object DefTranslator extends Translator[TinyScalaParser.Def_Context, Unit] {
@@ -13,7 +13,7 @@ object DefTranslator extends Translator[TinyScalaParser.Def_Context, Unit] {
       new ObjectPatVarDefTranslator(definingObject.objectName).translate(node.patVarDef)
     }
     else {
-      FunDefTranslator.translate(node.funDef)
+      FunDefSignatureTranslator.translate(node.funDef)
     }
   }
 }

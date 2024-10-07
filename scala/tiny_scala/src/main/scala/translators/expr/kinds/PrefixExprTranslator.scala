@@ -99,7 +99,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     structDef.properties.zip(expressions).zipWithIndex.foreach { case ((prop, expr), i) =>
       // get pointer to first field
       val fieldPointer = s"$exprVal.f$i.ptr"
-      context.writeCodeLn(target) { s"$fieldPointer = getelementptr ${structDef.llvmRepr}, ptr $exprVal, i32 0, i32 $i" }
+      context.writeCodeLn(target) { s"$fieldPointer = getelementptr ${structDef.llvmName}, ptr $exprVal, i32 0, i32 $i" }
       context.writeCodeLn(target) { s"store ${prop._type.llvmRepr} ${expr.llvmName}, ptr $fieldPointer" }
     }
     return ReturnedValue(llvmName = exprVal, _type = struct)
@@ -107,7 +107,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
 
   private def allocateStruct(exprValName: String, context: TranslationContext, structDef: StructDef): Unit = {
     val sizeValName = s"$exprValName.size"
-    context.writeCodeLn(target) { s"$sizeValName = getelementptr ${structDef.llvmRepr}, ptr null, i32 1" }
+    context.writeCodeLn(target) { s"$sizeValName = getelementptr ${structDef.llvmName}, ptr null, i32 1" }
     val sizeIntValName = s"$exprValName.size.i"
     context.writeCodeLn(target) { s"$sizeIntValName = ptrtoint ptr ${sizeValName} to i64" }
     context.writeCodeLn(target) { s"$exprValName = call ptr @malloc(i64 $sizeIntValName)" }

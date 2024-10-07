@@ -6,7 +6,7 @@ import models.Type.Ref._Null
 import models.{CodeTarget, Literal, ReturnedValue, Type}
 import translators.Translator
 import translators.expr.ExprTranslator
-import util.Util
+import util.{TypeResolver, Util}
 
 import sun.jvm.hotspot.HelloWorld.e
 
@@ -68,13 +68,15 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
 
   private def translateFunctionStableId(
     stableId: TinyScalaParser.StableIdContext,
+    typeParamsBlock: TinyScalaParser.TypeParamsBlockContext,
     argumentExprs: TinyScalaParser.ArgumentExprsContext,
   )(implicit context: TranslationContext): ReturnedValue = {
     val functionName = Util.collectStableIdRepr(stableId)
-
-    val functionDef = context.findFunctionById(functionName).getOrElse {
-      throw new IllegalStateException(s"Function $functionName is unknown")
+    val typeParamsTypes = typeParamsBlock.typeParams.typeDefinition().asScala.toList.map { t =>
+      TypeResolver.getTypeFromDefinition(t)
     }
+
+    val functionDef = TypeResolver.resolveFunction(functionName, typeParamsTypes)
 
     val argumentExpressions = argumentExprs.exprs.expr().asScala
 
