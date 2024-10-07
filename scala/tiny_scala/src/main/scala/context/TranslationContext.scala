@@ -216,9 +216,9 @@ case class TranslationContextImpl(
       defining <- c.defining
     } yield defining match {
       case Defining.WithConcreteGenerics(genericAliases) => genericAliases
-      case _ => Map()
+      case _ => Map[TinyScalaName, Type]()
     }
-  }.reduce { (a, b) => a.concat(b)}
+  }.reduce { (a, b) => a ++ b}
 
 
   // Для отступов:

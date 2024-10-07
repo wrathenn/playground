@@ -11,6 +11,7 @@ import cats.syntax.all._
 import com.wrathenn.compilers.context.LocalContext.Defining
 import com.wrathenn.compilers.models.function.FunctionDef
 import com.wrathenn.compilers.models.struct.{StructDef, StructDefGeneric}
+import com.wrathenn.compilers.translators.functions.FunDefExprTranslator
 import com.wrathenn.compilers.translators.templates.TmplDefCaseClassTranslator
 import com.wrathenn.compilers.util.Aliases.TinyScalaName
 
@@ -41,7 +42,7 @@ object TypeResolver {
     if (typeDefinition.simpleType != null) GenericKey(typeDefinition.simpleType.Id.getText, List())
     else {
       val className = typeDefinition.genericType.Id.getText
-      val generics = typeDefinition.genericType.typeParams.typeDefinition().asScala.map { td => getStructKey(td) }
+      val generics = typeDefinition.genericType.typeParamsBlock.typeParams.typeDefinition().asScala.map { td => getStructKey(td) }
       GenericKey(className, generics.toList)
     }
   }
@@ -78,23 +79,20 @@ object TypeResolver {
           isFunctionParam = true,
         )
       }
+      val returnsType = resolveType(genericFunctionDef.returns)
 
+      val functionDef = FunctionDef(
+        tinyScalaName = genericFunctionDef.tinyScalaName,
+        llvmName = s"@${genericFunctionDef.tinyScalaName}_${concreteGenericTypes.hashCode()}", // so they are distinct
+        concreteGenericTypes = completedKey.concreteGenericTypes,
+        params = params,
+        returns = returnsType,
+        isVarArg = false,
+      )
+      context.addFunctionDefinition(functionDef)
+      new FunDefExprTranslator(functionDef).translate(genericFunctionDef.expression)
 
-    }
-
-
-    FunctionDef(
-      tinyScalaName = genericFunctionDef.tinyScalaName,
-      llvmName = s"@${genericFunctionDef.tinyScalaName}_${concreteGenericTypes.hashCode()}", // so they are distinct
-      concreteGenericTypes = completedKey.concreteGenericTypes,
-      params = ???,
-      returns = ???,
-      isVarArg = ???
-    )
-
-    if (genericKey.generics.isEmpty) {
-      val name = genericKey.tinyScalaName
-      context.find
+      functionDef
     }
   }
 

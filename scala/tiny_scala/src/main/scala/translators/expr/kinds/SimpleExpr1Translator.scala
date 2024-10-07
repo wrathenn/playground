@@ -8,8 +8,7 @@ import translators.Translator
 import translators.expr.ExprTranslator
 import util.{TypeResolver, Util}
 
-import sun.jvm.hotspot.HelloWorld.e
-
+import cats.syntax.all._
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaParser.SimpleExpr1Context, ReturnedValue] {
@@ -68,13 +67,13 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
 
   private def translateFunctionStableId(
     stableId: TinyScalaParser.StableIdContext,
-    typeParamsBlock: TinyScalaParser.TypeParamsBlockContext,
+    typeParamsBlock: Option[TinyScalaParser.TypeParamsBlockContext],
     argumentExprs: TinyScalaParser.ArgumentExprsContext,
   )(implicit context: TranslationContext): ReturnedValue = {
     val functionName = Util.collectStableIdRepr(stableId)
-    val typeParamsTypes = typeParamsBlock.typeParams.typeDefinition().asScala.toList.map { t =>
+    val typeParamsTypes = typeParamsBlock.map(_.typeParams.typeDefinition().asScala.toList.map { t =>
       TypeResolver.getTypeFromDefinition(t)
-    }
+    }).getOrElse(List[Type]())
 
     val functionDef = TypeResolver.resolveFunction(functionName, typeParamsTypes)
 
@@ -127,7 +126,8 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
     if (argumentExprs == null) {
       translateSimpleStableId(stableId)
     } else {
-      translateFunctionStableId(stableId, argumentExprs)
+      val typeParamsBlock = if (node.typeParamsBlock() == null) None else node.typeParamsBlock.some
+      translateFunctionStableId(stableId, typeParamsBlock, argumentExprs)
     }
   }
 }

@@ -6,19 +6,20 @@ import models.function.FunctionDef
 import models.{CodeTarget, Type}
 import translators.Translator
 import translators.expr.ExprTranslator
+import cats.syntax.all._
 
 class FunDefExprTranslator(
   val functionDef: FunctionDef,
-) extends Translator[TinyScalaParser.ExprContext, FunctionDef]{
+) extends Translator[TinyScalaParser.ExprContext, Unit]{
 
-  override def translate(node: TinyScalaParser.ExprContext)(implicit context: TranslationContext): FunctionDef = {
+  override def translate(node: TinyScalaParser.ExprContext)(implicit context: TranslationContext): Unit = {
     val returnsLlvm = functionDef.returns.llvmRepr
     val paramsLlvm = functionDef.params.map { p => s"${p._type.llvmRepr} ${p.llvmNameRepr}"}.mkString(", ")
     context.writeCodeLn(CodeTarget.LOCAL) { s"define $returnsLlvm ${functionDef.llvmName} ($paramsLlvm) {" }
     context.>>()
 
     val exprResult = context.inLocalContext(defining = LocalContext.Defining.Function(functionDef).some) {
-      new ExprTranslator(CodeTarget.LOCAL).translate(node.expr)
+      new ExprTranslator(CodeTarget.LOCAL).translate(node)
     }
 
     if (exprResult._type == Type._Nothing) {
