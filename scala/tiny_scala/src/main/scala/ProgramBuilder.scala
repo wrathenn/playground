@@ -3,7 +3,7 @@ package com.wrathenn.compilers
 import context.TranslationContext
 import models.{CodeTarget, Type, VariableDecl, VariableDef, function}
 
-import com.wrathenn.compilers.models.function.FunctionDef
+import com.wrathenn.compilers.models.function.{FunctionDef, FunctionDefGeneric}
 import com.wrathenn.compilers.translators.CompilationUnitTranslator
 import io.circe.parser
 
@@ -14,7 +14,7 @@ object ProgramBuilder {
 
     // add printf
     context.writeCodeLn(target = CodeTarget.GLOBAL) { "declare i32 @printf(ptr noundef, ...)" }
-    context.addFunctionDefinition(function.FunctionDef(
+    val printfFunctionDef = FunctionDef(
       tinyScalaName = "print",
       llvmName = "@printf",
       params = List(
@@ -29,7 +29,8 @@ object ProgramBuilder {
       returns = Type.Primitive._Int,
       isVarArg = true,
       concreteGenericTypes = Map(),
-    ))
+    )
+    context.addFunctionDefinition(printfFunctionDef)
   }
 
   def buildProgram(parser: TinyScalaParser)(implicit context: TranslationContext): String = {

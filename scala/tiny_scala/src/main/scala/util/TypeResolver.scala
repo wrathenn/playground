@@ -48,6 +48,14 @@ object TypeResolver {
   }
 
   def resolveFunction(functionName: TinyScalaName, concreteGenericTypes: List[Type])(implicit context: TranslationContext): FunctionDef = {
+    if (concreteGenericTypes.isEmpty) {
+      val completedKey = CompletedKey(functionName, Map())
+      context.findFunctionByKey(completedKey) match {
+        case Some(value) => return value
+        case None => {}
+      }
+    }
+
     val genericFunctionDef = context.findGenericFunctionByName(functionName).getOrElse {
       throw new IllegalStateException(s"Unknown function ${functionName}")
     }
@@ -73,7 +81,7 @@ object TypeResolver {
         val _type = this.resolveType(p.genericKey)
         VariableDef(
           tinyScalaName = p.name,
-          llvmNameRepr = p.name,
+          llvmNameRepr = s"%${p.name}",
           _type = _type,
           decl = VariableDecl.VAL,
           isFunctionParam = true,

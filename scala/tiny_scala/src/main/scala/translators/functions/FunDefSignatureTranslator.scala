@@ -27,7 +27,10 @@ object FunDefSignatureTranslator extends Translator[TinyScalaParser.FunDefContex
     val objectName = definingObject.objectName
     val tinyScalaGlobalName = s"$objectName.$name"
 
-    val typeParamAliases = node.funSig.sigTypeParams.sigTypeParam.asScala.map(_.Id.getText).toList
+    val typeParamAliases = if (node.funSig.sigTypeParams != null) {
+      node.funSig.sigTypeParams.sigTypeParam.asScala.map(_.Id.getText).toList
+    } else List()
+
     val params = {
       val _params = node.funSig.params
       if (_params == null) List()
