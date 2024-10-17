@@ -13,7 +13,7 @@ import com.wrathenn.compilers.models.function.FunctionDef
 import com.wrathenn.compilers.models.struct.{StructDef, StructDefGeneric}
 import com.wrathenn.compilers.translators.functions.FunDefExprTranslator
 import com.wrathenn.compilers.translators.templates.TmplDefCaseClassTranslator
-import com.wrathenn.compilers.util.Aliases.TinyScalaName
+import com.wrathenn.compilers.util.Aliases.{LlvmName, TinyScalaName}
 
 import java.util.UUID
 import scala.jdk.CollectionConverters.CollectionHasAsScala
@@ -66,8 +66,8 @@ object TypeResolver {
           s"${concreteGenericTypes.size} were provided"
       )
     }
-
-    val completedKey = CompletedKey(functionName, genericFunctionDef.typeParamAliases.zip(concreteGenericTypes).toMap)
+    val resolvedGenerics = genericFunctionDef.typeParamAliases.zip(concreteGenericTypes).toMap
+    val completedKey = CompletedKey(functionName, resolvedGenerics)
 
     context.findFunctionByKey(completedKey) match {
       case Some(value) => return value
@@ -78,7 +78,7 @@ object TypeResolver {
       defining = Defining.WithConcreteGenerics(completedKey.concreteGenericTypes).some
     ) {
       val params = genericFunctionDef.params.map { p =>
-        val _type = this.resolveType(p.genericKey)
+        val _type = this.resolveType(p.genericKey, resolvedGenerics)
         VariableDef(
           tinyScalaName = p.name,
           llvmNameRepr = s"%${p.name}",
@@ -87,7 +87,7 @@ object TypeResolver {
           isFunctionParam = true,
         )
       }
-      val returnsType = resolveType(genericFunctionDef.returns)
+      val returnsType = resolveType(genericFunctionDef.returns, resolvedGenerics)
 
       val functionDef = FunctionDef(
         tinyScalaName = genericFunctionDef.tinyScalaName,
@@ -104,7 +104,10 @@ object TypeResolver {
     }
   }
 
-  def resolveType(genericKey: GenericKey)(implicit context: TranslationContext): Type = {
+  private def resolveType(
+    genericKey: GenericKey,
+    prevResolvedGenerics: Map[TinyScalaName, Type]
+  )(implicit context: TranslationContext): Type = {
     if (genericKey.generics.isEmpty) {
       genericKey.tinyScalaName match {
         case Primitive._Int.tinyScalaName => return Primitive._Int
@@ -116,6 +119,9 @@ object TypeResolver {
         case Primitive._Unit.tinyScalaName => return _Unit
         case Ref._String.tinyScalaName => return Ref._String
         case _ => {}
+      }
+      if (prevResolvedGenerics.contains(genericKey.tinyScalaName)) {
+        return prevResolvedGenerics(genericKey.tinyScalaName)
       }
     }
 
@@ -138,7 +144,13 @@ object TypeResolver {
       )
     }
 
-    val resolvedGenerics = genericStructDef.typeParamAliases.zip(genericKey.generics).map { case (alias, gk) => alias -> resolveType(gk) }.toMap
+    val resolvedGenerics = prevResolvedGenerics concat
+      genericStructDef.typeParamAliases
+        .zip(genericKey.generics)
+        .map { case (alias, gk) =>
+          alias -> resolveType(gk, prevResolvedGenerics)
+        }.toMap
+
     val completedKey = CompletedKey(tinyScalaName = genericKey.tinyScalaName, concreteGenericTypes = resolvedGenerics)
 
     if (context.structDefinitions.contains(completedKey)) {
@@ -150,7 +162,7 @@ object TypeResolver {
       llvmName = s"%${genericKey.tinyScalaName}_${completedKey.concreteGenericTypes.hashCode()}",
       concreteGenericTypes = completedKey.concreteGenericTypes,
       properties = genericStructDef.properties.zipWithIndex.map { case (p, i) =>
-        val _type = resolveType(p.genericKey)
+        val _type = resolveType(p.genericKey, resolvedGenerics)
         StructDef.Property(
           name = p.name,
           _type = _type,
@@ -167,12 +179,12 @@ object TypeResolver {
 
   def getTypeFromDefinition(typeDefinition: TypeDefinitionContext)(implicit context: TranslationContext): Type = {
     val structKey = this.getStructKey(typeDefinition)
-    resolveType(structKey)
+    resolveType(structKey, Map())
   }
 
   def getStructFromDefinition(typeDefinition: TypeDefinitionContext)(implicit context: TranslationContext): Type.Ref.Struct = {
     val structKey = this.getStructKey(typeDefinition)
-    resolveType(structKey) match {
+    resolveType(structKey, Map()) match {
       case struct: Type.Ref.Struct => struct
       case _ => throw new IllegalStateException("")
     }

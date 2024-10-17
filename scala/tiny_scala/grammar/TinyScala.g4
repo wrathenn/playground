@@ -32,12 +32,16 @@ classParamClause
     ;
 
 classParams
-    : classParam (',' classParam)*
+    : (NL | WS)* (classParam oneCommaBetweenNL)* classParam oneOrZeroCommaBetweenNL
+//    | classParam (',' classParam)*
     ;
 
 classParam
     : Id Colon typeDefinition
     ;
+
+oneCommaBetweenNL : NL* ',' NL* ;
+oneOrZeroCommaBetweenNL : NL* ','? NL* ;
 
 // ---------- EXPRESSIONS ----------
 statement
