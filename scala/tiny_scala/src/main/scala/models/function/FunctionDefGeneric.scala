@@ -1,13 +1,13 @@
 package com.wrathenn.compilers
 package models.function
 
-import models.{GenericKey, GenericProperty, Type, VariableDef}
+import models.{TypeName, GenericProperty, Type, VariableDef}
 import util.Aliases.TinyScalaName
 
 case class FunctionDefGeneric(
   tinyScalaName: TinyScalaName,
   typeParamAliases: List[TinyScalaName],
   params: List[GenericProperty],
-  returns: GenericKey,
+  returns: TypeName,
   expression: TinyScalaParser.ExprContext,
 )

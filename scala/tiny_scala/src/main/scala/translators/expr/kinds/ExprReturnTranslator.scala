@@ -7,6 +7,8 @@ import models.{CodeTarget, ReturnedValue, Type}
 import translators.Translator
 import translators.expr.ExprTranslator
 
+import com.wrathenn.compilers.util.TypeResolver
+
 class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParser.ExprContext, ReturnedValue] {
   private val dummyReturnValue = ReturnedValue(llvmName = "RETURNED", _Unit)
 
@@ -15,7 +17,7 @@ class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     val definingFunction = context.getDefiningFunction.getOrElse {
       throw new IllegalStateException("Return statement not in a scope of a function")
     }.functionDef
-    val shouldReturn = definingFunction.returns
+    val shouldReturn = TypeResolver.resolveType(definingFunction.returns)
 
     if (returnExpr == null) {
       if (shouldReturn != _Unit) {

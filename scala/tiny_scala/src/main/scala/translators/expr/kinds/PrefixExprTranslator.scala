@@ -84,23 +84,25 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     }
 
     structDef.properties.zip(expressions).foreach { case (p, e) =>
-      if (p._type.isInstanceOf[Type.Primitive] && e._type.isInstanceOf[Type.Ref]) {
+      val pType = TypeResolver.resolveType(p._type)
+      if (pType.isInstanceOf[Type.Primitive] && e._type.isInstanceOf[Type.Ref]) {
         throw new IllegalStateException(s"todo unboxing")
       }
-      else if (p._type.isInstanceOf[Type.Ref] && e._type.isInstanceOf[Type.Primitive]) {
+      else if (pType.isInstanceOf[Type.Ref] && e._type.isInstanceOf[Type.Primitive]) {
         throw new IllegalStateException(s"todo boxing")
       }
-      else if (p._type != e._type) {
+      else if (pType != e._type) {
         throw new IllegalStateException(s"Type mismatch: expected ${p._type}, got ${e._type}")
       }
     }
 
     allocateStruct(exprValName = exprVal, context, structDef)
     structDef.properties.zip(expressions).zipWithIndex.foreach { case ((prop, expr), i) =>
+      val propType = TypeResolver.resolveType(prop._type)
       // get pointer to first field
       val fieldPointer = s"$exprVal.f$i.ptr"
       context.writeCodeLn(target) { s"$fieldPointer = getelementptr ${structDef.llvmName}, ptr $exprVal, i32 0, i32 $i" }
-      context.writeCodeLn(target) { s"store ${prop._type.llvmRepr} ${expr.llvmName}, ptr $fieldPointer" }
+      context.writeCodeLn(target) { s"store ${propType.llvmRepr} ${expr.llvmName}, ptr $fieldPointer" }
     }
     return ReturnedValue(llvmName = exprVal, _type = struct)
   }

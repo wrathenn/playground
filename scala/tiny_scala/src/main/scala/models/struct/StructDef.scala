@@ -1,23 +1,23 @@
 package com.wrathenn.compilers
 package models.struct
 
-import models.{CompletedKey, Type}
+import models.TypeName
 import util.Aliases.{LlvmName, TinyScalaName}
 
 
 case class StructDef(
   tinyScalaName: TinyScalaName,
   llvmName: LlvmName,
-  concreteGenericTypes: Map[TinyScalaName, Type],
+  concreteGenericTypes: List[(TinyScalaName, TypeName)],
   properties: List[StructDef.Property],
 ) {
-  val key: CompletedKey = CompletedKey(tinyScalaName, concreteGenericTypes)
+  val typeName: TypeName = TypeName(tinyScalaName = tinyScalaName, generics = concreteGenericTypes.map(_._2))
 }
 
 object StructDef {
   case class Property(
     name: TinyScalaName,
-    _type: Type,
+    _type: TypeName,
     index: Int,
   )
 }

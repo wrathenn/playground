@@ -1,16 +1,14 @@
 package com.wrathenn.compilers
 package models.function
 
-import models.{CompletedKey, Type, VariableDef}
+import models.{Type, TypeName, VariableDef}
 import util.Aliases.{LlvmName, TinyScalaName}
 
 case class FunctionDef(
   tinyScalaName: TinyScalaName,
   llvmName: LlvmName,
-  concreteGenericTypes: Map[TinyScalaName, Type],
+  concreteGenericTypes: Map[TinyScalaName, TypeName],
   params: List[VariableDef],
-  returns: Type,
+  returns: TypeName,
   isVarArg: Boolean,
-) {
-  val key: CompletedKey = CompletedKey(tinyScalaName = tinyScalaName, concreteGenericTypes = concreteGenericTypes)
-}
+)

@@ -3,12 +3,12 @@ package models
 
 import util.Aliases.TinyScalaName
 
-case class GenericKey(
+case class TypeName(
   tinyScalaName: TinyScalaName,
-  generics: List[GenericKey],
+  generics: List[TypeName],
 )
 
 case class GenericProperty(
   name: TinyScalaName,
-  genericKey: GenericKey,
+  genericKey: TypeName,
 )

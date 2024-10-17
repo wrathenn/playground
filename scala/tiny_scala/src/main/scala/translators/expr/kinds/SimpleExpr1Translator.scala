@@ -102,11 +102,12 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
       }
       val paramsLlvm = "(" + expressions.map { e => s"${e._type.llvmRepr} ${e.llvmName}" }.mkString(", ") + ")"
 
+      val returnsType = TypeResolver.resolveType(functionDef.returns)
       context.writeCodeLn(target) {
-        s"$tempVal = call ${functionDef.returns.llvmRepr} $argumentsLlvm ${functionDef.llvmName}${paramsLlvm}"
+        s"$tempVal = call ${returnsType.llvmRepr} $argumentsLlvm ${functionDef.llvmName}${paramsLlvm}"
       }
 
-      ReturnedValue(llvmName = tempVal, _type = functionDef.returns)
+      ReturnedValue(llvmName = tempVal, _type = returnsType)
     }
     res
   }

@@ -1,7 +1,7 @@
 package com.wrathenn.compilers
 
 import context.TranslationContext
-import models.{CodeTarget, Type, VariableDecl, VariableDef, function}
+import models.{CodeTarget, Type, TypeName, VariableDecl, VariableDef, function}
 
 import com.wrathenn.compilers.models.function.{FunctionDef, FunctionDefGeneric}
 import com.wrathenn.compilers.translators.CompilationUnitTranslator
@@ -26,11 +26,11 @@ object ProgramBuilder {
           isFunctionParam = true,
         ),
       ),
-      returns = Type.Primitive._Int,
+      returns = TypeName(tinyScalaName = "Int", generics = List()),
       isVarArg = true,
       concreteGenericTypes = Map(),
     )
-    context.addFunctionDefinition(printfFunctionDef)
+//    context.addFunctionDefinition(printfFunctionDef)
   }
 
   def buildProgram(parser: TinyScalaParser)(implicit context: TranslationContext): String = {

@@ -14,7 +14,7 @@ object FunDefSignatureTranslator extends Translator[TinyScalaParser.FunDefContex
   private def collectParams(params: List[TinyScalaParser.ParamContext]): List[GenericProperty] = {
     params.map { param =>
       val name = param.Id.getText
-      val typeKey = TypeResolver.getStructKey(param.typeDefinition)
+      val typeKey = TypeResolver.getStructTypeName(param.typeDefinition)
 
       GenericProperty(name, typeKey)
     }
@@ -38,7 +38,7 @@ object FunDefSignatureTranslator extends Translator[TinyScalaParser.FunDefContex
     }
     val paramsDef = collectParams(params)
 
-    val returns = TypeResolver.getStructKey(node.typeDefinition)
+    val returns = TypeResolver.getStructTypeName(node.typeDefinition)
 
     val localGenericFunctionDef = FunctionDefGeneric(
       tinyScalaName = name,

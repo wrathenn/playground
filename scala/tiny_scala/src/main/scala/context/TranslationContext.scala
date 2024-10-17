@@ -31,9 +31,9 @@ class CodeStorage(
 }
 
 trait TranslationContext {
-  val structDefinitions: collection.Map[CompletedKey, StructDef]
+  val structDefinitions: collection.Map[TypeName, StructDef]
   val genericStructDefinitions: collection.Map[TinyScalaName, StructDefGeneric]
-  val functionDefinitions: collection.Map[CompletedKey, FunctionDef]
+  val functionDefinitions: collection.Map[Nothing, FunctionDef] // TODO
   val genericFunctionDefinitions: collection.Map[TinyScalaName, FunctionDefGeneric]
 
   val globalVariables: collection.Map[TinyScalaName, VariableDef]
@@ -44,7 +44,7 @@ trait TranslationContext {
   def addStructDefinition(structDef: StructDef): Unit
   def addGenericStructDefinition(genericStructDef: StructDefGeneric): Unit
   // functions
-  def findFunctionByKey(key: CompletedKey): Option[FunctionDef]
+  def findFunctionByKey(key: Nothing): Option[FunctionDef] // TODO
   def addFunctionDefinition(functionDef: FunctionDef): Unit
   def addLocalFunctionDefinition(functionDef: FunctionDef): Unit
   // generic functions
@@ -77,9 +77,9 @@ trait TranslationContext {
 }
 
 case class TranslationContextImpl(
-  override val structDefinitions: mutable.Map[CompletedKey, StructDef],
+  override val structDefinitions: mutable.Map[TypeName, StructDef],
   override val genericStructDefinitions: mutable.Map[TinyScalaName, StructDefGeneric],
-  override val functionDefinitions: mutable.Map[CompletedKey, FunctionDef],
+  override val functionDefinitions: mutable.Map[Nothing, FunctionDef], // TODO
   override val genericFunctionDefinitions: mutable.Map[TinyScalaName, FunctionDefGeneric],
 
   override val globalVariables: mutable.Map[TinyScalaName, VariableDef],
@@ -120,7 +120,7 @@ case class TranslationContextImpl(
   /**
    * Поиск по tinyScala-представлению.
    */
-  override def findFunctionByKey(key: CompletedKey): Option[FunctionDef] = {
+  override def findFunctionByKey(key: Nothing): Option[FunctionDef] = { // TODO
     functionDefinitions.get(key) orElse searchStack { c =>
       c.functions.get(key)
     }
@@ -240,7 +240,7 @@ case class TranslationContextImpl(
   }
 
   override def addStructDefinition(structDef: StructDef): Unit = {
-    this.structDefinitions.addOne(structDef.key -> structDef)
+    this.structDefinitions.addOne(structDef.typeName -> structDef)
   }
 
   override def addGenericStructDefinition(genericStructDef: StructDefGeneric): Unit = {
@@ -252,7 +252,8 @@ case class TranslationContextImpl(
   }
 
   override def addFunctionDefinition(functionDef: FunctionDef): Unit = {
-    this.functionDefinitions.addOne(functionDef.key -> functionDef)
+    ??? // TODO
+//    this.functionDefinitions.addOne(functionDef.key -> functionDef)
   }
 
   override def addGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit = {
@@ -261,7 +262,8 @@ case class TranslationContextImpl(
 
   override def addLocalFunctionDefinition(functionDef: FunctionDef): Unit = {
     val localContext = getLocalContextOrDie
-    localContext.functions.addOne(functionDef.key -> functionDef)
+    ??? // TODO
+//    localContext.functions.addOne(functionDef.key -> functionDef)
   }
   override def addLocalGenericFunctionDefinition(genericFunctionDef: FunctionDefGeneric): Unit = {
     val localContext = getLocalContextOrDie
