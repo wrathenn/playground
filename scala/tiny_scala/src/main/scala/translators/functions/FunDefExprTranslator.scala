@@ -28,7 +28,10 @@ class FunDefExprTranslator(
     if (exprResult._type == Type._Nothing) {
 
     }
-    else if (exprResult._type == returnsType) {
+    else if (
+      exprResult._type == returnsType
+      || (returnsType.isInstanceOf[Type.Ref] && exprResult._type == Type.Ref._Null)
+    ) {
       context.writeCodeLn(CodeTarget.LOCAL) { s"ret ${exprResult._type.llvmRepr} ${exprResult.llvmName}" }
     }
     else {

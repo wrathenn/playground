@@ -4,7 +4,11 @@ case class List[A](
 )
 
 object Test extends App {
+  def listAddElement[A](list: List[A], element: A): List[A] = {
+    return new List[A](element, list)
+  }
   val a: List[Int] = null
   val newList: List[Int] = new List[Int](1, null)
+  listAddElement[Int](newList, 3)
   print("Compiled!\n")
 }

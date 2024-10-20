@@ -143,7 +143,7 @@ object TypeResolver {
     Ref._Any.tinyScalaName -> Ref._Any,
   )
 
-  def finalizeTypeName(
+  private def finalizeTypeName(
     typeName: TypeName,
     prevResolvedGenerics: Map[TinyScalaName, TypeName],
   ): TypeName = {
@@ -179,11 +179,6 @@ object TypeResolver {
       }
     }
 
-    // todo move this after resolving generics?
-    if (context.structDefinitions.contains(typeName)) {
-      return Type.Ref.Struct(tinyScalaName = typeName.tinyScalaName, structDef = context.structDefinitions(typeName))
-    }
-
     // Now will try to define type if it wasn't defined yet. Will add it to context.structDefinitions
     val genericStructDef: StructDefGeneric = context.genericStructDefinitions.get(typeName.tinyScalaName).getOrElse {
       throw new IllegalStateException(s"No ${typeName.tinyScalaName} type was defined")
@@ -216,6 +211,10 @@ object TypeResolver {
       concreteGenericTypes = resolvedGenerics,
       properties = properties,
     )
+
+    if (context.structDefinitions.contains(structDef.typeName)) {
+      return Type.Ref.Struct(tinyScalaName = typeName.tinyScalaName, structDef = context.structDefinitions(structDef.typeName))
+    }
 
     val newStructLlvmCode = TmplDefCaseClassTranslator.genStructRepr(structDef)
     context.writeCodeLn(CodeTarget.GLOBAL) { newStructLlvmCode }
