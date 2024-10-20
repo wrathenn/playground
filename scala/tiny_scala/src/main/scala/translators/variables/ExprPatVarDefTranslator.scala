@@ -2,9 +2,10 @@ package com.wrathenn.compilers
 package translators.variables
 
 import context.TranslationContext
-import models.{CodeTarget, ReturnedValue, Type, VariableDef}
+import models.{CodeTarget, ReturnedValue, VariableDef}
 import translators.Translator
 import translators.expr.ExprTranslator
+import com.wrathenn.compilers.models.`type`.Type
 
 class ExprPatVarDefTranslator(val target: CodeTarget) extends Translator[TinyScalaParser.PatVarDefContext, ReturnedValue] {
   override def translate(node: TinyScalaParser.PatVarDefContext)(implicit context: TranslationContext): ReturnedValue = {

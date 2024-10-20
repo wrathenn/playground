@@ -1,7 +1,8 @@
 package com.wrathenn.compilers
 
 import context.TranslationContext
-import models.{CodeTarget, Type, TypeName, VariableDecl, VariableDef, function}
+import models.{CodeTarget, VariableDecl, VariableDef, function}
+import com.wrathenn.compilers.models.`type`.{Type, TypeName}
 
 import com.wrathenn.compilers.models.function.{FunctionDef, FunctionDefGeneric}
 import com.wrathenn.compilers.translators.CompilationUnitTranslator
@@ -14,23 +15,8 @@ object ProgramBuilder {
 
     // add printf
     context.writeCodeLn(target = CodeTarget.GLOBAL) { "declare i32 @printf(ptr noundef, ...)" }
-    val printfFunctionDef = FunctionDef(
-      tinyScalaName = "print",
-      llvmName = "@printf",
-      params = List(
-        VariableDef(
-          tinyScalaName = "fmt",
-          llvmNameRepr = "fmt",
-          _type = Type.Ref._String,
-          decl = VariableDecl.VAL,
-          isFunctionParam = true,
-        ),
-      ),
-      returns = TypeName(tinyScalaName = "Int", generics = List()),
-      isVarArg = true,
-      concreteGenericTypes = Map(),
-    )
-//    context.addFunctionDefinition(printfFunctionDef)
+    context.addGenericFunctionDefinition(Defaults.printfFunctionDefGeneric)
+    context.addFunctionDefinition(Defaults.printfFunctionDef)
   }
 
   def buildProgram(parser: TinyScalaParser)(implicit context: TranslationContext): String = {

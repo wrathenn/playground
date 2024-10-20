@@ -1,11 +1,12 @@
 package com.wrathenn.compilers
 package translators.templates
 
-import models.{CodeTarget, GenericProperty, Type}
+import models.{CodeTarget, `type`}
 import translators.Translator
 import util.{TypeResolver, Util}
 import context.TranslationContext
 
+import com.wrathenn.compilers.models.`type`.{GenericProperty, Type}
 import com.wrathenn.compilers.models.struct.{StructDef, StructDefGeneric}
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
@@ -40,7 +41,7 @@ object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCase
     val properties = classParams.map { p =>
       val name = p.Id.getText
       val key = TypeResolver.getStructTypeName(p.typeDefinition)
-      GenericProperty(name, key)
+      `type`.GenericProperty(name, key)
     }
 
     val genericStructDef = StructDefGeneric(

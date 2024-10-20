@@ -2,8 +2,9 @@ package com.wrathenn.compilers
 package translators.variables
 
 import context.TranslationContext
-import models.{Type, VariableDecl}
+import models.VariableDecl
 import util.TypeResolver
+import com.wrathenn.compilers.models.`type`.Type
 
 object PatVarDefTranslatorHelper {
   case class IncompleteVariableDef(

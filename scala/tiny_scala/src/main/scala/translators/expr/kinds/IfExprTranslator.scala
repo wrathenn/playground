@@ -2,12 +2,13 @@ package com.wrathenn.compilers
 package translators.expr.kinds
 
 import context.TranslationContext
-import models.Type.Primitive._Unit
-import models.{CodeTarget, ReturnedValue, Type}
+import com.wrathenn.compilers.models.`type`.Type.Primitive._Unit
+import models.{CodeTarget, ReturnedValue}
 import translators.Translator
 import translators.expr.ExprTranslator
 
 import cats.syntax.all._
+import com.wrathenn.compilers.models.`type`.Type
 
 class IfExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.ExprContext, ReturnedValue] {
   override def translate(node: TinyScalaParser.ExprContext)(implicit context: TranslationContext): ReturnedValue = {

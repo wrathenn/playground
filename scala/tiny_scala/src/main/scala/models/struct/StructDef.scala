@@ -1,8 +1,8 @@
 package com.wrathenn.compilers
 package models.struct
 
-import models.TypeName
 import util.Aliases.{LlvmName, TinyScalaName}
+import com.wrathenn.compilers.models.`type`.TypeName
 
 
 case class StructDef(

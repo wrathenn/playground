@@ -3,6 +3,8 @@ package models
 
 import util.Aliases.{LlvmName, TinyScalaName}
 
+import com.wrathenn.compilers.models.`type`.Type
+
 case class VariableDef(
   tinyScalaName: TinyScalaName,
   llvmNameRepr: LlvmName,

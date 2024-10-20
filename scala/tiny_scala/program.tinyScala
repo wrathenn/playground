@@ -6,5 +6,5 @@ case class List[A](
 object Test extends App {
   val a: List[Int] = null
   val newList: List[Int] = new List[Int](1, null)
-  // print("Compiled!\n")
+  print("Compiled!\n")
 }

@@ -2,10 +2,11 @@ package com.wrathenn.compilers
 package translators.expr.kinds
 
 import context.TranslationContext
-import models.Type.Primitive._Unit
-import models.{CodeTarget, ReturnedValue, Type}
+import com.wrathenn.compilers.models.`type`.Type.Primitive._Unit
+import models.{CodeTarget, ReturnedValue}
 import translators.Translator
 import translators.expr.ExprTranslator
+import com.wrathenn.compilers.models.`type`.Type
 
 import com.wrathenn.compilers.util.TypeResolver
 
@@ -17,7 +18,7 @@ class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     val definingFunction = context.getDefiningFunction.getOrElse {
       throw new IllegalStateException("Return statement not in a scope of a function")
     }.functionDef
-    val shouldReturn = TypeResolver.resolveType(definingFunction.returns, prevResolvedGenerics = ???)
+    val shouldReturn = definingFunction.returns
 
     if (returnExpr == null) {
       if (shouldReturn != _Unit) {

@@ -1,7 +1,8 @@
 package com.wrathenn.compilers
 package models.function
 
-import models.{Type, TypeName, VariableDef}
+import models.VariableDef
+import models.`type`.{Type, TypeName}
 import util.Aliases.{LlvmName, TinyScalaName}
 
 case class FunctionDef(
@@ -9,6 +10,22 @@ case class FunctionDef(
   llvmName: LlvmName,
   concreteGenericTypes: Map[TinyScalaName, TypeName],
   params: List[VariableDef],
-  returns: TypeName,
+  returns: Type,
   isVarArg: Boolean,
-)
+) {
+  val key: FunctionDef.Key = FunctionDef.Key(
+    tinyScalaName = tinyScalaName,
+    params = params,
+    returnsType = returns,
+  )
+}
+
+object FunctionDef {
+  case class Key(
+    tinyScalaName: TinyScalaName,
+    params: List[VariableDef],
+    returnsType: Type,
+  ) {
+    override def toString: String = s"fkey $tinyScalaName(${params.map(_._type).mkString(", ")}: $returnsType "
+  }
+}

@@ -2,9 +2,10 @@ package com.wrathenn.compilers
 package translators.statement
 
 import context.TranslationContext
-import models.{CodeTarget, Type}
+import models.CodeTarget
 import translators.Translator
 import translators.expr.ExprTranslator
+import com.wrathenn.compilers.models.`type`.Type
 
 import java.util.UUID
 

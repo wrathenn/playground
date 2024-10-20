@@ -1,6 +1,8 @@
 package com.wrathenn.compilers
 package models
 
+import models.`type`.Type
+
 sealed trait Literal
 
 object Literal {

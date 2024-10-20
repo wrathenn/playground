@@ -2,10 +2,11 @@ package com.wrathenn.compilers
 package translators.expr.kinds
 
 import context.TranslationContext
-import models.{CodeTarget, ReturnedValue, Type}
+import models.{CodeTarget, ReturnedValue}
 import translators.Translator
 import translators.expr.ExprTranslator
 import translators.variables.ExprPatVarDefTranslator
+import com.wrathenn.compilers.models.`type`.Type
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 

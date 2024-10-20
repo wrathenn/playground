@@ -2,9 +2,10 @@ package com.wrathenn.compilers
 package util
 
 import models.Operator.Infix
-import models.Type.Primitive
-import models.{Literal, Operator, Type}
-import models.Type.Ref._String
+import com.wrathenn.compilers.models.`type`.Type.Primitive
+import models.{Literal, Operator}
+import com.wrathenn.compilers.models.`type`.Type
+import com.wrathenn.compilers.models.`type`.Type.Ref._String
 
 import com.wrathenn.compilers.util.Aliases.TinyScalaName
 import org.antlr.v4.runtime.tree.TerminalNode

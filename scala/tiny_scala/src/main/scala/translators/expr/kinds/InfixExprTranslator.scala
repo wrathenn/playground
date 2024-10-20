@@ -2,10 +2,11 @@ package com.wrathenn.compilers
 package translators.expr.kinds
 
 import context.TranslationContext
-import models.Type.Primitive
-import models.{CodeTarget, Operator, ReturnedValue, Type}
+import com.wrathenn.compilers.models.`type`.Type.Primitive
+import models.{CodeTarget, Operator, ReturnedValue}
 import translators.Translator
 import util.Util
+import com.wrathenn.compilers.models.`type`.Type
 
 class InfixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.InfixExprContext, ReturnedValue] {
 

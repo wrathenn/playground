@@ -1,9 +1,7 @@
 package com.wrathenn.compilers
-package models
+package models.`type`
 
-import models.Type.Primitive._Unit
-
-import com.wrathenn.compilers.models.struct.StructDef
+import models.struct.StructDef
 
 sealed class Type(
   val tinyScalaName: String,

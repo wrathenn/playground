@@ -2,10 +2,12 @@ package com.wrathenn.compilers
 package translators.functions
 
 import context.TranslationContext
-import models.GenericProperty
 import models.function.FunctionDefGeneric
 import translators.Translator
 import util.TypeResolver
+
+import com.wrathenn.compilers.models.`type`
+import com.wrathenn.compilers.models.`type`.GenericProperty
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
@@ -16,7 +18,7 @@ object FunDefSignatureTranslator extends Translator[TinyScalaParser.FunDefContex
       val name = param.Id.getText
       val typeKey = TypeResolver.getStructTypeName(param.typeDefinition)
 
-      GenericProperty(name, typeKey)
+      `type`.GenericProperty(name, typeKey)
     }
   }
 

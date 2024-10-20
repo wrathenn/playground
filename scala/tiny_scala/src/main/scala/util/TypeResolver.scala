@@ -4,11 +4,12 @@ package util
 import TinyScalaParser.TypeDefinitionContext
 import context.LocalContext.Defining
 import context.TranslationContext
-import models.Type.Primitive._Unit
-import models.Type.{Primitive, Ref}
-import models.function.FunctionDef
-import models.struct.{StructDef, StructDefGeneric}
 import models._
+import models.`type`.Type.Primitive._Unit
+import models.`type`.Type.{Primitive, Ref}
+import models.`type`.{Type, TypeName}
+import models.function.{FunctionDef, FunctionDefGeneric}
+import models.struct.{StructDef, StructDefGeneric}
 import translators.functions.FunDefExprTranslator
 import translators.templates.TmplDefCaseClassTranslator
 import util.Aliases.TinyScalaName
@@ -46,62 +47,61 @@ object TypeResolver {
     }
   }
 
-  def resolveFunction(functionName: TinyScalaName, concreteGenericTypes: List[Type])(implicit context: TranslationContext): FunctionDef = {
-    ???
-//    if (concreteGenericTypes.isEmpty) {
-//      val completedKey = CompletedKey(functionName, Map())
-//      context.findFunctionByKey(completedKey) match {
-//        case Some(value) => return value
-//        case None => {}
-//      }
-//    }
-//
-//    val genericFunctionDef = context.findGenericFunctionByName(functionName).getOrElse {
-//      throw new IllegalStateException(s"Unknown function ${functionName}")
-//    }
-//
-//    if (genericFunctionDef.typeParamAliases.size != concreteGenericTypes.size) {
-//      throw new IllegalStateException(
-//        s"${functionName} accepts ${genericFunctionDef.typeParamAliases.size} type parameters," +
-//          s"${concreteGenericTypes.size} were provided"
-//      )
-//    }
-//    val resolvedGenerics = genericFunctionDef.typeParamAliases.zip(concreteGenericTypes).toMap
-//    val completedKey = CompletedKey(functionName, resolvedGenerics)
-//
-//    context.findFunctionByKey(completedKey) match {
-//      case Some(value) => return value
-//      case None => {}
-//    }
-//
-//    context.inLocalContext(
-//      defining = Defining.WithConcreteGenerics(completedKey.concreteGenericTypes).some
-//    ) {
-//      val params = genericFunctionDef.params.map { p =>
-//        val _type = this.resolveType(p.genericKey, resolvedGenerics)
-//        VariableDef(
-//          tinyScalaName = p.name,
-//          llvmNameRepr = s"%${p.name}",
-//          _type = _type,
-//          decl = VariableDecl.VAL,
-//          isFunctionParam = true,
-//        )
-//      }
-//      val returnsType = resolveType(genericFunctionDef.returns, resolvedGenerics)
-//
-//      val functionDef = FunctionDef(
-//        tinyScalaName = genericFunctionDef.tinyScalaName,
-//        llvmName = s"@${genericFunctionDef.tinyScalaName}_${concreteGenericTypes.hashCode()}", // so they are distinct
-//        concreteGenericTypes = completedKey.concreteGenericTypes,
-//        params = params,
-//        returns = returnsType,
-//        isVarArg = false,
-//      )
-//      context.addFunctionDefinition(functionDef)
-//      new FunDefExprTranslator(functionDef).translate(genericFunctionDef.expression)
-//
-//      functionDef
-//    }
+  private def completeGenericFunction(
+    genericFunction: FunctionDefGeneric,
+    concreteGenerics: List[TypeName],
+  )(implicit context: TranslationContext): FunctionDef = {
+    if (genericFunction.typeParamAliases.size != concreteGenerics.size) {
+      throw new IllegalStateException(s"Expected ${genericFunction.typeParamAliases.size} type parameters, got ${concreteGenerics.size}")
+    }
+
+    val resolvedGenerics = genericFunction.typeParamAliases.zip(concreteGenerics).toMap
+
+    val params = genericFunction.params.map { genericParam =>
+      val _type = resolveType(genericParam.typeName, resolvedGenerics)
+      VariableDef(
+        tinyScalaName = genericParam.name,
+        llvmNameRepr = s"%${genericParam.name}",
+        _type = _type,
+        decl = VariableDecl.VAL,
+        isFunctionParam = true,
+      )
+    }
+
+    val returnsType = resolveType(genericFunction.returns, resolvedGenerics)
+
+    val functionKey = FunctionDef.Key(tinyScalaName = genericFunction.tinyScalaName, params = params, returnsType = returnsType)
+    context.findFunctionByKey(functionKey) match {
+      case Some(value) => return value
+      case None => {}
+    }
+
+    context.inLocalContext(
+      defining = Defining.WithConcreteGenerics(resolvedGenerics).some
+    ) {
+      val functionDef = FunctionDef(
+        tinyScalaName = genericFunction.tinyScalaName,
+        llvmName = s"@${genericFunction.tinyScalaName}_${functionKey.hashCode().abs}", // so they are distinct
+        concreteGenericTypes = resolvedGenerics,
+        params = params,
+        returns = returnsType,
+        isVarArg = false,
+      )
+      context.addFunctionDefinition(functionDef)
+      new FunDefExprTranslator(functionDef).translate(genericFunction.expression)
+
+      functionDef
+    }
+  }
+
+  def resolveFunction(
+    functionName: TinyScalaName,
+    concreteGenericTypes: List[TypeName]
+  )(implicit context: TranslationContext): FunctionDef = {
+    val genericFunction = context.findGenericFunctionByName(functionName).getOrElse {
+      throw new IllegalArgumentException(s"Function $functionName not found")
+    }
+    completeGenericFunction(genericFunction, concreteGenericTypes)
   }
 
 
@@ -205,7 +205,7 @@ object TypeResolver {
     val properties = genericStructDef.properties.zipWithIndex.map { case (p, i) =>
       StructDef.Property(
         name = p.name,
-        _type = finalizeTypeName(p.genericKey, prevResolvedGenerics ++ resolvedGenerics),
+        _type = finalizeTypeName(p.typeName, prevResolvedGenerics ++ resolvedGenerics),
         index = i,
       )
     }

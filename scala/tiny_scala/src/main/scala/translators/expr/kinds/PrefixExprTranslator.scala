@@ -2,13 +2,15 @@ package com.wrathenn.compilers
 package translators.expr.kinds
 
 import context.TranslationContext
-import models.Type.Primitive
-import models.Type.Ref.Struct
+
+import com.wrathenn.compilers.models.`type`.Type.Primitive
+import com.wrathenn.compilers.models.`type`.Type.Ref.Struct
 import models._
 import translators.Translator
 import translators.expr.ExprTranslator
 import util.{TypeResolver, Util}
 
+import com.wrathenn.compilers.models.`type`.Type
 import com.wrathenn.compilers.models.struct.StructDef
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala

@@ -2,13 +2,16 @@ package com.wrathenn.compilers
 package translators.expr.kinds
 
 import context.TranslationContext
-import models.Type.Ref._Null
-import models.{CodeTarget, Literal, ReturnedValue, Type}
+
+import com.wrathenn.compilers.models.`type`.Type.Ref._Null
+import models.{CodeTarget, Literal, ReturnedValue}
 import translators.Translator
 import translators.expr.ExprTranslator
 import util.{TypeResolver, Util}
 
 import cats.syntax.all._
+import com.wrathenn.compilers.models.`type`.{Type, TypeName}
+
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaParser.SimpleExpr1Context, ReturnedValue] {
@@ -71,11 +74,11 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
     argumentExprs: TinyScalaParser.ArgumentExprsContext,
   )(implicit context: TranslationContext): ReturnedValue = {
     val functionName = Util.collectStableIdRepr(stableId)
-    val typeParamsTypes = typeParamsBlock.map(_.typeParams.typeDefinition().asScala.toList.map { t =>
-      TypeResolver.getTypeFromDefinition(t)
-    }).getOrElse(List[Type]())
+    val typeParamsTypeNames = typeParamsBlock.map(_.typeParams.typeDefinition().asScala.toList.map { t =>
+      TypeResolver.getStructTypeName(t)
+    }).getOrElse(List[TypeName]())
 
-    val functionDef = TypeResolver.resolveFunction(functionName, typeParamsTypes)
+    val functionDef = TypeResolver.resolveFunction(functionName, typeParamsTypeNames)
 
     val argumentExpressions = argumentExprs.exprs.expr().asScala
 
@@ -102,7 +105,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
       }
       val paramsLlvm = "(" + expressions.map { e => s"${e._type.llvmRepr} ${e.llvmName}" }.mkString(", ") + ")"
 
-      val returnsType = TypeResolver.resolveType(functionDef.returns, prevResolvedGenerics = ???)
+      val returnsType = functionDef.returns
       context.writeCodeLn(target) {
         s"$tempVal = call ${returnsType.llvmRepr} $argumentsLlvm ${functionDef.llvmName}${paramsLlvm}"
       }

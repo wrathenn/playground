@@ -1,7 +1,7 @@
 package com.wrathenn.compilers
 package models.function
 
-import models.{TypeName, GenericProperty, Type, VariableDef}
+import models.`type`.{GenericProperty, TypeName}
 import util.Aliases.TinyScalaName
 
 case class FunctionDefGeneric(

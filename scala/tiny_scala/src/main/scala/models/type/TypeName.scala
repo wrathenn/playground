@@ -1,5 +1,5 @@
 package com.wrathenn.compilers
-package models
+package models.`type`
 
 import util.Aliases.TinyScalaName
 
@@ -15,5 +15,5 @@ case class TypeName(
 
 case class GenericProperty(
   name: TinyScalaName,
-  genericKey: TypeName,
+  typeName: TypeName,
 )
