@@ -104,6 +104,7 @@ object TypeResolver {
 //    }
   }
 
+
   def resolvePrimitive(
     typeName: TypeName,
     prevResolvedGenerics: Map[TinyScalaName, TypeName] = Map(),
@@ -129,21 +130,46 @@ object TypeResolver {
     None
   }
 
+  private val defaultTypes = Map(
+    Primitive._Int.tinyScalaName -> Primitive._Int,
+    Primitive._Long.tinyScalaName -> Primitive._Long,
+    Primitive._Float.tinyScalaName -> Primitive._Float,
+    Primitive._Double.tinyScalaName -> Primitive._Double,
+    Primitive._Chr.tinyScalaName -> Primitive._Chr,
+    Primitive._Boolean.tinyScalaName -> Primitive._Boolean,
+    Primitive._Unit.tinyScalaName -> Primitive._Unit,
+    Ref._String.tinyScalaName -> Ref._String,
+    Ref._Null.tinyScalaName -> Ref._Null,
+    Ref._Any.tinyScalaName -> Ref._Any,
+  )
+
+  def finalizeTypeName(
+    typeName: TypeName,
+    prevResolvedGenerics: Map[TinyScalaName, TypeName],
+  ): TypeName = {
+    // No generics -- search default or previously resolved generics.
+    // Otherwise this typeName is finalized
+    if (typeName.generics.isEmpty) {
+      if (defaultTypes.contains(typeName.tinyScalaName)) {
+        return typeName
+      }
+      if (prevResolvedGenerics.contains(typeName.tinyScalaName)) {
+        return prevResolvedGenerics(typeName.tinyScalaName)
+      }
+      return typeName
+    }
+
+    val resolvedGenerics = typeName.generics.map(g => finalizeTypeName(g, prevResolvedGenerics))
+    TypeName(typeName.tinyScalaName, resolvedGenerics)
+  }
+
   def resolveType(
     typeName: TypeName,
-    prevResolvedGenerics: Map[TinyScalaName, TypeName] = Map(),
+    prevResolvedGenerics: Map[TinyScalaName, TypeName],
   )(implicit context: TranslationContext): Type = {
     if (typeName.generics.isEmpty) {
-      typeName.tinyScalaName match {
-        case Primitive._Int.tinyScalaName => return Primitive._Int
-        case Primitive._Long.tinyScalaName => return Primitive._Long
-        case Primitive._Float.tinyScalaName => return Primitive._Float
-        case Primitive._Double.tinyScalaName => return Primitive._Double
-        case Primitive._Chr.tinyScalaName => return Primitive._Chr
-        case Primitive._Boolean.tinyScalaName => return Primitive._Boolean
-        case Primitive._Unit.tinyScalaName => return _Unit
-        case Ref._String.tinyScalaName => return Ref._String
-        case _ => {}
+      if (defaultTypes.contains(typeName.tinyScalaName)) {
+        return defaultTypes(typeName.tinyScalaName)
       }
       if (prevResolvedGenerics.contains(typeName.tinyScalaName)) {
         return resolveType(
@@ -153,6 +179,7 @@ object TypeResolver {
       }
     }
 
+    // todo move this after resolving generics?
     if (context.structDefinitions.contains(typeName)) {
       return Type.Ref.Struct(tinyScalaName = typeName.tinyScalaName, structDef = context.structDefinitions(typeName))
     }
@@ -171,11 +198,14 @@ object TypeResolver {
 
     val resolvedGenerics = genericStructDef.typeParamAliases
       .zip(typeName.generics)
+      .map { case (alias, generic) =>
+        alias -> finalizeTypeName(generic, prevResolvedGenerics)
+      }
 
     val properties = genericStructDef.properties.zipWithIndex.map { case (p, i) =>
       StructDef.Property(
         name = p.name,
-        _type = p.genericKey,
+        _type = finalizeTypeName(p.genericKey, prevResolvedGenerics ++ resolvedGenerics),
         index = i,
       )
     }
@@ -196,12 +226,12 @@ object TypeResolver {
 
   def getTypeFromDefinition(typeDefinition: TypeDefinitionContext)(implicit context: TranslationContext): Type = {
     val structKey = this.getStructTypeName(typeDefinition)
-    resolveType(structKey)
+    resolveType(structKey, prevResolvedGenerics = Map())
   }
 
   def getStructFromDefinition(typeDefinition: TypeDefinitionContext)(implicit context: TranslationContext): Type.Ref.Struct = {
     val structKey = this.getStructTypeName(typeDefinition)
-    resolveType(structKey) match {
+    resolveType(structKey, prevResolvedGenerics = Map()) match {
       case struct: Type.Ref.Struct => struct
       case _ => throw new IllegalStateException("")
     }

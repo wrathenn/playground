@@ -17,7 +17,7 @@ class ExprReturnTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     val definingFunction = context.getDefiningFunction.getOrElse {
       throw new IllegalStateException("Return statement not in a scope of a function")
     }.functionDef
-    val shouldReturn = TypeResolver.resolveType(definingFunction.returns)
+    val shouldReturn = TypeResolver.resolveType(definingFunction.returns, prevResolvedGenerics = ???)
 
     if (returnExpr == null) {
       if (shouldReturn != _Unit) {

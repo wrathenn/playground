@@ -43,8 +43,8 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
         }
       }
       case Literal.Null => {
-        context.writeCodeLn(target) { s"$tempVal = ptr null\n" }
-        ReturnedValue(llvmName = tempVal, _type = _Null)
+//        context.writeCodeLn(target) { s"$tempVal = ptr null\n" }
+        ReturnedValue(llvmName = "null", _type = _Null)
       }
     }
   }
@@ -102,7 +102,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
       }
       val paramsLlvm = "(" + expressions.map { e => s"${e._type.llvmRepr} ${e.llvmName}" }.mkString(", ") + ")"
 
-      val returnsType = TypeResolver.resolveType(functionDef.returns)
+      val returnsType = TypeResolver.resolveType(functionDef.returns, prevResolvedGenerics = ???)
       context.writeCodeLn(target) {
         s"$tempVal = call ${returnsType.llvmRepr} $argumentsLlvm ${functionDef.llvmName}${paramsLlvm}"
       }

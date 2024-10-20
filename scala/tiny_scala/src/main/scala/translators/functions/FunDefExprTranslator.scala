@@ -15,7 +15,7 @@ class FunDefExprTranslator(
 ) extends Translator[TinyScalaParser.ExprContext, Unit]{
 
   override def translate(node: TinyScalaParser.ExprContext)(implicit context: TranslationContext): Unit = {
-    val returnsType = TypeResolver.resolveType(functionDef.returns)
+    val returnsType = TypeResolver.resolveType(functionDef.returns, prevResolvedGenerics = ???)
     val returnsLlvm = returnsType.llvmRepr
     val paramsLlvm = functionDef.params.map { p => s"${p._type.llvmRepr} ${p.llvmNameRepr}"}.mkString(", ")
     context.writeCodeLn(CodeTarget.LOCAL) { s"define $returnsLlvm ${functionDef.llvmName} ($paramsLlvm) {" }

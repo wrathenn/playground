@@ -1,14 +1,10 @@
-object FibTest {
-
-  def fib(a: Int): Int = {
-    if (a == 1) return 1
-    if (a == 2) return 1
-    val res: Int = FibTest.fib(a - 1) + FibTest.fib(a - 2)
-    res
-  }
-}
+case class List[A](
+    element: A,
+    next: List[A],
+)
 
 object Test extends App {
-  val f: Int = FibTest.fib(10)
-  print("%d\n", f)
+  val a: List[Int] = null
+  val newList: List[Int] = new List[Int](1, null)
+  // print("Compiled!\n")
 }
