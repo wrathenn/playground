@@ -9,6 +9,7 @@ object Test extends App {
   }
   val a: List[Int] = null
   val newList: List[Int] = new List[Int](1, null)
-  listAddElement[Int](newList, 3)
-  print("Compiled!\n")
+  val newnewList: List[Int] = listAddElement[Int](newList, 3)
+  val res: Int = newnewList.element
+  print("Compiled! %d\n", res)
 }

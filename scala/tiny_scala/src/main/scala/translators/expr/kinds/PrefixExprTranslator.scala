@@ -86,7 +86,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
     }
 
     structDef.properties.zip(expressions).foreach { case (p, e) =>
-      val pType = TypeResolver.resolveType(p._type, prevResolvedGenerics = structDef.concreteGenericTypes.toMap)
+      val pType = TypeResolver.resolveType(p._type)
       if (pType.isInstanceOf[Type.Primitive] && e._type.isInstanceOf[Type.Ref]) {
         throw new IllegalStateException(s"Property is Primitive, expression is Ref")
       }
@@ -105,7 +105,7 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
 
     allocateStruct(exprValName = exprVal, context, structDef)
     structDef.properties.zip(expressions).zipWithIndex.foreach { case ((prop, expr), i) =>
-      val propType = TypeResolver.resolveType(prop._type, prevResolvedGenerics = structDef.concreteGenericTypes.toMap)
+      val propType = TypeResolver.resolveType(prop._type)
       // get pointer to first field
       val fieldPointer = s"$exprVal.f$i.ptr"
       context.writeCodeLn(target) { s"$fieldPointer = getelementptr ${structDef.llvmName}, ptr $exprVal, i32 0, i32 $i" }

@@ -14,10 +14,8 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 object TmplDefCaseClassTranslator extends Translator[TinyScalaParser.TmplDefCaseClassContext, Unit] {
   def genStructRepr(structDef: StructDef)(implicit context: TranslationContext): String = {
     val types = structDef.properties.map { prop =>
-      (TypeResolver.resolvePrimitive(prop._type, structDef.concreteGenericTypes.toMap) match {
-        case Some(value) => value.llvmRepr
-        case None => "ptr"
-      }) -> prop.name
+      val resolvedType = TypeResolver.resolveType(prop._type)
+      resolvedType.llvmRepr -> prop.name
     }.reverse
 
     val last = types.head

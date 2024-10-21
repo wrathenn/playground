@@ -10,7 +10,10 @@ import util.Aliases.{LlvmName, TinyScalaName}
 import cats.syntax.all._
 import com.wrathenn.compilers.models.`type`.{Type, TypeName}
 
+import scala.annotation.tailrec
+import scala.reflect.runtime.universe._
 import scala.collection.{AbstractSeq, mutable}
+import scala.reflect.{ClassTag, classTag}
 
 class CodeStorage(
   val globalCode: StringBuilder = new StringBuilder(),
@@ -69,7 +72,7 @@ trait TranslationContext {
   def getDefiningObjectOrDie: LocalContext.Defining.Object
   def getDefiningFunction: Option[LocalContext.Defining.Function]
   def getDefiningFunctionOrDie: LocalContext.Defining.Function
-  def collectDefiningWithConcreteGenerics(): Map[TinyScalaName, TypeName]
+  def prevResolvedGenerics: Map[TinyScalaName, TypeName]
 
   def writeCode(target: CodeTarget)(codeStr: String): Unit
   def writeCodeLn(target: CodeTarget)(codeStr: String): Unit
@@ -186,37 +189,39 @@ case class TranslationContextImpl(
     localContext.variables.contains(name)
   }
 
-  override def getDefiningObject: Option[Defining.Object] = for {
-    top <- this.local.headOption
-    defining <- top.defining
-    res: Defining.Object <- defining match {
-      case obj: Defining.Object => obj.some
-      case _ => None
+  @tailrec
+  private def getDefiningOfType_R[A <: Defining : ClassTag](stack: mutable.Stack[LocalContext]): Option[A] = {
+    stack.headOption match {
+      case None => None
+      case Some(top) =>
+        val res = top.defining.flatMap {
+          case obj if classTag[A].runtimeClass.isInstance(obj) => Some(obj)
+          case _ => None
+        }
+
+        if (res.isDefined) res.asInstanceOf[Option[A]]
+        else getDefiningOfType_R[A](stack.tail)
     }
-  } yield res
+  }
+
+  override def getDefiningObject: Option[Defining.Object] = getDefiningOfType_R[Defining.Object](this.local)
 
   override def getDefiningObjectOrDie: Defining.Object = getDefiningObject.getOrElse {
     throw new IllegalStateException("Not in object definition")
   }
 
-  override def getDefiningFunction: Option[Defining.Function] = for {
-    top <- this.local.headOption
-    defining <- top.defining
-    res: Defining.Function <- defining match {
-      case fun: Defining.Function => fun.some
-      case _ => None
-    }
-  } yield res
+  override def getDefiningFunction: Option[Defining.Function] = getDefiningOfType_R[Defining.Function](this.local)
 
   override def getDefiningFunctionOrDie: Defining.Function = getDefiningFunction.getOrElse {
     throw new IllegalStateException("Not in function definition")
   }
 
-  override def collectDefiningWithConcreteGenerics(): Map[TinyScalaName, TypeName] = local.toList.flatMap { c =>
+  override def prevResolvedGenerics: Map[TinyScalaName, TypeName] = local.toList.flatMap { c =>
     for {
       defining <- c.defining
     } yield defining match {
       case Defining.WithConcreteGenerics(genericAliases) => genericAliases
+      case Defining.Function(functionDef) => functionDef.concreteGenericTypes
       case _ => Map[TinyScalaName, TypeName]()
     }
   }.reduce { (a, b) => a ++ b}

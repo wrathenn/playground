@@ -57,29 +57,27 @@ object TypeResolver {
 
     val resolvedGenerics = genericFunction.typeParamAliases.zip(concreteGenerics).toMap
 
-    val params = genericFunction.params.map { genericParam =>
-      val _type = resolveType(genericParam.typeName, resolvedGenerics)
-      VariableDef(
-        tinyScalaName = genericParam.name,
-        llvmNameRepr = s"%${genericParam.name}",
-        _type = _type,
-        decl = VariableDecl.VAL,
-        isFunctionParam = true,
-      )
-    }
+    val functionDef = context.inLocalContext(defining = Defining.WithConcreteGenerics(resolvedGenerics).some) {
+      val params = genericFunction.params.map { genericParam =>
+        val _type = resolveType(genericParam.typeName)
+        VariableDef(
+          tinyScalaName = genericParam.name,
+          llvmNameRepr = s"%${genericParam.name}",
+          _type = _type,
+          decl = VariableDecl.VAL,
+          isFunctionParam = true,
+        )
+      }
 
-    val returnsType = resolveType(genericFunction.returns, resolvedGenerics)
+      val returnsType = resolveType(genericFunction.returns)
 
-    val functionKey = FunctionDef.Key(tinyScalaName = genericFunction.tinyScalaName, params = params, returnsType = returnsType)
-    context.findFunctionByKey(functionKey) match {
-      case Some(value) => return value
-      case None => {}
-    }
+      val functionKey = FunctionDef.Key(tinyScalaName = genericFunction.tinyScalaName, params = params, returnsType = returnsType)
+      context.findFunctionByKey(functionKey) match {
+        case Some(value) => return value
+        case None => {}
+      }
 
-    context.inLocalContext(
-      defining = Defining.WithConcreteGenerics(resolvedGenerics).some
-    ) {
-      val functionDef = FunctionDef(
+      FunctionDef(
         tinyScalaName = genericFunction.tinyScalaName,
         llvmName = s"@${genericFunction.tinyScalaName}_${functionKey.hashCode().abs}", // so they are distinct
         concreteGenericTypes = resolvedGenerics,
@@ -87,11 +85,14 @@ object TypeResolver {
         returns = returnsType,
         isVarArg = false,
       )
+    }
+
+    context.inLocalContext(defining = Defining.Function(functionDef).some) {
       context.addFunctionDefinition(functionDef)
       new FunDefExprTranslator(functionDef).translate(genericFunction.expression)
-
-      functionDef
     }
+
+    functionDef
   }
 
   def resolveFunction(
@@ -101,33 +102,8 @@ object TypeResolver {
     val genericFunction = context.findGenericFunctionByName(functionName).getOrElse {
       throw new IllegalArgumentException(s"Function $functionName not found")
     }
+
     completeGenericFunction(genericFunction, concreteGenericTypes)
-  }
-
-
-  def resolvePrimitive(
-    typeName: TypeName,
-    prevResolvedGenerics: Map[TinyScalaName, TypeName] = Map(),
-  ): Option[Type.Primitive] = {
-    if (typeName.generics.isEmpty) {
-      typeName.tinyScalaName match {
-        case Primitive._Int.tinyScalaName => return Primitive._Int.some
-        case Primitive._Long.tinyScalaName => return Primitive._Long.some
-        case Primitive._Float.tinyScalaName => return Primitive._Float.some
-        case Primitive._Double.tinyScalaName => return Primitive._Double.some
-        case Primitive._Chr.tinyScalaName => return Primitive._Chr.some
-        case Primitive._Boolean.tinyScalaName => return Primitive._Boolean.some
-        case Primitive._Unit.tinyScalaName => return _Unit.some
-        case _ => {}
-      }
-      if (prevResolvedGenerics.contains(typeName.tinyScalaName)) {
-        return resolvePrimitive(
-          typeName = prevResolvedGenerics(typeName.tinyScalaName),
-          prevResolvedGenerics = prevResolvedGenerics,
-        )
-      }
-    }
-    None
   }
 
   private val defaultTypes = Map(
@@ -143,10 +119,8 @@ object TypeResolver {
     Ref._Any.tinyScalaName -> Ref._Any,
   )
 
-  private def finalizeTypeName(
-    typeName: TypeName,
-    prevResolvedGenerics: Map[TinyScalaName, TypeName],
-  ): TypeName = {
+  private def finalizeTypeName(typeName: TypeName)(implicit context: TranslationContext): TypeName = {
+    val prevResolvedGenerics = context.prevResolvedGenerics
     // No generics -- search default or previously resolved generics.
     // Otherwise this typeName is finalized
     if (typeName.generics.isEmpty) {
@@ -159,23 +133,19 @@ object TypeResolver {
       return typeName
     }
 
-    val resolvedGenerics = typeName.generics.map(g => finalizeTypeName(g, prevResolvedGenerics))
+    val resolvedGenerics = typeName.generics.map(g => finalizeTypeName(g))
     TypeName(typeName.tinyScalaName, resolvedGenerics)
   }
 
-  def resolveType(
-    typeName: TypeName,
-    prevResolvedGenerics: Map[TinyScalaName, TypeName],
-  )(implicit context: TranslationContext): Type = {
+  def resolveType(typeName: TypeName)(implicit context: TranslationContext): Type = {
+    val prevResolvedGenerics = context.prevResolvedGenerics
+
     if (typeName.generics.isEmpty) {
       if (defaultTypes.contains(typeName.tinyScalaName)) {
         return defaultTypes(typeName.tinyScalaName)
       }
       if (prevResolvedGenerics.contains(typeName.tinyScalaName)) {
-        return resolveType(
-          typeName = prevResolvedGenerics(typeName.tinyScalaName),
-          prevResolvedGenerics = prevResolvedGenerics
-        )
+        return resolveType(prevResolvedGenerics(typeName.tinyScalaName))
       }
     }
 
@@ -194,43 +164,47 @@ object TypeResolver {
     val resolvedGenerics = genericStructDef.typeParamAliases
       .zip(typeName.generics)
       .map { case (alias, generic) =>
-        alias -> finalizeTypeName(generic, prevResolvedGenerics)
+        alias -> finalizeTypeName(generic)
       }
 
-    val properties = genericStructDef.properties.zipWithIndex.map { case (p, i) =>
-      StructDef.Property(
-        name = p.name,
-        _type = finalizeTypeName(p.typeName, prevResolvedGenerics ++ resolvedGenerics),
-        index = i,
+    val structDef = context.inLocalContext(defining = Defining.WithConcreteGenerics(resolvedGenerics.toMap).some) {
+      val properties = genericStructDef.properties.zipWithIndex.map { case (p, i) =>
+        StructDef.Property(
+          name = p.name,
+          _type = finalizeTypeName(p.typeName),
+          index = i,
+        )
+      }
+
+      val structDef = StructDef(
+        tinyScalaName = typeName.tinyScalaName,
+        llvmName = s"%${typeName.tinyScalaName}_${resolvedGenerics.hashCode().abs}",
+        concreteGenericTypes = resolvedGenerics,
+        properties = properties,
       )
+
+      if (context.structDefinitions.contains(structDef.typeName)) {
+        return Type.Ref.Struct(tinyScalaName = typeName.tinyScalaName, structDef = context.structDefinitions(structDef.typeName))
+      }
+      context.addStructDefinition(structDef)
+
+      val newStructLlvmCode = TmplDefCaseClassTranslator.genStructRepr(structDef)
+      context.writeCodeLn(CodeTarget.GLOBAL) { newStructLlvmCode }
+
+      structDef
     }
 
-    val structDef = StructDef(
-      tinyScalaName = typeName.tinyScalaName,
-      llvmName = s"%${typeName.tinyScalaName}_${resolvedGenerics.hashCode().abs}",
-      concreteGenericTypes = resolvedGenerics,
-      properties = properties,
-    )
-
-    if (context.structDefinitions.contains(structDef.typeName)) {
-      return Type.Ref.Struct(tinyScalaName = typeName.tinyScalaName, structDef = context.structDefinitions(structDef.typeName))
-    }
-
-    val newStructLlvmCode = TmplDefCaseClassTranslator.genStructRepr(structDef)
-    context.writeCodeLn(CodeTarget.GLOBAL) { newStructLlvmCode }
-
-    context.addStructDefinition(structDef)
     Type.Ref.Struct(typeName.tinyScalaName, structDef)
   }
 
   def getTypeFromDefinition(typeDefinition: TypeDefinitionContext)(implicit context: TranslationContext): Type = {
     val structKey = this.getStructTypeName(typeDefinition)
-    resolveType(structKey, prevResolvedGenerics = Map())
+    resolveType(structKey)
   }
 
   def getStructFromDefinition(typeDefinition: TypeDefinitionContext)(implicit context: TranslationContext): Type.Ref.Struct = {
     val structKey = this.getStructTypeName(typeDefinition)
-    resolveType(structKey, prevResolvedGenerics = Map()) match {
+    resolveType(structKey) match {
       case struct: Type.Ref.Struct => struct
       case _ => throw new IllegalStateException("")
     }

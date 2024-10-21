@@ -27,6 +27,7 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.23.1"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.10"
 libraryDependencies += "org.typelevel" %% "log4cats-slf4j" % "2.6.0"
 scalacOptions += "-Ymacro-annotations"
+libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test
 libraryDependencies += "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test
