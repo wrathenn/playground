@@ -3,9 +3,8 @@ package translators.expr
 
 import models.{CodeTarget, ReturnedValue, VariableDecl}
 import translators.Translator
-
 import context.TranslationContext
-import translators.expr.kinds.{ExprBlockTranslator, ExprReturnTranslator, IfExprTranslator, InfixExprTranslator}
+import translators.expr.kinds.{ExprBlockTranslator, ExprReturnTranslator, IfExprTranslator, InfixExprTranslator, StableIdTranslator}
 import util.Util
 
 class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.ExprContext, ReturnedValue] {
@@ -28,13 +27,10 @@ class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.Expr
     }
 
     if (node.stableId != null) {
-      val variableName = Util.collectStableIdRepr(node.stableId)
-      val variable = context.findVariableById(variableName).getOrElse {
-        throw new IllegalStateException(s"Undefined variable $variableName")
-      }
+      val variable = new StableIdTranslator(target).translate(node.stableId)
       variable.decl match {
         case VariableDecl.VAL => {
-          throw new IllegalStateException(s"Cannot redefine VAL $variableName")
+          throw new IllegalStateException(s"Cannot redefine VAL ${variable.tinyScalaName}")
         }
         case VariableDecl.VAR => {}
       }

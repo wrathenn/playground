@@ -55,10 +55,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
   private def translateSimpleStableId(node: TinyScalaParser.StableIdContext)(
     implicit context: TranslationContext
   ): ReturnedValue = {
-    val scalaName = Util.collectStableIdRepr(node)
-    val variable = context.findVariableById(scalaName).getOrElse {
-      throw new IllegalStateException(s"Cant find $scalaName at this point")
-    }
+    val variable = new StableIdTranslator(target).translate(node)
 
     if (variable.isFunctionParam) return ReturnedValue(llvmName = variable.llvmNameRepr, _type = variable._type)
 

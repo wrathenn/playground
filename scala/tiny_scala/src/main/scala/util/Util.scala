@@ -28,6 +28,7 @@ object Util {
     result.toList
   }
 
+  // use this only for functions!
   def collectStableIdRepr(node: TinyScalaParser.StableIdContext): TinyScalaName = {
     if (node.stableId == null) node.Id.getText
     else collectStableIdRepr(node.stableId) ++ s".${node.Id.getText}"
