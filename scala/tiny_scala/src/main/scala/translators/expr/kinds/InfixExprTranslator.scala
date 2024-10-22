@@ -10,14 +10,21 @@ import com.wrathenn.compilers.models.`type`.Type
 
 class InfixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.InfixExprContext, ReturnedValue] {
 
-  private def castTwoResults(context: TranslationContext, e1: ReturnedValue, e2: ReturnedValue): (String, String, Primitive) = {
+  private def castTwoResults(context: TranslationContext, e1: ReturnedValue, e2: ReturnedValue): (String, String, Type) = {
+    if (e1._type.isInstanceOf[Type.Ref] && e2._type.isInstanceOf[Type.Ref]) {
+      if (e1._type == e2._type) return (e1.llvmName, e2.llvmName, e1._type)
+      if (e1._type == Type.Ref._Null) return (e1.llvmName, e2.llvmName, e2._type)
+      if (e2._type == Type.Ref._Null) return (e1.llvmName, e2.llvmName, e1._type)
+      throw new IllegalStateException(s"Infix operator between incompatible non-primitive types: ${e1._type.tinyScalaName} and ${e2._type.tinyScalaName}")
+    }
+
     val e1Type = e1._type match {
       case primitive: Primitive => primitive
-      case _ => throw new IllegalStateException("Infix operator between non-primitives")
+      case _ => throw new IllegalStateException("Infix operator between non-primitive and primitive")
     }
     val e2Type = e2._type match {
       case primitive: Primitive => primitive
-      case _ => throw new IllegalStateException("Infix operator between non-primitives")
+      case _ => throw new IllegalStateException("Infix operator between primitive and non-primitive")
     }
 
     if (e1Type == e2Type) return (e1.llvmName, e2.llvmName, e1Type)

@@ -83,7 +83,7 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
       val expressions = argumentExpressions.map { e => new ExprTranslator(target).translate(e) }
 
       functionDef.params.zip(expressions).foreach { case (p, e) =>
-        if (p._type != e._type) {
+        if (p._type != e._type && !(p._type.isInstanceOf[Type.Ref] && e._type == Type.Ref._Null)) {
           throw new IllegalStateException(s"Type mismatch. Expected: ${p._type}, actual: ${e._type}")
         }
       }
@@ -103,11 +103,18 @@ class SimpleExpr1Translator(target: CodeTarget) extends Translator[TinyScalaPars
       val paramsLlvm = "(" + expressions.map { e => s"${e._type.llvmRepr} ${e.llvmName}" }.mkString(", ") + ")"
 
       val returnsType = functionDef.returns
-      context.writeCodeLn(target) {
-        s"$tempVal = call ${returnsType.llvmRepr} $argumentsLlvm ${functionDef.llvmName}${paramsLlvm}"
-      }
 
-      ReturnedValue(llvmName = tempVal, _type = returnsType)
+      if (returnsType == Type.Primitive._Unit) {
+        context.writeCodeLn(target) {
+          s"call ${returnsType.llvmRepr} $argumentsLlvm ${functionDef.llvmName}${paramsLlvm}"
+        }
+        ReturnedValue(llvmName = "", _type = returnsType)
+      } else {
+        context.writeCodeLn(target) {
+          s"$tempVal = call ${returnsType.llvmRepr} $argumentsLlvm ${functionDef.llvmName}${paramsLlvm}"
+        }
+        ReturnedValue(llvmName = tempVal, _type = returnsType)
+      }
     }
     res
   }

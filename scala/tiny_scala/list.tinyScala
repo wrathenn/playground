@@ -1,0 +1,9 @@
+case class List[A](
+    val element: A,
+    val next: List[A],
+)
+
+object Test extends App {
+  val newList: List[Int] = null
+  print("Compiled!\n")
+}

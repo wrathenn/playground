@@ -52,7 +52,7 @@ object TypeResolver {
     concreteGenerics: List[TypeName],
   )(implicit context: TranslationContext): FunctionDef = {
     if (genericFunction.typeParamAliases.size != concreteGenerics.size) {
-      throw new IllegalStateException(s"Expected ${genericFunction.typeParamAliases.size} type parameters, got ${concreteGenerics.size}")
+      throw new IllegalStateException(s"Expected ${genericFunction.typeParamAliases.size} type parameters for function ${genericFunction.tinyScalaName}, got ${concreteGenerics.size}")
     }
 
     val resolvedGenerics = genericFunction.typeParamAliases.zip(concreteGenerics).toMap
@@ -84,13 +84,10 @@ object TypeResolver {
         params = params,
         returns = returnsType,
         isVarArg = false,
+        expression = genericFunction.expression,
       )
     }
-
-    context.inLocalContext(defining = Defining.Function(functionDef).some) {
-      context.addFunctionDefinition(functionDef)
-      new FunDefExprTranslator(functionDef).translate(genericFunction.expression)
-    }
+    context.addFunctionDefinition(functionDef)
 
     functionDef
   }

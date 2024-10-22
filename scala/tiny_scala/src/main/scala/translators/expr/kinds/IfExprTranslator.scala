@@ -67,6 +67,21 @@ class IfExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.Ex
     else if (elseResult._type == Type._Nothing) {
       ReturnedValue(llvmName = thenResult.llvmName, _type = thenResult._type)
     }
+    else if (thenResult._type.isInstanceOf[Type.Ref] && elseResult._type.isInstanceOf[Type.Ref]) {
+      if (thenResult._type == Type.Ref._Null) {
+        context.writeCodeLn(target) {
+          s"$tempVal = phi ${elseResult._type.llvmRepr} [${thenResult.llvmName}, %$thenLabel], [${elseResult.llvmName}, %$elseLabel]"
+        }
+        ReturnedValue(llvmName = tempVal, _type = elseResult._type)
+      } else if (elseResult._type == Type.Ref._Null) {
+        context.writeCodeLn(target) {
+          s"$tempVal = phi ${thenResult._type.llvmRepr} [${thenResult.llvmName}, %$thenLabel], [${elseResult.llvmName}, %$elseLabel]"
+        }
+        ReturnedValue(llvmName = tempVal, _type = thenResult._type)
+      } else {
+        throw new IllegalStateException(s"Type mismatch. Then: ${thenResult._type}. Else: ${elseResult._type}")
+      }
+    }
     else {
       throw new IllegalStateException(s"Type mismatch. Then: ${thenResult._type}. Else: ${elseResult._type}")
     }

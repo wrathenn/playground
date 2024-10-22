@@ -15,8 +15,8 @@ objectIsMain : 'extends' 'App' ;
 
 templateBody
     : NL* (
-        '{' (NL | WS)* '}' |
-        '{' (NL | WS)* (templateStat (NL | ';')+)* templateStat (NL | ';')* '}'
+        '{' NL* '}' |
+        '{' ((NL|';')* templateStat (NL|';')+)* ((NL|';')* templateStat (NL|';')*) '}'
     )
     ;
 
@@ -28,12 +28,11 @@ templateStat
 
 // class:
 classParamClause
-    : NL? '(' classParams ')'
+    : NL* '(' classParams ')'
     ;
 
 classParams
-    : (NL | WS)* (classParam oneCommaBetweenNL)* classParam oneOrZeroCommaBetweenNL
-//    | classParam (',' classParam)*
+    : (NL)* (classParam oneCommaBetweenNL)* classParam oneOrZeroCommaBetweenNL
     ;
 
 classParam
@@ -93,11 +92,11 @@ argumentExprs
     ;
 
 exprs
-    : expr (',' expr)*
+    : NL* (expr oneCommaBetweenNL)* expr oneOrZeroCommaBetweenNL
     ;
 
 exprBlock
-    : '{' (NL | WS)* (exprBlockStat (NL | ';')+)* '}'
+    : '{' NL* (exprBlockStat (NL | ';')+)* '}'
     ;
 
 exprBlockStat
@@ -188,39 +187,6 @@ opNoPrecedence: (
         OpPrecedence4 | OpPrecedence5 | OpPrecedence6 |
         OpPrecedence7 | OpPrecedence8 | OpPrecedence9
     );
-
-// ---------- Patterns ----------
-
-pattern
-    : pattern1 ('|' pattern1)*
-    ;
-
-pattern1
-    : (BoundVarid | '_' | Id) Colon typeDefinition
-//    | simplePattern
-//    | simplePattern (Id NL? simplePattern)*
-    ;
-
-//simplePattern
-//    : '_'
-//    | Varid
-//    | literal
-//    | stableId ('(' patterns? ')')?
-//    | '(' patterns? ')'
-//    ;
-
-patterns
-    : pattern (',' patterns)?
-    | '_'
-    ;
-
-enumerators
-    : generator+
-    ;
-
-generator
-    : pattern1 '<-' expr (pattern1 '=' expr)*
-    ;
 
 // Lexer
 BooleanLiteral
@@ -429,9 +395,9 @@ fragment Plainid
 //
 // Whitespace and comments
 //
-NEWLINE
-    : NL+ -> skip
-    ;
+//NEWLINE
+//    : NL+ -> skip
+//    ;
 
 WS
     : WhiteSpace+ -> skip

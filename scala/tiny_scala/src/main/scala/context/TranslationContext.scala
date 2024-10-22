@@ -3,15 +3,12 @@ package context
 
 import context.LocalContext.Defining
 import models._
+import models.`type`.TypeName
 import models.function.{FunctionDef, FunctionDefGeneric}
 import models.struct.{StructDef, StructDefGeneric}
 import util.Aliases.{LlvmName, TinyScalaName}
 
-import cats.syntax.all._
-import com.wrathenn.compilers.models.`type`.{Type, TypeName}
-
 import scala.annotation.tailrec
-import scala.reflect.runtime.universe._
 import scala.collection.{AbstractSeq, mutable}
 import scala.reflect.{ClassTag, classTag}
 

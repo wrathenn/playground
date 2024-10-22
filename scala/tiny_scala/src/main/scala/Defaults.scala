@@ -33,5 +33,6 @@ object Defaults {
     returns = Type.Primitive._Int,
     isVarArg = true,
     concreteGenericTypes = Map(),
+    expression = null,
   )
 }

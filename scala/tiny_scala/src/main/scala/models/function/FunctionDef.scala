@@ -12,6 +12,7 @@ case class FunctionDef(
   params: List[VariableDef],
   returns: Type,
   isVarArg: Boolean,
+  expression: TinyScalaParser.ExprContext,
 ) {
   val key: FunctionDef.Key = FunctionDef.Key(
     tinyScalaName = tinyScalaName,

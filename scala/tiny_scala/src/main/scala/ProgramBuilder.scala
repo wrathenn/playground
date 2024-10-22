@@ -1,12 +1,14 @@
 package com.wrathenn.compilers
 
+import context.LocalContext.Defining
 import context.TranslationContext
-import models.{CodeTarget, VariableDecl, VariableDef, function}
-import com.wrathenn.compilers.models.`type`.{Type, TypeName}
+import models.CodeTarget
+import models.function.FunctionDef
+import translators.CompilationUnitTranslator
+import translators.functions.FunDefExprTranslator
 
-import com.wrathenn.compilers.models.function.{FunctionDef, FunctionDefGeneric}
-import com.wrathenn.compilers.translators.CompilationUnitTranslator
-import io.circe.parser
+import scala.collection.mutable
+import cats.syntax.all._
 
 object ProgramBuilder {
   private def addDefaultFunctions(context: TranslationContext): Unit = {
@@ -26,6 +28,18 @@ object ProgramBuilder {
     CompilationUnitTranslator.translate(treeRoot)
 
     val sb = new StringBuilder()
+
+    val definedFunctions = mutable.Set[FunctionDef.Key](Defaults.printfFunctionDef.key)
+    while (definedFunctions != context.functionDefinitions.keySet) {
+      val willDefineKey = context.functionDefinitions.keySet.diff(definedFunctions).head
+      val functionDef = context.functionDefinitions(willDefineKey)
+
+      context.inLocalContext(defining = Defining.Function(functionDef).some) {
+        context.addFunctionDefinition(functionDef)
+        new FunDefExprTranslator(functionDef).translate(functionDef.expression)
+      }
+      definedFunctions.add(willDefineKey)
+    }
 
     sb.append("; --- GLOBAL CODE: ---\n")
     sb.append(context.code.readGlobalCode)
