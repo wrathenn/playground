@@ -1,9 +1,62 @@
 case class List[A](
-    val element: A,
-    val next: List[A],
+    element: A,
+    next: List[A],
 )
 
+object ListF {
+  def prepended[A](elem: A, list: List[A]): List[A] = {
+    new List[A](elem, list)
+  }
+
+  def appended[A](list: List[A], elem: A): List[A] = {
+    if (list == null) {
+       new List[A](elem, null)
+    } else {
+      val nextNode: List[A] = ListF.appended[A](list.next, elem)
+      new List[A](list.element, nextNode)
+    }
+  }
+
+  def printList[A](list: List[A], fmt: String): Unit = {
+    if (list == null) {
+      print("\n")
+      return
+    }
+    print(fmt, list.element)
+    ListF.printList[A](list.next, fmt)
+  }
+
+  def insertIntoSorted[A](elem: A, list: List[A]): List[A] = {
+    if (list == null) return new List[A](elem, null)
+
+    if (elem < list.element) return ListF.prepended[A](elem, list)
+
+    val part: List[A] = ListF.insertIntoSorted[A](elem, list.next)
+    new List[A](list.element, part)
+  }
+
+  def __sorted[A](list: List[A], res: List[A]): List[A] = {
+    if (list == null) {
+      return res
+    }
+
+    val newRes: List[A] = ListF.insertIntoSorted[A](list.element, res)
+    ListF.__sorted[A](list.next, newRes)
+  }
+
+  def sorted[A](list: List[A]): List[A] = ListF.__sorted[A](list, null)
+}
+
 object Test extends App {
-  val newList: List[Int] = null
-  print("Compiled!\n")
+  val test: List[Int] = new List[Int](1, null)
+  val test1: List[Int] = ListF.prepended[Int](3,
+    ListF.prepended[Int](2,
+    ListF.prepended[Int](1,
+    test),),)
+  val test2: List[Int] = ListF.appended[Int](null, 6)
+  print("Compiled! %d\n", test2.element)
+  ListF.printList[Int](test1, "%d,")
+
+  val sorted: List[Int] = ListF.sorted[Int](test1)
+  ListF.printList[Int](sorted, "%d, ")
 }

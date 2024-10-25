@@ -48,15 +48,19 @@ object ListF {
 }
 
 object Test extends App {
-  val test: List[Int] = new List[Int](1, null)
-  val test1: List[Int] = ListF.prepended[Int](3,
-    ListF.prepended[Int](2,
-    ListF.prepended[Int](1,
-    test),),)
-  val test2: List[Int] = ListF.appended[Int](null, 6)
-  print("Compiled! %d\n", test2.element)
-  ListF.printList[Int](test1, "%d,")
+  var list: List[Int] = null
 
-  val sorted: List[Int] = ListF.sorted[Int](test1)
-  ListF.printList[Int](sorted, "%d, ")
+  var c: Int = 0
+  while (!(c == 100)) {
+    list = ListF.prepended[Int](c, list)
+    c = c + 1
+  }
+  ListF.printList[Int](list, "%d, ")
+
+  var i: Int = 0
+  while (!(i == 10000)) {
+    val sorted: List[Int] = ListF.sorted[Int](list)
+    i = i + 1
+  }
+  print("Finished %d sortings\n", i)
 }

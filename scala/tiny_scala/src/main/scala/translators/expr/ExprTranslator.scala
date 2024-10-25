@@ -7,6 +7,8 @@ import context.TranslationContext
 import translators.expr.kinds.{ExprBlockTranslator, ExprReturnTranslator, IfExprTranslator, InfixExprTranslator, StableIdTranslator}
 import util.Util
 
+import com.wrathenn.compilers.models.`type`.Type
+
 class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.ExprContext, ReturnedValue] {
 
   override def translate(node: TinyScalaParser.ExprContext)(implicit context: TranslationContext): ReturnedValue = {
@@ -35,15 +37,15 @@ class ExprTranslator(target: CodeTarget) extends Translator[TinyScalaParser.Expr
         case VariableDecl.VAR => {}
       }
 
-      val exprValue = this.translate(node)
+      val exprValue = this.translate(node.expr(0))
       if (exprValue._type != variable._type) {
         throw new IllegalStateException(s"Type mismatch for assignment expression to ${variable.tinyScalaName} -- expected: ${variable._type}, actual: ${exprValue._type}")
       }
 
-
       context.writeCode(target) {
         s"store ${exprValue._type.llvmRepr} ${exprValue.llvmName}, ptr ${variable.llvmNameRepr}\n"
       }
+      return ReturnedValue("UNIT", Type.Primitive._Unit)
     }
 
     throw new IllegalStateException("Unknown expression definition, check grammar")

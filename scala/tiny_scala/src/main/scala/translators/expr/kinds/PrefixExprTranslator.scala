@@ -61,7 +61,13 @@ class PrefixExprTranslator(target: CodeTarget) extends Translator[TinyScalaParse
         ReturnedValue(llvmName = tempVal, _type = primitiveType)
       }
       case Operator.Not => {
-        ???
+        val tempVal = context.genLocalVariableName(target)
+        if (primitiveType != Primitive._Boolean) {
+          throw new IllegalStateException(s"Not operator is applicable only on Booleans, not on ${primitiveType.tinyScalaName}")
+        }
+
+        context.writeCodeLn(target) { s"$tempVal = xor i1 ${res.llvmName}, true" }
+        ReturnedValue(llvmName = tempVal, _type = Primitive._Boolean)
       }
     }
 
