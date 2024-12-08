@@ -8,13 +8,12 @@ import com.wrathenn.exp.lab4.algs.cnf.AlgsCNF
 import scala.annotation.tailrec
 
 
-//object Resolution {
-//
-//  def resolve(data: List[Expr], conclusion: Expr): Boolean = {
-//    val notConclusion = Expr.~~(conclusion)
-//    val disjuncts = (data :+ notConclusion).flatMap { e => AlgsCNF.convertToCnf(e) }
-//
-//  }
-//
-//  private def asdf(disjuncts: List[Disjunct])
-//}
+object Resolution {
+
+  def resolve(data: List[Expr], conclusion: Expr): Boolean = {
+    val notConclusion = Expr.~~(conclusion)
+    val disjuncts = (data :+ notConclusion).flatMap { e => AlgsCNF.convertToCnf(e) }
+    ???
+  }
+
+}
