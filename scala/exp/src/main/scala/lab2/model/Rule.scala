@@ -9,4 +9,6 @@ case class Rule(
   id: Rule.ID,
   from: Set[Node.ID],
   to: Node.ID
-)
+) {
+  override def toString() = s"($id): [${from.mkString(", ")}] -> $to"
+}

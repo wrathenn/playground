@@ -3,6 +3,8 @@ package lab2.algs
 
 import lab2.model.{Node, Rule}
 
+import com.wrathenn.exp.lab2.model.Node.ID
+
 import scala.collection.mutable
 
 class DepthFirstSearch(
@@ -10,7 +12,7 @@ class DepthFirstSearch(
   private val rules: List[Rule],
 ) {
   private val nodesMap = nodes.map(n => n.id -> n).toMap
-  private val rulesReverseMap = rules.groupBy(_.to)
+  private val rulesReverseMap: Map[ID, List[Rule]] = rules.groupBy(_.to)
 
   private case class Context(
     closedNodes: mutable.Set[Node.ID],
@@ -26,12 +28,12 @@ class DepthFirstSearch(
     debugLn(s"Доказательство правила ${rule.id}:")
     context.indent += 1
 
-    if (context.closedRules.contains(rule.id)) {
+    if (context.closedRules contains rule.id) {
       debugLn(s"✅ Правило ${rule.id} в списке закрытых")
       context.indent -= 1
       return true
     }
-    if (context.unreachableRules.contains(rule.id)) {
+    if (context.unreachableRules contains rule.id) {
       debugLn(s"❌ Правило ${rule.id} в списке невыполнимых")
       context.indent -= 1
       return false
@@ -58,12 +60,12 @@ class DepthFirstSearch(
     debugLn(s"Вывод вершины $nodeId:")
     context.indent += 1
 
-    if (context.closedNodes.contains(nodeId)) {
+    if (context.closedNodes contains nodeId) {
       debugLn(s"✅ Вершина $nodeId в списке закрытых")
       context.indent -= 1
       return true
     }
-    if (context.unreachableNodes.contains(nodeId)) {
+    if (context.unreachableNodes contains nodeId) {
       debugLn(s"❌ Вершина $nodeId в списке недостижимых")
       context.indent -= 1
       return false
@@ -87,7 +89,7 @@ class DepthFirstSearch(
       }
     }
 
-    debugLn(s"❌Не удалось доказать правила, ведущие в вершину $nodeId, она будет добавлена в список недостижимых")
+    debugLn(s"❌ Не удалось доказать правила, ведущие в вершину $nodeId, она будет добавлена в список недостижимых")
     context.unreachableNodes += nodeId
 
     context.indent -= 1

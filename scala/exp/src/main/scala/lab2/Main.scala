@@ -1,7 +1,7 @@
 package com.wrathenn.exp
 package lab2
 
-import lab2.algs.{BreadthFirstSearch, DepthFirstSearch}
+import lab2.algs.{BreadthFirstSearch, DepthFirstSearch, DepthFirstSearchStack}
 import lab2.model.{Node, Rule}
 
 object Main extends App {
@@ -57,4 +57,9 @@ object Main extends App {
   val dfs = new DepthFirstSearch(nodes, rules)
   val dfsResult = dfs.search(from, to)
   println(s"В глубину: ${if (dfsResult) "достижимо" else "не достижимо"}")
+
+//  println("\n\n\n\n")
+//  val dfs2 = new DepthFirstSearchStack(nodes, rules)
+//  val dfsResult2 = dfs2.search(from, to)
+//  println(s"В глубину со стеком: ${if (dfsResult2) "достижимо" else "не достижимо"}")
 }
