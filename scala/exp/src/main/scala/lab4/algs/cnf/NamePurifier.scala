@@ -1,14 +1,14 @@
 package com.wrathenn.exp
 package lab4.algs.cnf
 
-import com.wrathenn.exp.lab4.model.Expr
-import com.wrathenn.exp.lab4.model.Expr.Term
-import com.wrathenn.exp.lab4.model.Expr.Term.Variable
+import com.wrathenn.exp.lab4.model
+import com.wrathenn.exp.lab4.model.Disjunct
+import com.wrathenn.exp.lab4.model.Disjunct._
 
 import scala.collection.mutable
 
 /**
- * В нескольких разных Expr могут быть одинаковые имена переменных.
+ * В нескольких разных Disjunct могут быть одинаковые имена переменных.
  * В процессе унификации при резолюции распространение значений
  *   должно происходить по всем переменных среди всех дизъюнктов,
  *   поэтому при работе алгоритма все переменнные из разных Expr
@@ -29,25 +29,19 @@ class NamePurifier {
   private def getOrAdd(variable: Variable)(implicit context: mutable.Map[Variable, Variable]): Variable =
     context.getOrElse(variable, addToContext(variable))
 
-  private def purifyWithContext(expr: Expr)(implicit context: mutable.Map[Variable, Variable]): Expr = {
-    expr match {
-      case e: Expr.Const => e
-      case Expr.Predicate(id, args) => {
-        val newArgs = args.map {
-          case a: Variable => getOrAdd(a)
-          case a: Term.Const => a
-        }
-        Expr.Predicate(id, newArgs)
+  private def purifyWithContext(disjunct: Disjunct)(implicit context: mutable.Map[Variable, Variable]): Disjunct = {
+    val newPredicates = for {
+      predicate <- disjunct.over
+      newArgs = predicate.args.map {
+        case a: Variable => getOrAdd(a)
+        case a: Const => a
       }
-      case Expr.~~(e) => Expr.~~(purifyWithContext(e))
-      case Expr.|(e1, e2) => Expr.|(purifyWithContext(e1), purifyWithContext(e2))
-      case Expr.&(e1, e2) => Expr.&(purifyWithContext(e1), purifyWithContext(e2))
-      case Expr.->(e1, e2) => Expr.->(purifyWithContext(e1), purifyWithContext(e2))
-      case Expr.<->(e1, e2) => Expr.<->(purifyWithContext(e1), purifyWithContext(e2))
-    }
+    } yield predicate.copy(args = newArgs)
+
+    disjunct.copy(over = newPredicates)
   }
 
-  def purify(expr: Expr): Expr = {
+  def purify(expr: Disjunct): Disjunct = {
     implicit val context: mutable.Map[Variable, Variable] = mutable.Map()
     purifyWithContext(expr)
   }

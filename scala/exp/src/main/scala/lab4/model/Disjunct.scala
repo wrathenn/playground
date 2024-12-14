@@ -1,13 +1,17 @@
 package com.wrathenn.exp
 package lab4.model
 
-sealed trait Disjunct {
-  def |(e2: Disjunct): Disjunct.| = (this -> e2) match {
-    case (e1: Disjunct.Atom, e2: Disjunct.Atom) => Disjunct.|(Set(e1, e2))
-    case (e1: Disjunct.Atom, e2: Disjunct.|) => e2.copy(over = e2.over + e1)
-    case (e1: Disjunct.|, e2: Disjunct.Atom) => e1.copy(over = e1.over + e2)
-    case (e1: Disjunct.|, e2: Disjunct.|) => Disjunct.|(e1.over ++ e2.over)
-  }
+import lab4.model.Disjunct.Predicate
+
+import cats.Order
+import cats.data.{NonEmptyList, NonEmptySet}
+import cats.syntax.all._
+
+case class Disjunct(
+  over: NonEmptyList[Predicate]
+) {
+  override def toString: String = over.toNonEmptyList.toList.mkString("∨")
+  def |(other: Disjunct): Disjunct = Disjunct(this.over concatNel other.over)
 }
 
 /**
@@ -15,15 +19,19 @@ sealed trait Disjunct {
  * This is an output of CNF conversion algorithm.
  */
 object Disjunct {
-  sealed class Atom(val isNegative: Boolean) extends Disjunct
-
   sealed trait Term
   case class Variable(id: String) extends Term
+  case class Const(id: String, isNegative: Boolean) extends Term
 
-  case class Const(id: String, override val isNegative: Boolean) extends Atom(isNegative) with Term
-  case class Predicate(id: String, args: List[Term], override val isNegative: Boolean) extends Atom(isNegative)
+  implicit val predicateOrder: Order[Predicate] =
+    (x: Predicate, y: Predicate) => x.id.compareTo(y.id)
 
-  case class |(over: Set[Atom]) extends Disjunct {
-    override def toString: String = over.mkString("∨")
+  case class Predicate(id: String, args: List[Term], isNegative: Boolean) {
+    override def toString: String = {
+      val negPart = if (isNegative) "¬" else ""
+      val argsPart = if (args.isEmpty) "" else args.mkString(", ")
+      s"$negPart$id$argsPart"
+    }
+    def toDisjunct: Disjunct = Disjunct(over = NonEmptyList.of(this))
   }
 }

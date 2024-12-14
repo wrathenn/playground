@@ -34,7 +34,7 @@ class DepthFirstSearch(
       return true
     }
     if (context.unreachableRules contains rule.id) {
-      debugLn(s"❌ Правило ${rule.id} в списке невыполнимых")
+      debugLn(s"❌ Правило ${rule.id} в списке запрещенных")
       context.indent -= 1
       return false
     }
@@ -42,7 +42,7 @@ class DepthFirstSearch(
     rule.from.foreach { nodeId =>
       val nodeProved = proveNode(nodeId)
       if (!nodeProved) {
-        debugLn(s"❌ Правило ${rule.id} добавлено в список невыполнимых")
+        debugLn(s"❌ Правило ${rule.id} добавлено в список запрещенных")
         context.unreachableRules += rule.id
 
         context.indent -= 1
@@ -57,7 +57,7 @@ class DepthFirstSearch(
   }
 
   private def proveNode(nodeId: Node.ID)(implicit context: Context): Boolean = {
-    debugLn(s"Вывод вершины $nodeId:")
+    debugLn(s"Доказательство вершины $nodeId:")
     context.indent += 1
 
     if (context.closedNodes contains nodeId) {
@@ -66,7 +66,7 @@ class DepthFirstSearch(
       return true
     }
     if (context.unreachableNodes contains nodeId) {
-      debugLn(s"❌ Вершина $nodeId в списке недостижимых")
+      debugLn(s"❌ Вершина $nodeId в списке запрещенных")
       context.indent -= 1
       return false
     }
@@ -83,13 +83,13 @@ class DepthFirstSearch(
       if (proveRule(r)) {
         context.closedNodes += nodeId
 
-        debugLn(s"✅ Правило  ${r.id}: (${r.from.mkString(" & ")})->${r.to} выполняется, вершина $nodeId добавлена в список закрытых")
+        debugLn(s"✅ Правило  ${r.id}: (${r.from.mkString(" & ")})->${r.to} доказано, вершина $nodeId добавлена в список закрытых")
         context.indent -= 1
         return true
       }
     }
 
-    debugLn(s"❌ Не удалось доказать правила, ведущие в вершину $nodeId, она будет добавлена в список недостижимых")
+    debugLn(s"❌ Не удалось доказать правила, ведущие в вершину $nodeId, она будет добавлена в список запрещенных")
     context.unreachableNodes += nodeId
 
     context.indent -= 1

@@ -35,13 +35,13 @@ object AlgsCNF {
 
   private def applyDistribution(e: ExprMvNeg): List[Disjunct] = {
     e match {
-      case Const(id, isNegative) => List(Disjunct.Const(id, isNegative))
+      case Const(id, isNegative) => List(Disjunct.Predicate(id, args = List(), isNegative = isNegative).toDisjunct)
       case Predicate(id, args, isNegative) => {
         val disjArgs = args.map {
           case Term.Const(id, isNegative) => Disjunct.Const(id, isNegative)
           case Term.Variable(id) => Disjunct.Variable(id)
         }
-        List(Disjunct.Predicate(id, disjArgs, isNegative))
+        List(Disjunct.Predicate(id, disjArgs, isNegative).toDisjunct)
       }
       case |(e1, &(e21, e22)) => applyDistribution(e1 | e21) ++ applyDistribution(e1 | e22)
       case |(&(e11, e12), e2) => applyDistribution(e11 | e2) ++ applyDistribution(e12 | e2)
