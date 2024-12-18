@@ -1,8 +1,8 @@
 package com.wrathenn.exp
 package lab4.algs
 
-import lab4.algs.cnf.Unification.{Substitution, Result => UniResult}
-import lab4.algs.cnf.{AlgsCNF, NamePurifier, Unification}
+import Unification.{Substitution, Result => UniResult}
+import lab4.algs.cnf.{AlgsCNF, NamePurifier}
 import lab4.model.Disjunct.{Predicate, Term}
 import lab4.model.{Disjunct, Expr}
 
@@ -61,8 +61,10 @@ object Resolution {
       p1 <- d1.over
       p2 <- d2.over
 
+      _ = Dbg.debugLn(s"🔍 Унификация $p1 и $p2")
+
       notP2 = p2.copy(isNegative = !p2.isNegative)
-      unificationResult = Unification.unify(p1, notP2)
+      unificationResult = Dbg.indented { Unification.unify(p1, notP2) }
       _ = unificationResult match {
         case UniResult.Success(substitutions) => {
           return findResolvent(d1, d2, p1, p2, substitutions).toRight { Result.Success }
@@ -79,24 +81,49 @@ object Resolution {
       d1 <- disjuncts.toList
       d2 <- disjuncts.tail
 
-      _ = resolveDisjuncts(d1, d2) match {
-        case Right(resolvent) => return resolution(NonEmptyList.of(resolvent) ++ disjuncts.tail)
-        case Left(Result.Success) => return true
-        case Left(Result.Failure) => {}
+      _ = if (d1 != d2) {
+        println(s"Поиск резольвенты для $d1 и $d2:")
+        Dbg.indented { resolveDisjuncts(d1, d2) } match {
+          case Right(resolvent) => {
+            println(s"Резольвента найдена: $resolvent")
+            val resolventList = NonEmptyList.of(resolvent)
+            val nextDisjuncts = if (disjuncts.tail.isEmpty) resolventList else resolventList ++ disjuncts.tail.tail
+            println("Новое множество дизъюнктов:")
+            dbgDisjuncts(nextDisjuncts)
+
+            return resolution(nextDisjuncts)
+          }
+          case Left(Result.Success) => {
+            println(s"Выведен пустой дизъюнкт")
+            return true
+          }
+          case Left(Result.Failure) => {}
+        }
       }
     } yield {}
 
     false
   }
 
+  private def dbgDisjuncts(disjuncts: NonEmptyList[Disjunct]): Unit = {
+    disjuncts.toList.zipWithIndex.foreach { case (d, i) =>
+      Dbg.debugLn(s"$i) $d")
+    }
+  }
+
   def resolve(data: List[Expr], conclusion: Expr): Boolean = {
+    Dbg.debugLn("Начало резолюции")
     val notConclusion = Expr.~~(conclusion)
+    Dbg.debugLn(s"Отрицание цели: $notConclusion")
 
     val disjunctNamePurifier = new NamePurifier()
     val disjuncts = (data :+ notConclusion)
       .flatMap { e => AlgsCNF.convertToCnf(e) }
       .map(disjunctNamePurifier.purify)
       .toNel.getOrElse { return false }
+
+    Dbg.debugLn(s"Множество дизъюнктов:")
+    dbgDisjuncts(disjuncts)
 
     resolution(disjuncts)
   }
