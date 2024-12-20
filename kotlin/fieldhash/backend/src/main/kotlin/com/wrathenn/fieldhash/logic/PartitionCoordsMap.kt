@@ -51,9 +51,5 @@ fun PartitionChainNode.Expanding.combine(): Partition {
         }
     }
 
-    return Partition(
-        xCount = xLcm,
-        yCount = yLcm,
-        coordsMap = resultCoordsMap,
-    )
+    return Partition(xCount = xLcm, yCount = yLcm, coordsMap = resultCoordsMap)
 }

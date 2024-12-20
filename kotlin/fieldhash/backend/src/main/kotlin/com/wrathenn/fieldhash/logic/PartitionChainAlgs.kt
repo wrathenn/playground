@@ -26,7 +26,7 @@ private tailrec fun calculateHashRec(rect: Rectangle, chain: List<Partition>, po
         throw IllegalStateException("Не найден хеш для координат $coords в разбиении $partition")
     }
 
-    // Теперь надо найти до какого прямоугольника сократили область
+    // Теперь надо найти, до какого прямоугольника сократили область
     val mergeMap = partition.hashToMerges()
     val merge = mergeMap[hash]!!
 
@@ -41,20 +41,10 @@ private tailrec fun calculateHashRec(rect: Rectangle, chain: List<Partition>, po
         val _downRightX = x * lx + x; if (_downRightX > downRightX) downRightX = _downRightX
         val _downRightY = y * ly + y; if (_downRightY > downRightY) downRightY = _downRightY
 
-        Rectangle(
-            upLeftX = _upLeftX,
-            upLeftY = _upLeftY,
-            downRightX = _downRightX,
-            downRightY = _downRightY,
-        )
+        Rectangle(upLeftX = _upLeftX, upLeftY = _upLeftY, downRightX = _downRightX, downRightY = _downRightY)
     }
 
-    val maxRectangle = Rectangle(
-        upLeftX = upLeftX,
-        upLeftY = upLeftY,
-        downRightX = downRightX,
-        downRightY = downRightY
-    )
+    val maxRectangle = Rectangle(upLeftX = upLeftX, upLeftY = upLeftY, downRightX = downRightX, downRightY = downRightY)
 
     return calculateHashRec(maxRectangle, chain.tail(), point, resHash + hash)
 }

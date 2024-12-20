@@ -18,5 +18,10 @@ sealed class PartitionChainNode(val type: Type) {
 }
 
 data class PartitionChain(
+    val id: Long,
+    val nodes: NonEmptyList<PartitionChainNode>,
+)
+
+data class PartitionChainInsertable(
     val nodes: NonEmptyList<PartitionChainNode>,
 )

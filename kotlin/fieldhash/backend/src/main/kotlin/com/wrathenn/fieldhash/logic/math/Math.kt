@@ -18,7 +18,7 @@ fun lcm(a1: Long, a2: Long): Long {
     return (a1 * a2) / gcd(a1, a2)
 }
 
-private fun lcmRec(numbers: List<Long>, res: Long): Long {
+private tailrec fun lcmRec(numbers: List<Long>, res: Long): Long {
     if (numbers.isEmpty()) {
         return res
     }
