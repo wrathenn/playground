@@ -9,6 +9,8 @@ import lab4.model.{Disjunct, Expr}
 import cats.data.NonEmptyList
 import cats.syntax.all._
 
+import scala.annotation.tailrec
+
 object Resolution {
 
   private sealed trait Result
@@ -76,33 +78,46 @@ object Resolution {
     Result.Failure.asLeft
   }
 
-  private def resolution(disjuncts: NonEmptyList[Disjunct]): Boolean = {
-    for {
-      d1 <- disjuncts.toList
-      d2 <- disjuncts.tail
+  @tailrec
+  private def resolution(
+    // Дизъюнкты, для которых ранее уже пытались составить контрарные пары (они были в качестве currentDisjunct)
+    processedDisjuncts: List[Disjunct],
+    // Дизъюнкт, для которого сейчас составляется контрарная пара
+    currentDisjunct: Disjunct,
+    // Дизъюнкты, из которых уже пробовали составлять контрарную пару с currentDisjunct
+    checkedDisjuncts: List[Disjunct],
+    // Дизъюнкты, с которыми еще надо попробовать составить контрарную пару с currentDisjunct
+    nextDisjuncts: List[Disjunct],
+  ): Boolean = {
+    if (nextDisjuncts.isEmpty && checkedDisjuncts.isEmpty) {
+      Dbg.debugLn(s"Завершен поиск контрарных пар для последнего дизъюнкта $currentDisjunct")
+      return false
+    }
 
-      _ = if (d1 != d2) {
-        println(s"Поиск резольвенты для $d1 и $d2:")
-        Dbg.indented { resolveDisjuncts(d1, d2) } match {
-          case Right(resolvent) => {
-            println(s"Резольвента найдена: $resolvent")
-            val resolventList = NonEmptyList.of(resolvent)
-            val nextDisjuncts = if (disjuncts.tail.isEmpty) resolventList else resolventList ++ disjuncts.tail.tail
-            println("Новое множество дизъюнктов:")
-            dbgDisjuncts(nextDisjuncts)
+    if (nextDisjuncts.isEmpty) {
+      Dbg.debugLn(s"Завершен поиск контрарных пар для дизъюнкта $currentDisjunct")
+      dbgDisjuncts(NonEmptyList.fromList { (processedDisjuncts :+ currentDisjunct) ++ checkedDisjuncts }.get)
+      resolution(processedDisjuncts :+ currentDisjunct, checkedDisjuncts.head, List(), checkedDisjuncts.tail)
+    } else {
 
-            return resolution(nextDisjuncts)
-          }
-          case Left(Result.Success) => {
-            println(s"Выведен пустой дизъюнкт")
-            return true
-          }
-          case Left(Result.Failure) => {}
-        }
+      val nextDisjunct = nextDisjuncts.head
+      val resolventResult = Dbg.indented {
+        resolveDisjuncts(currentDisjunct, nextDisjunct)
       }
-    } yield {}
+      val addedDisjuncts: List[Disjunct] = resolventResult match {
+        case Right(resolvent) => {
+          Dbg.debugLn(s"Резольвента найдена: $resolvent, она будет добавлена во множество дизъюнктов")
+          List(resolvent)
+        }
+        case Left(Result.Success) => {
+          println(s"Выведен пустой дизъюнкт")
+          return true
+        }
+        case Left(Result.Failure) => List()
+      }
 
-    false
+      resolution(processedDisjuncts, currentDisjunct, checkedDisjuncts :+ nextDisjunct, nextDisjuncts.tail ++ addedDisjuncts)
+    }
   }
 
   private def dbgDisjuncts(disjuncts: NonEmptyList[Disjunct]): Unit = {
@@ -125,7 +140,7 @@ object Resolution {
     Dbg.debugLn(s"Множество дизъюнктов:")
     dbgDisjuncts(disjuncts)
 
-    resolution(disjuncts)
+    resolution(List(), disjuncts.head, List(), disjuncts.tail)
   }
 
 }

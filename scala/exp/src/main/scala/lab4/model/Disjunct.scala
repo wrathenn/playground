@@ -10,7 +10,7 @@ import cats.syntax.all._
 case class Disjunct(
   over: NonEmptyList[Predicate]
 ) {
-  override def toString: String = over.toNonEmptyList.toList.mkString(" ∧ ")
+  override def toString: String = over.toNonEmptyList.toList.mkString(" ∨ ")
   def |(other: Disjunct): Disjunct = Disjunct(this.over concatNel other.over)
 }
 

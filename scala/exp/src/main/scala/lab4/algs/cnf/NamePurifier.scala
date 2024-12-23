@@ -23,6 +23,7 @@ class NamePurifier {
     val newName = s"${variable.id}_$usedCount"
     val res = Variable(newName)
     context.addOne(variable -> res)
+    usedNames.put(variable, usedCount + 1)
     res
   }
 
