@@ -107,7 +107,10 @@ object Resolution {
       val addedDisjuncts: List[Disjunct] = resolventResult match {
         case Right(resolvent) => {
           Dbg.debugLn(s"Резольвента найдена: $resolvent, она будет добавлена во множество дизъюнктов")
-          List(resolvent)
+          if (processedDisjuncts.contains(resolvent) || checkedDisjuncts.contains(resolvent) || nextDisjuncts.contains(resolvent)) {
+            Dbg.debugLn(s"Дизъюнкт уже присутствует в множестве.")
+            List()
+          } else List(resolvent)
         }
         case Left(Result.Success) => {
           println(s"Выведен пустой дизъюнкт")
@@ -120,7 +123,7 @@ object Resolution {
     }
   }
 
-  private def dbgDisjuncts(disjuncts: NonEmptyList[Disjunct]): Unit = {
+  private def dbgDisjuncts(disjuncts: List[Disjunct]): Unit = {
     disjuncts.toList.zipWithIndex.foreach { case (d, i) =>
       Dbg.debugLn(s"$i) $d")
     }
@@ -138,7 +141,7 @@ object Resolution {
       .toNel.getOrElse { return false }
 
     Dbg.debugLn(s"Множество дизъюнктов:")
-    dbgDisjuncts(disjuncts)
+    dbgDisjuncts(disjuncts.toList)
 
     resolution(List(), disjuncts.head, List(), disjuncts.tail)
   }
