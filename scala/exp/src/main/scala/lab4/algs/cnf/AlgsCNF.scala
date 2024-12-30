@@ -5,7 +5,7 @@ import lab4.algs.cnf.model.ExprMvNeg._
 import lab4.algs.cnf.model.{ExprMvNeg, ExprSimple}
 import lab4.model.{Disjunct, Expr}
 
-import com.wrathenn.exp.lab4.model.Expr.Term
+import com.wrathenn.exp.lab4.model.Expr.Atom
 
 object AlgsCNF {
   private def removeComplexes(e: Expr): ExprSimple = {
@@ -38,8 +38,8 @@ object AlgsCNF {
       case Const(id, isNegative) => List(Disjunct.Predicate(id, args = List(), isNegative = isNegative).toDisjunct)
       case Predicate(id, args, isNegative) => {
         val disjArgs = args.map {
-          case Term.Const(id, isNegative) => Disjunct.Const(id, isNegative)
-          case Term.Variable(id) => Disjunct.Variable(id)
+          case Atom.Const(id, isNegative) => Disjunct.Const(id, isNegative)
+          case Atom.Variable(id) => Disjunct.Variable(id)
         }
         List(Disjunct.Predicate(id, disjArgs, isNegative).toDisjunct)
       }
@@ -61,7 +61,7 @@ object AlgsCNF {
 }
 
 object Test {
-  import lab4.model.Expr.Term.StringInterpolation
+  import lab4.model.Expr.Atom.StringInterpolation
 
   import com.wrathenn.exp.lab4.model.Expr.~~
 

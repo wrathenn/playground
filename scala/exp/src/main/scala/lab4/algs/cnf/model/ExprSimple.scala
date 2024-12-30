@@ -17,16 +17,9 @@ private[cnf] sealed trait ExprSimple {
  */
 private[cnf] object ExprSimple {
   case class Const(id: String) extends ExprSimple { override def toString = id }
-  case class Predicate(id: String, args: List[Expr.Term]) extends ExprSimple { override def toString = s"$id(${args.mkString(", ")})" }
+  case class Predicate(id: String, args: List[Expr.Atom]) extends ExprSimple { override def toString = s"$id(${args.mkString(", ")})" }
 
   case class ~~(e: ExprSimple) extends ExprSimple { override def toString = s"¬$e" }
   case class |(e1: ExprSimple, e2: ExprSimple) extends ExprSimple { override def toString = s"($e1 ∨ $e2)" }
   case class &(e1: ExprSimple, e2: ExprSimple) extends ExprSimple { override def toString = s"($e1 ∧ $e2)"}
-
-  object ~~ {
-    def apply(e: ExprSimple): ExprSimple = e match {
-      case e: ~~ => e.e
-      case _ => new ~~(e)
-    }
-  }
 }

@@ -15,7 +15,7 @@ sealed trait Expr {
  */
 object Expr {
   case class Const(id: String) extends Expr { override def toString = id }
-  case class Predicate(id: String, args: List[Term]) extends Expr { override def toString = s"$id(${args.mkString(", ")})" }
+  case class Predicate(id: String, args: List[Atom]) extends Expr { override def toString = s"$id(${args.mkString(", ")})" }
 
   case class ~~(e: Expr) extends Expr { override def toString = s"¬$e" }
   case class |(e1: Expr, e2: Expr) extends Expr { override def toString = s"($e1 ∨ $e2)" }
@@ -23,23 +23,16 @@ object Expr {
   case class ->(e1: Expr, e2: Expr) extends Expr { override def toString = s"($e1 -> $e2)" }
   case class <->(e1: Expr, e2: Expr) extends Expr { override def toString = s"($e1 <-> $e2)" }
 
-  sealed trait Term
-  object Term {
-    case class Const(id: String, isNegative: Boolean) extends Term
-    case class Variable(id: String) extends Term
+  sealed trait Atom
+  object Atom {
+    case class Const(id: String, isNegative: Boolean) extends Atom
+    case class Variable(id: String) extends Atom
 
     implicit class StringInterpolation(val sc: StringContext) extends AnyVal {
       def const(args: Any*): Expr.Const = Expr.Const(sc.s(args:_*))
-      def termVar(args: Any*): Term.Variable = Term.Variable(sc.s(args:_*))
-      def termC(args: Any*): Term.Const = Term.Const(sc.s(args:_*), isNegative = false)
-      def termNotC(args: Any*): Term.Const = Term.Const(sc.s(args:_*), isNegative = true)
-    }
-  }
-
-  object ~~ {
-    def apply(e: Expr): Expr = e match {
-      case e: ~~ => e.e
-      case _ => new ~~(e)
+      def atomVar(args: Any*): Atom.Variable = Atom.Variable(sc.s(args:_*))
+      def atomC(args: Any*): Atom.Const = Atom.Const(sc.s(args:_*), isNegative = false)
+      def atomNotC(args: Any*): Atom.Const = Atom.Const(sc.s(args:_*), isNegative = true)
     }
   }
 }

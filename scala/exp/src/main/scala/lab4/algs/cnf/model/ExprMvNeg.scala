@@ -16,7 +16,7 @@ private[cnf] sealed trait ExprMvNeg {
  */
 private[cnf] object ExprMvNeg {
   case class Const(id: String, isNegative: Boolean) extends ExprMvNeg { override def toString = id }
-  case class Predicate(id: String, args: List[Expr.Term], isNegative: Boolean) extends ExprMvNeg { override def toString = s"$id(${args.mkString(", ")})" }
+  case class Predicate(id: String, args: List[Expr.Atom], isNegative: Boolean) extends ExprMvNeg { override def toString = s"$id(${args.mkString(", ")})" }
 
   case class |(e1: ExprMvNeg, e2: ExprMvNeg) extends ExprMvNeg { override def toString = s"($e1 ∨ $e2)" }
   case class &(e1: ExprMvNeg, e2: ExprMvNeg) extends ExprMvNeg { override def toString = s"($e1 ∧ $e2)" }

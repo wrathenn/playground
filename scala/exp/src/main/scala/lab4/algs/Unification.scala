@@ -1,7 +1,7 @@
 package com.wrathenn.exp
 package lab4.algs
 
-import lab4.model.Disjunct.{Const, Predicate, Term, Variable}
+import lab4.model.Disjunct.{Const, Predicate, Atom, Variable}
 
 import cats.syntax.all._
 
@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 object Unification {
-  sealed trait Substitution[+A <: Term] { val from: Variable; val to: A }
+  sealed trait Substitution[+A <: Atom] { val from: Variable; val to: A }
   object Substitution {
     case class ToConst(from: Variable, to: Const) extends Substitution[Const] {
       override def toString: String = s"Подстановка $from = $to"
@@ -22,64 +22,64 @@ object Unification {
   sealed trait Result
   object Result {
     case class Success(
-      substitutions: List[Substitution[Term]]
+      substitutions: List[Substitution[Atom]]
     ) extends Result
 
     object Failure extends Result
   }
 
-  private sealed trait TermsResult
-  private object TermsResult {
-    sealed class Success extends TermsResult
+  private sealed trait AtomsResult
+  private object AtomsResult {
+    sealed class Success extends AtomsResult
 
-    case class Subst(substitution: Substitution[Term]) extends Success
+    case class Subst(substitution: Substitution[Atom]) extends Success
     object Subst {
       def apply(v: Variable, toConst: Const): Subst = Subst(Substitution.ToConst(v, toConst))
       def apply(v: Variable, toVar: Variable): Subst = Subst(Substitution.ToVar(v, toVar))
     }
     object Empty extends Success
 
-    object Failure extends TermsResult
+    object Failure extends AtomsResult
   }
 
-  private def unifyTerms(t1: Term, t2: Term): TermsResult = {
+  private def unifyAtoms(t1: Atom, t2: Atom): AtomsResult = {
     (t1, t2) match {
       case (c1: Const, c2: Const) =>
         if (c1 == c2) {
           Dbg.debugLn(s"✅ Константы $c1 и $c2 совпадают")
-          TermsResult.Empty
+          AtomsResult.Empty
         }
         else {
           Dbg.debugLn("❌ Названия констант не совпадают")
-          TermsResult.Failure
+          AtomsResult.Failure
         }
       case (v1: Variable, c2: Const) =>
         Dbg.debugLn(s"✅ Переменной $v1 присвоено значение $c2")
-        TermsResult.Subst(v1, c2)
+        AtomsResult.Subst(v1, c2)
       case (c1: Const, v2: Variable) =>
         Dbg.debugLn(s"✅ Переменной $v2 присвоено значение $c1")
-        TermsResult.Subst(v2, c1)
+        AtomsResult.Subst(v2, c1)
       case (v1: Variable, v2: Variable) =>
         Dbg.debugLn(s"✅ Переменные $v1 и $v2 связаны")
-        TermsResult.Subst(v1, v2)
+        AtomsResult.Subst(v1, v2)
     }
   }
 
-  private def spreadResult(onArgs: List[(Term, Term)], success: TermsResult.Success) : List[(Term, Term)] = {
-    def trySubst(variable: Variable, const: Const, term: Term): Term = if (term == variable) const else term
-    def tryBind(variable1: Variable, variable2: Variable, term: Term): Term = if (term == variable1) variable2 else variable1
+  private def spreadResult(onArgs: List[(Atom, Atom)], success: AtomsResult.Success) : List[(Atom, Atom)] = {
+    def trySubst(variable: Variable, const: Const, atom: Atom): Atom = if (atom == variable) const else atom
+    def tryBind(variable1: Variable, variable2: Variable, atom: Atom): Atom = if (atom == variable1) variable2 else variable1
 
     success match {
-      case TermsResult.Subst(Substitution.ToConst(variable, const)) =>
+      case AtomsResult.Subst(Substitution.ToConst(variable, const)) =>
         onArgs.map { case (t1, t2) => trySubst(variable, const, t1) -> trySubst(variable, const, t2)}
-      case TermsResult.Subst(Substitution.ToVar(v1, v2)) =>
+      case AtomsResult.Subst(Substitution.ToVar(v1, v2)) =>
         onArgs.map { case (t1, t2) => tryBind(v1, v2, t1) -> tryBind(v1, v2, t2) }
-      case TermsResult.Empty => onArgs
+      case AtomsResult.Empty => onArgs
     }
   }
 
   private case class MutableContext(
-    substitutions: mutable.ListBuffer[Substitution[Term]],
+    substitutions: mutable.ListBuffer[Substitution[Atom]],
   )
   private object MutableContext {
     def apply(): MutableContext = MutableContext(mutable.ListBuffer())
@@ -87,29 +87,29 @@ object Unification {
 
   @tailrec
   private def unifyAllArguments(
-    args: List[(Term, Term)],
-    res: List[Term] = List(),
-  )(implicit context: MutableContext): Either[Result.Failure.type, List[Term]] = {
+    args: List[(Atom, Atom)],
+    res: List[Atom] = List(),
+  )(implicit context: MutableContext): Either[Result.Failure.type, List[Atom]] = {
     if (args.isEmpty) return res.asRight
 
     val (t1, t2) = args.head
-    val termUnification = unifyTerms(t1, t2)
+    val termUnification = unifyAtoms(t1, t2)
 
     val success = termUnification match {
-      case TermsResult.Failure => return Result.Failure.asLeft
-      case success: TermsResult.Success => success
+      case AtomsResult.Failure => return Result.Failure.asLeft
+      case success: AtomsResult.Success => success
     }
 
     val nextArgs = spreadResult(args.tail, success)
     val thisArgsResult = success match {
-      case subst: TermsResult.Subst => {
+      case subst: AtomsResult.Subst => {
         context.substitutions.addOne(subst.substitution)
         subst.substitution match {
           case Substitution.ToConst(_, toConst) => toConst
           case Substitution.ToVar(_, v2) => v2
         }
       }
-      case TermsResult.Empty => t1
+      case AtomsResult.Empty => t1
     }
 
     unifyAllArguments(nextArgs, res :+ thisArgsResult)
