@@ -3,7 +3,7 @@ package lab4.algs
 
 import Unification.{Substitution, Result => UniResult}
 import lab4.algs.cnf.{AlgsCNF, NamePurifier}
-import lab4.model.Disjunct.{Predicate, Atom}
+import lab4.model.Disjunct.{Predicate, Term}
 import lab4.model.{Disjunct, Expr}
 
 import cats.data.NonEmptyList
@@ -19,11 +19,11 @@ object Resolution {
     object Failure extends Result
   }
 
-  private def applySubstitutions(predicate: Predicate, subtitutions: List[Substitution[Atom]]): Predicate = {
+  private def applySubstitutions(predicate: Predicate, subtitutions: List[Substitution[Term]]): Predicate = {
     val newArgs = predicate.args.map {
       case pred@(_: Disjunct.Const) => pred
       case pred@(_: Disjunct.Variable) =>
-        subtitutions.foldLeft[Atom](pred) { case (acc, subst) =>
+        subtitutions.foldLeft[Term](pred) { case (acc, subst) =>
           acc match {
             case variable: Disjunct.Variable =>
               if (subst.from == variable) subst.to else acc
@@ -34,7 +34,7 @@ object Resolution {
     predicate.copy(args = newArgs)
   }
 
-  private def spreadUnificationResult(disjunct: Disjunct, substitutions: List[Substitution[Atom]]): Disjunct = {
+  private def spreadUnificationResult(disjunct: Disjunct, substitutions: List[Substitution[Term]]): Disjunct = {
     val newOver = disjunct.over.map(applySubstitutions(_, substitutions))
     disjunct.copy(over = newOver)
   }
@@ -42,7 +42,7 @@ object Resolution {
   private def findResolvent(
     d1: Disjunct, d2: Disjunct,
     p1: Predicate, p2: Predicate,
-    substitutions: List[Substitution[Atom]],
+    substitutions: List[Substitution[Term]],
   ): Option[Disjunct] = {
     val d1NoP1 = d1.over.filter(_ != p1)
     val d2NoP2 = d2.over.filter(_ != p2)
@@ -57,7 +57,7 @@ object Resolution {
     spreadedResult.some
   }
 
-  // Either doesn't carry error/correct meaning here
+  // Either doesn't carry error-correct meaning here
   private def resolveDisjuncts(d1: Disjunct, d2: Disjunct): Either[Result, Disjunct] = {
     for {
       p1 <- d1.over
@@ -96,7 +96,7 @@ object Resolution {
 
     if (nextDisjuncts.isEmpty) {
       Dbg.debugLn(s"Завершен поиск контрарных пар для дизъюнкта $currentDisjunct")
-      dbgDisjuncts((processedDisjuncts :+ currentDisjunct) ++ checkedDisjuncts)
+      dbgDisjuncts(NonEmptyList.fromList { (processedDisjuncts :+ currentDisjunct) ++ checkedDisjuncts }.get)
       resolution(processedDisjuncts :+ currentDisjunct, checkedDisjuncts.head, List(), checkedDisjuncts.tail)
     } else {
 

@@ -19,14 +19,14 @@ case class Disjunct(
  * This is an output of CNF conversion algorithm.
  */
 object Disjunct {
-  sealed trait Atom
-  case class Variable(id: String) extends Atom { override def toString: String = id }
-  case class Const(id: String, isNegative: Boolean) extends Atom { override def toString: String = if (isNegative) "¬" else "" + id }
+  sealed trait Term
+  case class Variable(id: String) extends Term { override def toString: String = id }
+  case class Const(id: String, isNegative: Boolean) extends Term { override def toString: String = if (isNegative) "¬" else "" + id }
 
   implicit val predicateOrder: Order[Predicate] =
     (x: Predicate, y: Predicate) => x.id.compareTo(y.id)
 
-  case class Predicate(id: String, args: List[Atom], isNegative: Boolean) {
+  case class Predicate(id: String, args: List[Term], isNegative: Boolean) {
     override def toString: String = {
       val negPart = if (isNegative) "¬" else ""
       val argsPart = if (args.isEmpty) "" else args.mkString(", ")
