@@ -35,11 +35,4 @@ object Expr {
       def termNotC(args: Any*): Term.Const = Term.Const(sc.s(args:_*), isNegative = true)
     }
   }
-
-  object ~~ {
-    def apply(e: Expr): Expr = e match {
-      case e: ~~ => e.e
-      case _ => new ~~(e)
-    }
-  }
 }

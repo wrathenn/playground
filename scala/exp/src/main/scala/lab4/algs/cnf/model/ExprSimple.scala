@@ -22,11 +22,4 @@ private[cnf] object ExprSimple {
   case class ~~(e: ExprSimple) extends ExprSimple { override def toString = s"¬$e" }
   case class |(e1: ExprSimple, e2: ExprSimple) extends ExprSimple { override def toString = s"($e1 ∨ $e2)" }
   case class &(e1: ExprSimple, e2: ExprSimple) extends ExprSimple { override def toString = s"($e1 ∧ $e2)"}
-
-  object ~~ {
-    def apply(e: ExprSimple): ExprSimple = e match {
-      case e: ~~ => e.e
-      case _ => new ~~(e)
-    }
-  }
 }
