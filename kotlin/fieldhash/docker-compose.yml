@@ -2,6 +2,8 @@ services:
   db:
     build:
       context: db
+      platforms:
+        - linux/amd64
     restart: unless-stopped
     ports:
       - 5432:5432
@@ -14,7 +16,7 @@ services:
 
   backend:
     build:
-      context: backend
+      context: kotlin
     restart: unless-stopped
     ports:
       - 8080:8080

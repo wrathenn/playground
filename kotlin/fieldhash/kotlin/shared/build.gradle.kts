@@ -30,12 +30,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 }
 
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll(listOf("-Xjsr305=strict", "-Xcontext-receivers"))
-    }
-}
-
 tasks.withType<Test> {
     useJUnitPlatform()
 }

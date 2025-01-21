@@ -4,6 +4,7 @@ val arrowVersion: String by project
 val springdocVersion: String by project
 
 plugins {
+    application
     kotlin("jvm")
     kotlin("plugin.spring")
     id("org.springframework.boot")
@@ -11,11 +12,10 @@ plugins {
 
 group = "com.wrathenn"
 version = "0.0.1-SNAPSHOT"
+java.sourceCompatibility = JavaVersion.VERSION_17
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+application {
+    mainClass.set("com.wrathenn.fieldhash.FieldhashApplicationKt")
 }
 
 dependencies {
@@ -50,12 +50,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll(listOf("-Xjsr305=strict", "-Xcontext-receivers"))
-    }
 }
 
 tasks.withType<Test> {

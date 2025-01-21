@@ -9,6 +9,7 @@ import com.wrathenn.fieldhash.converter.toModel
 import com.wrathenn.fieldhash.service.FieldObjectService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -35,8 +36,8 @@ class FieldObjectController(
         return fieldObjectService.createFieldObject(fieldObject.toModel()).toDto()
     }
 
-    @PostMapping
-    fun updateFieldObject(id: Long, fieldObject: FieldObjectInsertableDto): FieldObjectDto {
+    @PostMapping("/{id}")
+    fun updateFieldObject(@PathVariable id: Long, fieldObject: FieldObjectInsertableDto): FieldObjectDto {
         return fieldObjectService.updateFieldObject(id, fieldObject.toModel()).toDto()
     }
 

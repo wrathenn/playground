@@ -8,11 +8,16 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import com.wrathenn.fieldhash.desktop.navigation.CustomNavigationHost
+import com.wrathenn.fieldhash.desktop.navigation.NavController.Companion.navControllerState
+import com.wrathenn.fieldhash.desktop.navigation.Screen
+import com.wrathenn.fieldhash.desktop.navigation.VerticalNavigationRail
 
 @Composable
 @Preview
@@ -42,6 +47,21 @@ fun App() {
 
 fun main() = application {
   Window(onCloseRequest = ::exitApplication) {
-    App()
+    App2()
+  }
+}
+
+@Composable
+fun App2() {
+  val screens = Screen.entries
+  val navController by navControllerState(Screen.PartitionChainsScreen.name)
+  val currentScreen by remember { navController.currentScreen }
+
+  Row(Modifier.fillMaxSize()) {
+    VerticalNavigationRail(navController)
+
+    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+      CustomNavigationHost(navController = navController)
+    }
   }
 }

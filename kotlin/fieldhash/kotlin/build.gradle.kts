@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val kotlinVersion: String by project
@@ -77,5 +79,12 @@ allprojects {
 
     tasks.withType<BootJar> {
         archiveClassifier.set("all")
+    }
+
+    tasks.withType<KotlinCompile> {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+            freeCompilerArgs = listOf("-Xjsr305=strict", "-Xcontext-receivers")
+        }
     }
 }

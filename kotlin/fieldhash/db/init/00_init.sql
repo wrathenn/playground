@@ -1,3 +1,5 @@
+create extension if not exists postgis;
+
 create schema master;
 
 create table master.partition_chain(

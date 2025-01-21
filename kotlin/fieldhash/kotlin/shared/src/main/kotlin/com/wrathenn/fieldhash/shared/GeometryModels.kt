@@ -7,14 +7,14 @@ sealed interface GeometryModel
  */
 data class GeometryPoint(
     val x: Double,
-    val y: Double
+    val y: Double,
 ): GeometryModel
 
 /**
  * Polyline
  */
 data class GeometryLineString(
-    val points: List<GeometryPoint>
+    val points: List<GeometryPoint>,
 ): GeometryModel
 
 /**
@@ -27,7 +27,7 @@ data class GeometryLineString(
  */
 data class GeometryPolygon(
     val shell: List<GeometryPoint>,
-    val holes: List<List<GeometryPoint>> = emptyList()
+    val holes: List<List<GeometryPoint>> = emptyList(),
 ): GeometryModel {
     constructor(nwX: Double, seX: Double, nwY: Double, seY: Double) : this(
         shell = listOf(
@@ -48,5 +48,5 @@ data class GeometryPolygon(
  * @param polygons list of polygons that form a multipolygon
  */
 data class GeometryMultiPolygon(
-    val polygons: List<GeometryPolygon>
+    val polygons: List<GeometryPolygon>,
 ): GeometryModel
